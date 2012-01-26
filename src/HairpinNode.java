@@ -347,7 +347,7 @@ public class HairpinNode extends BasicNode {
 					left += "-";
 				}
 				i += insert[l]+1;
-System.out.println("HairpinNode.showParse "+i+" "+n.length()+" "+numFixed);
+// System.out.println("HairpinNode.showParse "+i+" "+n.length()+" "+numFixed);
                 left += n.substring(i,i+1);
 			}
 		

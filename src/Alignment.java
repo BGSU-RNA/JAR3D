@@ -676,7 +676,7 @@ public class Alignment {
 		return alignmentVect;
 	}
 	
-	public static Vector getSortedHLAlignment(Vector sData, Vector modNames, int numSequences, int range)
+	public static String getSortedHLAlignment(Vector sData, Vector modNames, int numSequences, int range)
 	{
 		Vector alignmentVect = new Vector();
 		Vector pData = new Vector();
@@ -684,7 +684,8 @@ public class Alignment {
 		double[] modelScores = new double[modNames.size()];
 		Vector shortModNames = new Vector();
 		Vector tinyModNames = new Vector();
-		
+        String scores = "";
+
 		if(((String)modNames.get(0)).contains("http"))
 		{
 		// remove http:// from model names
@@ -706,6 +707,7 @@ public class Alignment {
 		// parse all sequences against models
 		for(int k = 0; k < modNames.size(); k++)
 		{
+			System.out.println("Alignment.getSortedHLAlignment: Model is "+modNames.get(k));
 			sData  = Alignment.doParse(sData,numSequences,(String)modNames.get(k),range);
 		}
 
@@ -720,11 +722,16 @@ public class Alignment {
 			}
 		}
 		
+		Formatter fmt = new Formatter(); 
+
 		System.out.println("Average score for each model unsorted: ");
 		for(int g = 0; g < modelSums.length; g++)
 		{
 			modelScores[g] = (modelSums[g]/sData.size());
 			System.out.format("%s %12.6f\n",tinyModNames.get(g),modelScores[g]);
+			
+			fmt = new Formatter();
+			scores += fmt.format(" %12.6f", Math.max(modelScores[g],-9999));	
 		}
 		
 		// re-sort models & their totals
@@ -738,6 +745,7 @@ public class Alignment {
 		for(int k = 0; k < modNames.size(); k++)
 			indices[k] = k;
 		
+		// the following block of code sorts modelScores in an inefficient way
 		for(int a = 0; a < modelScores.length; a++)
 		   {
 	            int max = a; //array position of largest element
@@ -746,17 +754,17 @@ public class Alignment {
 	                if(modelScores[b] > modelScores[max])
 	                	max = b;
 	            }
-	            // re-sort modelScores or else the sort wouldn't work
+	            // exchange scores
 	            double dtemp = modelScores[max];
 	            modelScores[max] = modelScores[a];
 	            modelScores[a] = dtemp;
 	            
-	            // re-sort indexing array for use with vectors
+	            // exchange indices for use with vectors
 	            int itemp = indices[max];
 	            indices[max] = indices[a];
 	            indices[a] = itemp;
 		    }
-		
+
 		System.out.println("Best score for each model, best model first: ");
 		for(int g = 0; g < modelSums.length; g++)
 		{
@@ -769,8 +777,6 @@ public class Alignment {
 		int[] mask = stripDash(pData);
 		String alnm = "";
 		
-	    Formatter fmt = new Formatter(); 
-
 		for(int j = 0; j < pData.size(); j++)
 		{
 			alnm = "";
@@ -790,7 +796,7 @@ public class Alignment {
 			}
 			alignmentVect.add(alnm);
 		}
-		return alignmentVect;
+		return scores;
 	}	
 
 	public static String getSortedILAlignment(Vector sData, Vector modNames, int numSequences, int range)

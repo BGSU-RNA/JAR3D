@@ -642,6 +642,8 @@ public class Sequence {
 			current = current.previous;		 // current equals the one before
 		}
 
+		System.out.println("Sequence.parseSequence: nucleotides 0 to "+(nucleotides.length()-1)+" "+nucleotides);
+		
 		// CYK algorithm for determining maximum log probability parse
 		for (int p=1; p <= nucleotides.length(); p++)         // length of subsequence
 		{
@@ -667,6 +669,7 @@ public class Sequence {
 
 
 		start = System.currentTimeMillis();
+		
 		((InitialNode)first).traceback(0,nucleotides.length()-1);
 		stop = System.currentTimeMillis();
 		elapsed = stop - start;

@@ -18,7 +18,7 @@ public class JAR3DMultipleSequencesMultipleModels {
 
 		int numSequences = 1000;                            // make sure this is larger than needed
 
-		String loopType = "IL";
+		String loopType = "HL";
 		Vector modnames = Sequence.getModelNames(loopType);
         String FASTAName = "";
 		Vector sData;
@@ -30,7 +30,7 @@ public class JAR3DMultipleSequencesMultipleModels {
             System.out.println("Aligning sequences from "+FASTAName);
 //            System.out.println("JAR3DMultipleSequencesMultipleModels: sequences\\"+FASTAName);
             sData = Alignment.loadFasta(FASTAName); 
-        	String newscores = Alignment.getSortedILAlignment(sData,modnames,numSequences,100);
+        	String newscores = Alignment.getSortedHLAlignment(sData,modnames,numSequences,100);
             scores.add(newscores);
         }
         
@@ -38,8 +38,9 @@ public class JAR3DMultipleSequencesMultipleModels {
         System.out.print("Names = {");
         for (int m=0; m < modnames.size();m++)
         {
-        	System.out.print("'"+((String)modnames.get(m)).replace(".txt","")+"',");
-        	System.out.print("'R "+((String)modnames.get(m)).replace(".txt","")+"'");
+        	System.out.print("'"+((String)modnames.get(m)).replace(".txt","")+"'");
+        	if (loopType.equals("IL")) 
+        		System.out.print(",'R "+((String)modnames.get(m)).replace(".txt","")+"'");
             if (m < (modnames.size()-1))
             	System.out.print(",");
         }

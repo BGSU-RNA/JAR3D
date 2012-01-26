@@ -11,7 +11,7 @@ public class JAR3DMoleculeAligner {
 
 		int numSequences = 1;
 
-		numSequences = 100;
+		numSequences = 3;
 
 		// choose sequence data and a model that goes with it
 		// for index restrictions to work, the first sequence needs to be at least as long as
@@ -39,8 +39,11 @@ public class JAR3DMoleculeAligner {
 //		Vector parseData = Alignment.doParse(sequenceData,3,"16S_model_from_2J00.txt",20);
 
 //		Vector sequenceData = Alignment.loadFasta("16S_sequences_from_1j5e_2AVY.fasta"); 
-//		sequenceData = Alignment.doParse(sequenceData,numSequences,"16S_model_from_1j5e.txt",10);
-
+//		sequenceData = Alignment.doParse(sequenceData,numSequences,"16S_model_from_1j5e_mod_4.txt",10);
+		
+		Vector sequenceData = Alignment.loadFasta("Stombaugh_et_al_Sup_Mat_S2.fasta"); 
+		sequenceData = Alignment.doParse(sequenceData,numSequences,"16S_from_2AVY.txt",15);
+				
 //		Vector sequenceData = Alignment.loadFasta("23S_sequences_from_1s72_2aw4_2j01.fasta"); 
 //		Vector parseData = Alignment.doParse(sequenceData,1,"23S_model_from_1s72.txt",12);
 		
@@ -50,14 +53,14 @@ public class JAR3DMoleculeAligner {
 //		Vector sequenceData = Alignment.parseFastaText("> Nov 1 No 1 tWH-IL-tHS  1s72 U 1095 A 1261\nUUAAG*CGA-G-A\n> Nov 1 No 1 tWH-IL-tHS  2AW4 C  998 G 1157\nCUAAG*CGA-A-G\n> Nov 1 No 1 tWH-IL-tHS  2j01 C  998 G 1157\nCUAAG*CGA-A-G\n> Nov 1 No 1 tWH-IL-tHS  1s72 C 1456 G 1489\nCUAAG*CGAAAUG\n> Nov 1 No 1 tWH-IL-tHS  1s72 G 2773 A 2801\nGUAAG*CGA-A-A\n> Nov 1 No 1 tWH-IL-tHS  2j01 C 1351 G 1380\nCUAAG*CGA-A-G\n> Nov 1 No 1 tWH-IL-tHS  2j01 A 2738 G 2766\nAUAAC*GGA-A-G\n> Nov 1 No 1 tWH-IL-tHS  2j01 C 1577 G 1421\nCUAAG*CGA-U-G\n",0,0);
 //		sequenceData = Alignment.doParse(sequenceData,numSequences,"Nov1-No1-Adjusted-tWH-IL-tHS.txt",200);
 
-		//Vector sequenceData = Alignment.loadFasta("16S_sequences_from_2AVY_2J00.fasta"); 
+//		Vector sequenceData = Alignment.loadFasta("16S_sequences_from_2AVY_2J00.fasta"); 
 //		Vector sequenceData = Alignment.loadFasta("16S_sequences_from_1j5e_2AVY.fasta"); 
 //		Vector sequenceData = Alignment.loadFastaColumns("16S_NAR_Non_Redundant_1j5e_first.fasta",31,1803); 
 		
-		numSequences = 20;
+		numSequences = 10;
 
-		Vector sequenceData = Alignment.loadFasta("LIB00003_IL_tSH-tWH-tHS.fasta");
-		sequenceData = Alignment.doParse(sequenceData,numSequences,"LIB00003_IL_tSH-tWH-tHS.txt",20);
+//		Vector sequenceData = Alignment.loadFasta("LIB00003_IL_tSH-tWH-tHS.fasta");
+//		sequenceData = Alignment.doParse(sequenceData,numSequences,"LIB00003_IL_tSH-tWH-tHS.txt",20);
 		
 		
 		//sequenceData = Alignment.doParse(sequenceData,numSequences,"16S_model_from_1j5e.txt",20);
