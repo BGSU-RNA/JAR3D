@@ -112,9 +112,10 @@ public class InitialNode extends BasicNode {
   		}
   		else
   		{
-  			System.out.println("  Initial node out of range");
-  			System.out.println(  "i="+i+" j="+j+" iMin="+super.iMin+" iMax="+super.iMax+" jMin="+super.jMin+" jMax="+super.jMax);
+  			System.out.println("InitialNode.traceback: Initial node out of range");
+  			System.out.println("  i="+i+" j="+j+" iMin="+super.iMin+" iMax="+super.iMax+" jMin="+super.jMin+" jMax="+super.jMax);
   			System.out.println("  Indices "+leftIndex+" "+rightIndex);
+  			System.out.println("  Previous was " + super.previous.mytype + " iMax=" + super.previous.iMax + " jMin=" + super.previous.jMin);
   		}
   	}
   	

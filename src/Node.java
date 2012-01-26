@@ -14,6 +14,7 @@ class Node {
 	public genData optimalGen1, optimalGen2;
 	public boolean visible, active;
 	public int rightIndex, leftIndex;
+	public double currentMaxLogProb;
 	
 	/**
 	 * This is the Node constructor
@@ -155,6 +156,8 @@ class Node {
 	{
 		if ((i >= iMin) && (i <= iMax) && (j >= jMin) && (j <= jMax))
 		{
+			if (maxLogProb[i-iMin][j-jMin] > currentMaxLogProb)
+				currentMaxLogProb = maxLogProb[i-iMin][j-jMin];
 			return maxLogProb[i-iMin][j-jMin];
 		}
 		else
@@ -209,12 +212,15 @@ class Node {
 		// if this hasn't already been done, then do this:
 		optimalMaxLogProb = maxLogProb[i-iMin][j-jMin];
 		
-		/*
-		System.out.print("Node.setOptimalAndRelease "+mytype+" "+iMin+"<="+i+"<="+iMax+" "+jMin+"<="+j+"<="+jMax);
-		System.out.print(" length "+myGen.length);
-		System.out.print(" leftIndex "+leftIndex);
-		System.out.println(" rightIndex "+rightIndex);
-		*/
+		
+		if (optimalMaxLogProb < -99999999)
+		{
+/*			System.out.print("Node.setOptimalAndRelease "+mytype+" "+iMin+"<="+i+"<="+iMax+" "+jMin+"<="+j+"<="+jMax);
+			System.out.print(" length "+myGen.length);
+			System.out.print(" leftIndex "+leftIndex);
+			System.out.print(" rightIndex "+rightIndex);
+			System.out.println(" maxlogprob " + optimalMaxLogProb);
+*/		}
 		
 		optimalGen1 = myGen[i-iMin][j-jMin];
 		optimalGen1.i = i;

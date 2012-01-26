@@ -8,6 +8,16 @@ import java.util.*;
  */
 public class Alignment {
 
+	public static Vector JAR3D(String UserDir, String FastaFile, String ModelFile, int numSequences, int DNA, int range) 
+	{
+		System.setProperty("user.dir",UserDir);
+//		 System.out.println(System.getProperty("user.dir"));
+		Vector sequenceData = Alignment.loadFastaColumnsDNA(FastaFile,0,0,DNA); 
+		sequenceData = Alignment.doParse(sequenceData,numSequences,ModelFile,range);
+		Alignment.displayAlignmentFASTA(sequenceData,numSequences);	
+		return sequenceData;
+	}
+
 	public static Vector loadFasta(String fileName)
 	{
 		Vector sData = new Vector();
@@ -22,8 +32,17 @@ public class Alignment {
 	 * @param EndCol
 	 * @return
 	 */
+
 	public static Vector loadFastaColumns(String fileName, int StartCol, int EndCol)
 	{
+		Vector sData = new Vector();
+		sData = loadFastaColumnsDNA(fileName,StartCol,EndCol,0);
+		return sData;
+	}
+
+	
+	public static Vector loadFastaColumnsDNA(String fileName, int StartCol, int EndCol, int DNA)
+		{
 		Vector sData = new Vector();
 		String temp="";
 		String organism="";
@@ -48,21 +67,59 @@ public class Alignment {
 			{
 				if(temp.charAt(0)=='>')
 				{
+					if (DNA > 1)
+					{
+						String d = "";
+						letters = Alignment.reverseString(letters);
+                        for (int j = 0; j < 300-letters.length(); j++)
+                        	d = d + '-';
+                        letters = d + letters;
+					}
 					if (EndCol > 0)
-						sData.add(new Sequence(organism.substring(2,organism.length()),letters.substring(StartCol,EndCol)));
+						sData.add(new Sequence(organism.substring(1,organism.length()),letters.substring(StartCol,EndCol)));
 					else
-						sData.add(new Sequence(organism.substring(2,organism.length()),letters));
+						sData.add(new Sequence(organism.substring(1,organism.length()),letters));
 					organism = temp;
 					letters = "";
 				}
 				else
+				{
+					if (DNA > 0)
+					{
+						temp = temp.replace("A", "w");
+						temp = temp.replace("a", "w");
+						temp = temp.replace("C", "x");
+						temp = temp.replace("c", "x");
+						temp = temp.replace("G", "y");
+						temp = temp.replace("g", "y");
+						temp = temp.replace("U", "z");
+						temp = temp.replace("u", "z");
+						temp = temp.replace("T", "z");
+						temp = temp.replace("t", "z");
+						temp = temp.replace("w", "U");
+						temp = temp.replace("x", "G");
+						temp = temp.replace("y", "C");
+						temp = temp.replace("z", "A");
+					}
 					letters+=temp;
+					
+				}
 
 				temp = rdr.readLine();
 			}
 
+			if (DNA > 1)
+			{
+				String d = "";
+				letters = Alignment.reverseString(letters);
+                for (int j = 0; j < 300-letters.length(); j++)
+                	d = d + '-';
+                letters = d + letters;
+			}
+
+			
 			if (EndCol > 0)
-				sData.add(new Sequence(organism.substring(2,organism.length()),letters.substring(StartCol,EndCol)));
+				sData.add(new Sequence(organism.substring(1,organism.length()),letters.substring(StartCol,EndCol)));
 			else
 				sData.add(new Sequence(organism.substring(2,organism.length()),letters));
 
@@ -124,8 +181,16 @@ public class Alignment {
 		return sData;
 	}
 
+	public static String reverseString(String S)
+	{
+		String T = "";
+		for (int i=S.length()-1; i > 0; i--)
+			T = T + S.charAt(i);
+		return T;
+	}
+
 	/**
-	 * This method reverses the sequence and parses
+	 * This method reverses the sequences in sequenceData and returns
 	 * @param numSequences
 	 * @param sequenceData
 	 * @return
@@ -264,9 +329,21 @@ public class Alignment {
 				current =  current.next;
 			}
 			((Sequence)sData.elementAt(i)).maxLogProbs.add(mProbs);
+			if (S.first.optimalMaxLogProb < -99999999)
+			{
+//				System.out.println("Alignment.doParse: No good parse found, score "+S.first.optimalMaxLogProb);
+				current = S.first.next;
+				while (current != null)
+				{
+					if (current.previous.currentMaxLogProb < -99999999 && current.currentMaxLogProb > -999999999)
+					{
+//						System.out.println("Alignment.doParse: best max Log Prob "+current.previous.currentMaxLogProb+" at "+current.previous.mytype+" "+(current.previous.leftIndex+1)+" "+(current.previous.rightIndex+1));
+					}
+					current = current.next;				
+				}
+			}
+			
 			((Sequence)sData.elementAt(i)).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
-			
-			
 			
 		}
 		return sData;
@@ -537,18 +614,29 @@ public class Alignment {
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
 	 */
-	public static Vector getAlignment(Vector sData)
+	public static Vector getAlignment(Vector sData, int numSequences)
 	{
 		Vector pData = new Vector();
 		
-		for (int i = 0; i < sData.size(); i++)
+		for (int i = 0; i < Math.min(sData.size(),numSequences+1); i++)
+		{
 			pData.add(((Sequence)sData.get(i)).parseData);
-
+//			System.out.println((String)pData.get(i));
+		}
+		
 		int[] mask = stripDash(pData);
 		String alnm = "";
 		Vector alignmentVect = new Vector();
 
-		for(int j = 0; j < pData.size(); j++)
+		alnm = "";
+		for(int i = 0; i < mask.length; i++)
+		{
+			if(mask[i] == 0)
+				alnm += ((String)pData.get(0)).charAt(i);
+		}		
+		alignmentVect.add(alnm);                          // paste in header line
+		
+		for(int j = 1; j < pData.size(); j++)
 		{
 			alnm = "";
 //			for(int x = 0; x < ((Sequence)sData.elementAt(j)).maxLogProbs.size(); x++)
@@ -559,10 +647,9 @@ public class Alignment {
 				if(mask[i] == 0)
 					alnm += ((String)pData.get(j)).charAt(i);
 			}		
-			alnm += " "+((Sequence)sData.elementAt(j)).organism+" ";
-			for(int x = 0; x < ((Sequence)sData.elementAt(j)).maxLogProbs.size(); x++)
-				alnm += ((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(x)).get(0);
 			alignmentVect.add(alnm);
+			alignmentVect.add(">"+((Sequence)sData.elementAt(j)).organism);
+			alignmentVect.add("Score = "+((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(0)).get(0));
 		}
 		return alignmentVect;	
 	}	
@@ -799,7 +886,7 @@ public class Alignment {
 		return scores;
 	}	
 
-	public static String getSortedILAlignment(Vector sData, Vector modNames, int numSequences, int range)
+	public static double[] getSortedILAlignment(Vector sData, Vector modNames, int numSequences, int range)
 	{
 		Vector alignmentVect = new Vector();                   // alignment lines to output
 		Vector pData = new Vector();                           // parse data
@@ -810,9 +897,10 @@ public class Alignment {
 		Vector shortModNames = new Vector();                   // for easier display
 		Vector tinyModNames = new Vector();                    // for even easier display
 		int[] reversed = new int[modNames.size()];             // is best model reversed?
-        String scores = "";
-        
-		Vector rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
+ //       String scores = "";
+        double[] scores = new double[2*modNames.size()];       // all scores computed
+
+        Vector rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
 		
 		if(((String)modNames.get(0)).contains("http"))         // look online for models
 		{
@@ -871,9 +959,11 @@ public class Alignment {
 			System.out.format("%s reversed %12.6f\n",tinyModNames.get(g),rmodelScores[g]);
 			
 			fmt = new Formatter();
-			scores += fmt.format(" %12.6f", Math.max(modelScores[g],-9999));
-			fmt = new Formatter();
-			scores += fmt.format(" %12.6f", Math.max(rmodelScores[g],-9999));
+			scores[2*g]   = Math.max(modelScores[g],-9999);
+			scores[2*g+1] = Math.max(rmodelScores[g],-9999);
+
+//			fmt = new Formatter();
+//			scores += fmt.format(" %12.6f", Math.max(rmodelScores[g],-9999));
 			
 			if(rmodelScores[g] > modelScores[g])          // choose between forward and reversed for each model
 			{

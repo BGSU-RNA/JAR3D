@@ -9,16 +9,19 @@ import java.util.*;
 public class JAR3DMoleculeAligner {
 	public static void main(String[] args) {
 
-		int numSequences = 1;
-
-		numSequences = 3;
+		int numSequences = 10;
+		int DNA = 0;
+		int range = 20;
 
 		if (args.length>0)
 		{
 			System.setProperty("user.dir",args[0]);
 			// System.out.println(System.getProperty("user.dir"));
-			Vector sequenceData = Alignment.loadFasta(args[1]); 
-			sequenceData = Alignment.doParse(sequenceData,numSequences,args[2],15);
+			DNA = (int)(Double.parseDouble(args[4]));
+			Vector sequenceData = Alignment.loadFastaColumnsDNA(args[1],0,0,DNA); 
+			numSequences = (int)(Double.parseDouble(args[3]));
+			range        = (int)(Double.parseDouble(args[5]));
+			sequenceData = Alignment.doParse(sequenceData,numSequences,args[2],range);
 			Alignment.displayAlignmentFASTA(sequenceData,numSequences);
 		}
 		else

@@ -50,6 +50,12 @@ public class JunctionNode extends BranchingNode {
 					{		   // branch one, from i to k        branch two, from k+1 to j
 							   // i-------------k--------------j
 						pnew = ((Node)super.children.get(0)).getMaxLogProb(i,k) + ((Node)super.children.get(1)).getMaxLogProb(k+1,j);
+/*						
+if (i==k)
+	System.out.println("JunctionNode.computeMaxLogProb i=k=" + i);
+if (k+1==j)
+	System.out.println("JunctionNode.computeMaxLogProb k+1=j=" + k+1);
+*/
 						if (pnew > p)
 						{
 							p = pnew;
@@ -112,7 +118,7 @@ public class JunctionNode extends BranchingNode {
 			}
   		}
   		else
-  			System.out.println("Out of range");
+  			System.out.println("Junction out of range");
   	}
 
 /*	

@@ -187,7 +187,11 @@ public class Sequence {
 				code[c] = 3;
 				break;
 			case 'T':
-				code[3] = 3;
+				code[c] = 3;
+				break;
+			case 't':
+				code[c] = 3;
+				break;
 			case '*':
 				code[c] = 4;
 				break;
@@ -638,11 +642,12 @@ public class Sequence {
 		Node current = last; 
 		while(current != null) // go until the end of the list
 		{
+			current.currentMaxLogProb = -1d/0d;
 			current.setMinMax(range, this);
 			current = current.previous;		 // current equals the one before
 		}
 
-		System.out.println("Sequence.parseSequence: nucleotides 0 to "+(nucleotides.length()-1)+" "+nucleotides);
+//		System.out.println("Sequence.parseSequence: nucleotides 0 to "+(nucleotides.length()-1)+" "+nucleotides);
 		
 		// CYK algorithm for determining maximum log probability parse
 		for (int p=1; p <= nucleotides.length(); p++)         // length of subsequence
@@ -683,46 +688,53 @@ public class Sequence {
 	
 	public static Vector getModelNames(String loopType)
 	{
-		Vector modnames = new Vector();
-		String listName = loopType + "_models.txt";
+		Vector modelNames = new Vector();
+		String listName = loopType + "_Models.txt";
 
 	try {
 		String curDir = System.getProperty("user.dir");
         curDir = curDir.replace("\\bin","");
+
 //		System.out.println("Sequence.getModelNames: Current directory is "+curDir);
-        File f1 = new File (curDir + "\\models");
-//	    FileWriter fstream = new FileWriter(curDir + "\\..\\models\\" + listName);
-//	    BufferedWriter out = new BufferedWriter(fstream);
+//        File f1 = new File (curDir + "\\models");
+//	    File[] modfiles = f1.listFiles();
+
+		BufferedReader rdr;
+
+		File f2 = new File(curDir + "\\models\\" + listName);
+		rdr = new BufferedReader(new FileReader(f2));
+
+		String fileLine = "";
+		fileLine = rdr.readLine();
+		System.out.println(fileLine);
 		
-		File[] modfiles = f1.listFiles();
-		for(int z=0;z<modfiles.length;z++) {
-			if (modfiles[z].getName().substring(9,11).equals(loopType))
-			{
-//				System.out.println("Sequence.getModelNames: "+modfiles[z].getName());
-				modnames.add(modfiles[z].getName());
-//				out.write(modfiles[z].getName()+"\n");
-			}
+		while(fileLine != null)
+		{
+//			System.out.println(fileLine);
+			modelNames.add(fileLine);
+			fileLine = rdr.readLine();
 		}
-//		out.close();
+
 		}
 	catch (Exception e) {
 		try{
-		URL dirurl = new URL("http://rna.bgsu.edu/JAR3D/models/"+listName);
-        URLConnection dircon = dirurl.openConnection();
-        BufferedReader rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
-        String ln = rdr.readLine();
-		while(ln != null)
-			{
-				modnames.add("http://rna.bgsu.edu/JAR3D/models/" + ln);
-				ln = rdr.readLine();
-			}
+			System.out.println("Couldn't find model files locally, looking online.");
+			URL dirurl = new URL("http://rna.bgsu.edu/JAR3D/models/"+listName);
+	        URLConnection dircon = dirurl.openConnection();
+	        BufferedReader rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
+	        String ln = rdr.readLine();
+			while(ln != null)
+				{
+					modelNames.add("http://rna.bgsu.edu/JAR3D/models/" + ln);
+					ln = rdr.readLine();
+				}
 		}
 		catch (Exception ex)
 		{
 			System.out.println(ex.getMessage());
 		}
 	}
-	return modnames;
+	return modelNames;
 	}
 
 

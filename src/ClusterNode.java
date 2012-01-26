@@ -37,8 +37,7 @@ public class ClusterNode extends BasicNode {
 		insertions = new Vector(numLeftInt+numRightInt);
 		for (int i = 0; i<numLeftInt+numRightInt; i++)
 		{
-// IMPORTANT!!!  This dummy setting needs to be changed to put in a letter distribution corresponding to the number of characters being parsed!
-			
+            // This dummy setting is below changed when an insertion is added
 			insertions.add(new InsertionDistribution(new double[]{1.0}, new double[]{0.4, 0.3,0.2,0.1,0.5}));
 		}
 	}
