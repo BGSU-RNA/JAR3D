@@ -13,6 +13,16 @@ public class JAR3DMoleculeAligner {
 
 		numSequences = 3;
 
+		if (args.length>0)
+		{
+			System.setProperty("user.dir",args[0]);
+			// System.out.println(System.getProperty("user.dir"));
+			Vector sequenceData = Alignment.loadFasta(args[1]); 
+			sequenceData = Alignment.doParse(sequenceData,numSequences,args[2],15);
+			Alignment.displayAlignmentFASTA(sequenceData,numSequences);
+		}
+		else
+		{
 		// choose sequence data and a model that goes with it
 		// for index restrictions to work, the first sequence needs to be at least as long as
 		// the sequence in the 3D structure from which the model was derived, and preferably
@@ -41,7 +51,7 @@ public class JAR3DMoleculeAligner {
 //		Vector sequenceData = Alignment.loadFasta("16S_sequences_from_1j5e_2AVY.fasta"); 
 //		sequenceData = Alignment.doParse(sequenceData,numSequences,"16S_model_from_1j5e_mod_4.txt",10);
 		
-		Vector sequenceData = Alignment.loadFasta("Stombaugh_et_al_Sup_Mat_S2.fasta"); 
+		Vector sequenceData = Alignment.loadFasta("16S_sequences_from_1j5e_2AVY.fasta"); 
 		sequenceData = Alignment.doParse(sequenceData,numSequences,"16S_from_2AVY.txt",15);
 				
 //		Vector sequenceData = Alignment.loadFasta("23S_sequences_from_1s72_2aw4_2j01.fasta"); 
@@ -75,7 +85,7 @@ public class JAR3DMoleculeAligner {
 //		Alignment.makeHTMLAlignment(sequenceData, numSequences);
 //		Vector aData = Alignment.getAlignment(parseData, sequenceData);
 //		Alignment.printAlignment(aData, 90);
-
+		}
 	}
 	
 }

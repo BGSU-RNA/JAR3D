@@ -491,7 +491,7 @@ public class Alignment {
 				{
 					char a;
 					a = ((String)pData.get(j)).charAt(i);
-					if ((a!='{') && (a!='}') && (a!='<') && (a!='>')) 
+//					if ((a!='{') && (a!='}') && (a!='<') && (a!='>')) 
 						System.out.print(a);
 				}
 			}
