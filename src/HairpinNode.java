@@ -19,9 +19,9 @@ public class HairpinNode extends BasicNode {
 	 * @param prev contains a pointer to the previous node
 	 * @param numfix is the number of fixed bases
 	 */
-	public HairpinNode(Node prev, int numfix, int lI, int rI) {
+	public HairpinNode(Node prev, int numfix, int lI, int rI, double nC) {
 		super(prev, "HairpinNode", lI, rI);
-
+		normalizationZ = nC;
 		if (numfix > 0)
 		{			
 			numFixed    = numfix;
@@ -131,6 +131,26 @@ public class HairpinNode extends BasicNode {
 			codes[i] = 0;
 				
 		normalizationZ = 1;
+//		System.out.println("Normalization: "+z);
+	}
+	
+	public void useFileNormalize()
+	{
+		double z = 0;
+		double p = 1;
+		int[] codes = new int[numFixed];
+		
+		maxLengths = new int[insertions.size()]; // maximum possible numbers of insertions
+		for(int l = 0; l < insertions.size(); l++)
+		{
+			maxLengths[l] = ((InsertionDistribution)insertions.get(l)).lengthDist.length-1;
+		}
+
+		
+		for (int i = 0; i < numFixed; i++)
+			codes[i] = 0;
+				
+//		normalizationZ = 1;
 //		System.out.println("Normalization: "+z);
 	}
 
@@ -310,7 +330,7 @@ public class HairpinNode extends BasicNode {
 				}
 			
 			}	// for loop that sets maxLogProb[i-super.iMin][j-super.jMin]
-			
+			p -= Math.log(normalizationZ); //Normalize the probability
   			maxLogProb[i-iMin][j-jMin] = p;
   			myGen[i-iMin][j-jMin] = new genData(optInsLengths);
 		} // end if loop
@@ -337,18 +357,20 @@ public class HairpinNode extends BasicNode {
 		int[] insert = optimalGen1.splitpoints;
 		int i = optimalGen1.i;
 		
-		String left = n.substring(i,i+1);
+		String npadded = n + "-----------------------------------------------------------------";
+		
+		String left = npadded.substring(i,i+1);
 
 		for(int l = 0; l < numFixed-1; l++)
 			{
-				left += n.substring(i+1,i+1+insert[l]);
+				left += npadded.substring(i+1,i+1+insert[l]);
 				for(int f = 0; f < maxLengths[l] - insert[l] ; f++)
 				{
 					left += "-";
 				}
 				i += insert[l]+1;
-// System.out.println("HairpinNode.showParse "+i+" "+n.length()+" "+numFixed);
-                left += n.substring(i,i+1);
+// System.out.println("HairpinNode.showParse "+i+" "+npadded.length()+" "+numFixed);
+                left += npadded.substring(i,i+1);
 			}
 		
 		return "<" + left + ">";

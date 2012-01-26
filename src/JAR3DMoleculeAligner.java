@@ -54,8 +54,9 @@ public class JAR3DMoleculeAligner {
 //		Vector sequenceData = Alignment.loadFasta("16S_sequences_from_1j5e_2AVY.fasta"); 
 //		sequenceData = Alignment.doParse(sequenceData,numSequences,"16S_model_from_1j5e_mod_4.txt",10);
 		
-		Vector sequenceData = Alignment.loadFasta("16S_sequences_from_1j5e_2AVY.fasta"); 
-		sequenceData = Alignment.doParse(sequenceData,numSequences,"16S_from_2AVY.txt",15);
+		Vector sequenceData = Alignment.loadFasta("16S_sequences_from_1J5E_2QAN.fasta"); 
+//		sequenceData = Alignment.doParse(sequenceData,numSequences,"16S_from_2AVY.txt",15);
+		sequenceData = Alignment.doParse(sequenceData,numSequences,"16S_model_from_1J5E_mod_4.txt",15);
 				
 //		Vector sequenceData = Alignment.loadFasta("23S_sequences_from_1s72_2aw4_2j01.fasta"); 
 //		Vector parseData = Alignment.doParse(sequenceData,1,"23S_model_from_1s72.txt",12);

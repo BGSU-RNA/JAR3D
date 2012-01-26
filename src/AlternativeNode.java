@@ -48,7 +48,7 @@ public class AlternativeNode extends BranchingNode {
 			int branch = 0;
 			for(int l = 0; l < probDist.length; l++)
 			{
-				System.out.println("Alternative node: i="+i+" j="+j+" l="+l);
+			//  System.out.println("Alternative node: i="+i+" j="+j+" l="+l);
 				pnew = logProbDist[l] + ((Node)super.children.get(l)).getMaxLogProb(i,j); 
 				if(pnew > p)
 				{

@@ -25,20 +25,21 @@ public class ClusterNode extends BasicNode {
 	 * @param numLIn is the number of insertions on the left side
 	 * @param numRIn is the number of insertions on the right side
 	 */
-	public ClusterNode(Node prev, double dProb, int numLIn, int numRIn, int lI, int rI) {
+	public ClusterNode(Node prev, double dProb, int numLIn, int numRIn, int lI, int rI, double nC) {
 		super(prev, "ClusterNode", lI, rI);
 		numLeftInt = numLIn;
 		numRightInt = numRIn;
+		normalizationZ = nC;
 		deleteProb = dProb;                                   // deletion probability
 		deleteLogProb = Math.log(deleteProb);                 // log probability
 		
-		// System.out.println("ClusterNode.constructor deleteLogProb " + deleteLogProb);
+		// System.out.println("ClusterNode.constructor normalization constant " + normalizationZ);
 		
 		insertions = new Vector(numLeftInt+numRightInt);
 		for (int i = 0; i<numLeftInt+numRightInt; i++)
 		{
             // This dummy setting is below changed when an insertion is added
-			insertions.add(new InsertionDistribution(new double[]{1.0}, new double[]{0.4, 0.3,0.2,0.1,0.5}));
+			insertions.add(new InsertionDistribution(new double[]{1.0}, new double[]{0.0, 0.3,0.2,0.1,0.5}));
 		}
 	}
 	
@@ -86,20 +87,20 @@ public class ClusterNode extends BasicNode {
 		{
 			maxLengths[l] = ((InsertionDistribution)insertions.get(l)).lengthDist.length-1;
 		}
-		
+
 		for(int i = 0; i < (Math.pow(4,numBases)); i++)
 		{
 			// score codes[] according to the various interactions
+
 			p = 1;
 			for(int j = 0; j < interactions.size(); j++)
 			{
 				p *= ((ClusterInteraction)interactions.get(j)).getSubstProb(codes);
 			}
-			z += p;
+			z += p;     // running total of probabilities
 //			System.out.println(z);
 			// push a 1 into codes and carry
 			codes[numBases-1] += 1;
-			
 			
 			int place = numBases-1;
 			while((codes[place] > 3) && (place > 0))// carry
@@ -114,7 +115,7 @@ public class ClusterNode extends BasicNode {
 		System.out.println("ClusterNode.Normalize normalized a node: " + z);
 	}
 
-	public void pretendToNormalize()
+	public void useFileNormalize()
 	{
 		double z = 0;
 		double p = 1;
@@ -130,7 +131,7 @@ public class ClusterNode extends BasicNode {
 			maxLengths[l] = ((InsertionDistribution)insertions.get(l)).lengthDist.length-1;
 		}
 		
-		normalizationZ = 1;
+//		normalizationZ = 1;
 	}
 
 	/**
@@ -282,29 +283,52 @@ public class ClusterNode extends BasicNode {
 	
 					pnew = 0;
 	
-					int k = i;
-					for(int m = 0; m < numLeftInt; m++)                // consider insertions on the left
+//				System.out.println();
+					int k = i;                                       // first base of the subsequence being parsed
+					for(int m = 0; m < numLeftInt; m++)              // go through insertions on the left
 					{
-						intCodes[m] = seq.code[k];
-						int[] insCodes = new int[insLengths[m]];
-						for (int q = 0; q < insLengths[m]; q++)
-							insCodes[q] = seq.code[k+1+q];
+						intCodes[m] = seq.code[k];                   // record code of interacting base
+						int[] insCodes = new int[insLengths[m]];     // place for codes of insertions
+						for (int q = 0; q < insLengths[m]; q++)      // loop through number of insertions at site m
+							insCodes[q] = seq.code[k+1+q];           // record codes of right number of inserted bases here
 						pnew += ((InsertionDistribution)insertions.get(m)).computeLogProb(insCodes);
 						k += insLengths[m] + 1;
 					}
 						
-					k = j;
-					for(int m = numBases-1; m >= numLeftInt; m--)      // consider insertions on the right
+					k = j;                                           // last base of the subsequence being parsed
+					for(int m = numBases-1; m >= numLeftInt; m--)    // consider insertions on the right
 					{
-//						System.out.println(i+" "+j+" "+m+" "+k+" "+seq.code.length);
-						intCodes[m] = seq.code[k];
-						int[] insCodes = new int[insLengths[m]];
-						for (int q = 0; q < insLengths[m]; q++)
-							insCodes[q] = seq.code[k-1-q];
-						pnew += ((InsertionDistribution)insertions.get(m)).computeLogProb(insCodes);
-						k = k - insLengths[m] - 1;
+//				System.out.println(i+" "+j+" "+m+" "+k+" "+seq.code.length);
+						intCodes[m] = seq.code[k];                   // record codes of interacting bases, starting from the right
+//				System.out.print("Length: "+insLengths[m-1]+" ");
+						int[] insCodes = new int[insLengths[m-1]];   // (-1)
+						for (int q = 0; q < insLengths[m-1]; q++)    // (-1) loop through number of insertions at site m, moving from the *right*
+						{
+							insCodes[q] = seq.code[k-1-q];           // record code of base here
+//				System.out.print("Code: "+insCodes[q]+" ");
+						}
+						pnew += ((InsertionDistribution)insertions.get(m-1)).computeLogProb(insCodes);
+						k = k - insLengths[m-1] - 1;                 // (-1)
+
+//				System.out.println();
 					}
-						
+					
+
+					
+//					System.out.print("Interacting codes: ");
+					for (int m = 0; m < numBases; m++)
+					{
+//						System.out.print(intCodes[m]);
+					}
+//					System.out.println("");
+
+//					System.out.print("Max lengths: ");
+					for (int m = 0; m < numBases; m++)
+					{
+//						System.out.print(maxLengths[m]);
+					}
+//					System.out.println("");
+
 					// score intCodes[] according to the various interactions
 					
 					for(int m = 0; m < interactions.size(); m++)
@@ -316,6 +340,8 @@ public class ClusterNode extends BasicNode {
 					
 					pnew += super.child.getMaxLogProb(i+numLeftInt+a, j-numRightInt-b);
 					
+					pnew -= Math.log(normalizationZ); // normalize the probability
+
 					// compare to current best possibility and keep if better
 					if(pnew > p)
 					{
@@ -361,7 +387,7 @@ public class ClusterNode extends BasicNode {
 			// for loop that sets maxLogProb[i-super.iMin][j-super.jMin]
 			
 			maxLogProb[i-iMin][j-jMin] = p;
-			
+
   			if (Deleted)
   			{
   	  			myGen[i-iMin][j-jMin] = new genData(true);

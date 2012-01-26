@@ -231,7 +231,7 @@ public class Sequence {
 			if(!(modelFileName.contains("http")))
 			{
 				String curDir = System.getProperty("user.dir");
-		        curDir = curDir.replace("\\bin","");
+		        curDir = curDir.replace(File.separator + "bin","");
 //				System.out.println("Sequence.addNodeData: Current directory is "+curDir);
 
 //				File f1 = new File (curDir + "\\..\\models");
@@ -248,7 +248,7 @@ public class Sequence {
 					System.out.println("Sequence.addNodeData: Model file not found.");
 					System.exit(0);
 				}
-				File f2 = new File(curDir + "\\models\\" + modelFileName);
+				File f2 = new File(curDir + File.separator + "models" + File.separator + modelFileName);
 				rdr = new BufferedReader(new FileReader(f2));
 			}
 			else
@@ -330,7 +330,7 @@ public class Sequence {
 							}
 							numDatas.add(nData);	
 						}
-
+						
 						switch(type)
 						{	
 						case 'I':
@@ -385,12 +385,12 @@ public class Sequence {
 						case 'J':
 							current = new JunctionNode(current, (int)((double[])numDatas.get(0))[0], (int)((double[])numDatas.get(1))[0],(int)((double[])numDatas.get(2))[0]);
 							break;
-						case 'H':					
-							current = new HairpinNode(current, (int)((double[])numDatas.get(0))[0], (int)((double[])numDatas.get(1))[0], (int)((double[])numDatas.get(2))[0]);
+						case 'H':
+							current = new HairpinNode(current, (int)((double[])numDatas.get(0))[0], (int)((double[])numDatas.get(1))[0], (int)((double[])numDatas.get(2))[0], ((double[])numDatas.get(3))[0]);
 							isHairpin = true;
 							break;
 						case 'C':
-							current = new ClusterNode(current, (int)((double[])numDatas.get(0))[0], (int)((double[])numDatas.get(1))[0], (int)((double[])numDatas.get(2))[0], (int)((double[])numDatas.get(3))[0], (int)((double[])numDatas.get(4))[0]);
+							current = new ClusterNode(current, ((double[])numDatas.get(0))[0], (int)((double[])numDatas.get(1))[0], (int)((double[])numDatas.get(2))[0], (int)((double[])numDatas.get(3))[0], (int)((double[])numDatas.get(4))[0], ((double[])numDatas.get(5))[0]);
 							isHairpin = false;
 							break;
 						case 'A':
@@ -462,15 +462,13 @@ public class Sequence {
 		}
 		 */
 
-		// pretend normalizations!!  must be changed!!!
-
 		while(current != null) // Go until end of list
 		{
 			if(current.getType().equals("ClusterNode"))
-				((ClusterNode)current).pretendToNormalize();
+				((ClusterNode)current).useFileNormalize();
 //				((ClusterNode)current).normalize();
 			if(current.getType().equals("HairpinNode"))
-				((HairpinNode)current).pretendToNormalize();
+				((HairpinNode)current).useFileNormalize();
 //				((HairpinNode)current).normalize();
 			current = current.next;
 		}
@@ -693,7 +691,7 @@ public class Sequence {
 
 	try {
 		String curDir = System.getProperty("user.dir");
-        curDir = curDir.replace("\\bin","");
+        curDir = curDir.replace(File.separator + "bin","");
 
 //		System.out.println("Sequence.getModelNames: Current directory is "+curDir);
 //        File f1 = new File (curDir + "\\models");
@@ -701,12 +699,12 @@ public class Sequence {
 
 		BufferedReader rdr;
 
-		File f2 = new File(curDir + "\\models\\" + listName);
+		File f2 = new File(curDir + File.separator + "models" + File.separator + listName);
 		rdr = new BufferedReader(new FileReader(f2));
 
 		String fileLine = "";
 		fileLine = rdr.readLine();
-		System.out.println(fileLine);
+//		System.out.println(fileLine);
 		
 		while(fileLine != null)
 		{
@@ -737,6 +735,40 @@ public class Sequence {
 	return modelNames;
 	}
 
+	/**
+	 * This method reads a text file and returns the lines as a vector
+	 * 
+	 */
+	
+	public static Vector readTextFile(String fileName)
+	{
+		Vector lineValues = new Vector();
+
+	try {
+		String curDir = System.getProperty("user.dir");
+        curDir = curDir.replace(File.separator + "bin","");
+
+		BufferedReader rdr;
+
+		File f2 = new File(curDir + File.separator + fileName);
+		rdr = new BufferedReader(new FileReader(f2));
+
+		String fileLine = "";
+		fileLine = rdr.readLine();
+		
+		while(fileLine != null)
+		{
+			lineValues.add(fileLine);
+			fileLine = rdr.readLine();
+		}
+
+		}
+	catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+
+	return lineValues;
+	}
 
 }// end class
 

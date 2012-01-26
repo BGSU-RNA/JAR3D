@@ -108,10 +108,12 @@ class Node {
 		*/
 		
 		int leftCol = seq.itcFirst[Math.min(leftIndex,seq.itcFirst.length-1)];    // 
+		leftCol = Math.min(leftCol, seq.cti.length-1);
 		//int leftCol = seq.itcFirst[leftIndex];    // 
 		iMin = seq.cti[leftCol] - range;
 		iMax = seq.cti[leftCol] + range;
 		int rightCol = seq.itcFirst[Math.min(rightIndex,seq.itcFirst.length-1)];
+		rightCol = Math.min(rightCol, seq.cti.length-1);
 		jMin = seq.cti[rightCol] - range;
 		jMax = seq.cti[rightCol] + range;
 		
