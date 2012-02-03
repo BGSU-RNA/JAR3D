@@ -2,6 +2,7 @@ import java.util.LinkedList;
 
 /**
  * This class is used to simulate alternative nodes
+ * It works really well.
  * @author meg pirrung
  *
  */

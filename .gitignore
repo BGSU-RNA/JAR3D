@@ -1,3 +1,6 @@
+*.dll
+*.so
+*.jnilib
 .classpath
 .project
 *.class
