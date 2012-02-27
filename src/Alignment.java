@@ -53,14 +53,23 @@ public class Alignment {
 		BufferedReader rdr;
 		try {
 			String curDir = System.getProperty("user.dir");
-			File f1 = new File (curDir + File.separator + "sequences");
-			File[] seqfiles = f1.listFiles();
-			int i = 0;
-			while(!seqfiles[i].getName().equals(fileName))
-				i++;
 
-			rdr = new BufferedReader(new FileReader(seqfiles[i]));
+//			File f1 = new File (curDir + File.separator + "sequences");
+//			File[] seqfiles = f1.listFiles();
+//			int i = 0;
+//			while(!seqfiles[i].getName().equals(fileName))
+//				i++;
 
+			try
+			{
+				rdr = new BufferedReader(new FileReader(fileName));
+			}
+			catch (FileNotFoundException e)
+			{
+				System.out.println("Reading sequence file from relative path");
+				rdr = new BufferedReader(new FileReader(curDir + File.separator + "sequences" + File.separator + fileName));
+			}
+				
 			temp = rdr.readLine();
 			organism = temp;
 			temp = rdr.readLine();
@@ -133,7 +142,7 @@ public class Alignment {
 			rdr.close();
 		}
 		catch (IOException e) {
-			System.out.println("Could not open fasta file");
+			System.out.println("Could not open sequence file");
 			System.out.println(e);
 		}
 		return sData;

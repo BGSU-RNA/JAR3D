@@ -201,14 +201,396 @@ public class Sequence {
 		}
 	}
 
+	/**
+	 * This method is used to set up the sequence of nodes in a linked list type structure that
+	 * also has a branching structure, depending on whether the list is traversed using next
+	 * or child nodes.
+	 * It takes the text of a model as input
+	 * @param modelFileName a string to hold which model file is to be read
+	 */
+	void addNodeDataModelText(String modelText)
+	{
+		start = System.currentTimeMillis();
+		Node current = new Node();
+		Stack branchingNodes = new Stack(); // keep track of current junction
+		int newchild = 0;
+		int charCnt = 0;
+		String nodeLine = "";
+		String dataString = "";
+		String comment = "";
+		int numFix = 0;
+		StringTokenizer element;
+		boolean flag = true;
+		boolean isHairpin = true;
+		double[] nData;
+		long start1 = System.currentTimeMillis();
 
+		int lineNum = 0;
+				
+		String[] modelArray;
+		modelArray = modelText.split("\\n");
+					
+		while(lineNum < modelArray.length)
+		{
+			nodeLine = modelArray[lineNum];
+			nodeLine = nodeLine.replace(" ","");
+			
+			if (!nodeLine.equals("//") && (!nodeLine.equals("")))
+			{
+				//System.out.println(nodeLine);
+				//Vector numData; // to hold data straight from txt file
+				Vector numDatas = new Vector(); // to hold arrays of doubles
+				Vector stringData = new Vector();
+				if(nodeLine.indexOf("//") != -1)
+				{
+					comment = nodeLine.substring(nodeLine.indexOf("//"),nodeLine.length());
+					nodeLine = nodeLine.substring(0,nodeLine.indexOf("//"));
+				}
+				StringTokenizer st = new StringTokenizer(nodeLine,"|");
+				dataString = st.nextToken(); // the name of the node
+				char type  = dataString.charAt(0);
+				char iType = dataString.charAt(2);
+				//System.out.print("Read node string: " + nodeLine);
+				//System.out.println("Node type: " + type);
+				//System.out.println("Comments: " + comment);
+
+				// allow comment lines in the data file, and blank lines too
+
+				if(iType == 'a' ) // character definition
+				{
+					dataString = st.nextToken();
+					element = new StringTokenizer(dataString, ",");
+					charCnt = element.countTokens();
+//						System.out.println("Number of characters to parse with: " + charCnt);
+					char[] codesFromDef = new char[charCnt];
+					for(int i = 0; i < charCnt; i++)
+						codesFromDef[i] = element.nextToken().charAt(0);
+				}
+				else
+				{
+					while(st.hasMoreTokens())
+					{
+						dataString = st.nextToken(); // each individual set of data
+						//System.out.println(dataString);
+						dataString = dataString.replace("[","*");
+						dataString = dataString.replace("]","*");
+						dataString = dataString.replace(",","*");
+						dataString = dataString.replace(" ","");
+
+						element = new StringTokenizer(dataString, "*");
+
+						nData = new double[element.countTokens()-1];
+						element.nextToken();
+						for(int i = 0; i < nData.length; i++)
+						{
+							String nT;
+							nT = element.nextToken();
+							//System.out.println(nT);
+							nData[i] = Double.parseDouble(nT);
+						}
+						numDatas.add(nData);	
+					}
+					
+					switch(type)
+					{	
+					case 'I':
+						switch(iType)
+						{
+						case 'i':
+							current = new InitialNode(current, (double[])numDatas.get(0), (double[])numDatas.get(1), (double[])numDatas.get(2), (double[])numDatas.get(3),(int)((double[])numDatas.get(4))[0],(int)((double[])numDatas.get(5))[0]);
+							if (flag)
+							{
+								first = current;
+								flag = false;
+							}
+							break;
+						case 't':
+							double[][] interactionParams = new double[charCnt][charCnt];
+							for(int i = 0; i < charCnt; i++)
+							{
+								for(int j = 0; j < charCnt; j++)
+								{
+									interactionParams[i][j] = ((double[])numDatas.get(1))[charCnt*i + j];
+								}
+							}
+							if(isHairpin)
+							{
+								((HairpinNode)current).addInteraction((int)((double[])numDatas.get(0))[0],(int)((double[])numDatas.get(0))[1], interactionParams);
+							}
+							else
+								((ClusterNode)current).addInteraction((int)((double[])numDatas.get(0))[0],(int)((double[])numDatas.get(0))[1], interactionParams);
+							break;
+						case 's':
+							if(isHairpin)
+							{
+								((HairpinNode)current).addInsertion((int)((double[])numDatas.get(0))[0],((double[])numDatas.get(1)),((double[])numDatas.get(2)));
+							}
+							else
+								((ClusterNode)current).addInsertion((int)((double[])numDatas.get(0))[0],((double[])numDatas.get(1)),((double[])numDatas.get(2)));
+							break;
+						default:
+						}
+						break;
+					case 'B':
+						double[][] pairProb = new double[charCnt][charCnt];
+						for(int i = 0; i < charCnt; i++)
+						{
+							for(int j = 0; j < charCnt; j++)
+							{
+								pairProb[i][j] = ((double[])numDatas.get(1))[charCnt*i + j];
+							}
+						}
+						current = new BasepairNode(current, ((double[])numDatas.get(0))[0], pairProb, (double[])numDatas.get(2), (double[])numDatas.get(3), (double[])numDatas.get(4), (double[])numDatas.get(5), (int)((double[])numDatas.get(6))[0],(int)((double[])numDatas.get(7))[0]);
+						break;
+					case 'J':
+						current = new JunctionNode(current, (int)((double[])numDatas.get(0))[0], (int)((double[])numDatas.get(1))[0],(int)((double[])numDatas.get(2))[0]);
+						break;
+					case 'H':
+						current = new HairpinNode(current, (int)((double[])numDatas.get(0))[0], (int)((double[])numDatas.get(1))[0], (int)((double[])numDatas.get(2))[0], ((double[])numDatas.get(3))[0]);
+						isHairpin = true;
+						break;
+					case 'C':
+						current = new ClusterNode(current, ((double[])numDatas.get(0))[0], (int)((double[])numDatas.get(1))[0], (int)((double[])numDatas.get(2))[0], (int)((double[])numDatas.get(3))[0], (int)((double[])numDatas.get(4))[0], ((double[])numDatas.get(5))[0]);
+						isHairpin = false;
+						break;
+					case 'A':
+						int numAlternatives = (int)((double[])numDatas.get(0))[0];
+						double[] priorProb = new double[numAlternatives];
+						for(int i = 0; i < numAlternatives; i++)
+						{
+							priorProb[i] = ((double[])numDatas.get(1))[i];
+						}
+						current = new AlternativeNode(current,numAlternatives,priorProb,(int)((double[])numDatas.get(2))[0],(int)((double[])numDatas.get(3))[0]);
+					default:
+					}
+				}
+				lineNum++;
+
+			}
+			else
+				lineNum++;
+		}
+
+		stop = System.currentTimeMillis();
+		elapsed = stop - start1;
+//		System.out.println("Reading model data file time: " + elapsed + " milliseconds");
+
+		start1 = System.currentTimeMillis();
+
+
+		// Common to all models we might make
+
+		last = current;
+		last.next = null; //The last element does not have a next, 
+		// so it is set to null so that it can be
+		// be used as a stopping case
+
+
+		current = last; // The current is set to last because you
+		// work from the back to assign previous nodes
+
+		while(current.previous != null) // go until the end of the list
+		{
+			current.previous.next = current; // assign the previous node's next
+			current = current.previous;		 // current equals the one before
+		}
+
+		stop = System.currentTimeMillis();
+		elapsed = stop - start1;
+//		System.out.println("Connecting nodes 1 time: " + elapsed + " milliseconds");
+		start1 = System.currentTimeMillis();
+
+
+		current = first; // set current equal to first for traversal and
+		// assignment of children
+
+		/*
+		while(current != null) // Go until end of list
+		{
+			if(current.getType().equals("ClusterNode"))
+				((ClusterNode)current).normalize();
+			if(current.getType().equals("HairpinNode"))
+				((HairpinNode)current).normalize();
+			current = current.next;
+		}
+		 */
+
+		while(current != null) // Go until end of list
+		{
+			if(current.getType().equals("ClusterNode"))
+				((ClusterNode)current).useFileNormalize();
+//				((ClusterNode)current).normalize();
+			if(current.getType().equals("HairpinNode"))
+				((HairpinNode)current).useFileNormalize();
+//				((HairpinNode)current).normalize();
+			current = current.next;
+		}
+
+
+		stop = System.currentTimeMillis();
+		elapsed = stop - start1;
+//		System.out.println("Connecting nodes 2 time: " + elapsed + " milliseconds");
+		start1 = System.currentTimeMillis();
+
+
+
+		current = first; // set current equal to first for traversal and
+		// assignment of children
+
+		while(current != null) // Go until end of list
+		{
+			if(current.getType().equals("JunctionNode") || current.getType().equals("AlternativeNode")) // if the type
+			{	
+				branchingNodes.push(current); // add this junction to the stack
+				((BranchingNode)current).children.add(current.next); // add the next
+			}					             						// as a child
+			else if(current.getType().equals("HairpinNode")||current.getType().equals("eNode"))
+			{
+				if(current.getType().equals("eNode"))
+					((AlternativeNode)branchingNodes.peek()).eNodes.add(current);
+
+				newchild = 0;
+				while(!(branchingNodes.isEmpty()) && newchild == 0)
+				{
+					((BranchingNode)branchingNodes.peek()).branches--;
+
+					if(((BranchingNode)branchingNodes.peek()).branches == 0)
+					{
+						if(current.getType().equals("AlternativeNode"))
+						{
+							for(int i = 0; i <((AlternativeNode)branchingNodes.peek()).eNodes.size();i++)
+								((BranchingNode)branchingNodes.peek()).children.add(((eNode)((AlternativeNode)branchingNodes.peek()).eNodes.get(i)).next);
+						}
+						branchingNodes.pop();
+						//System.out.println("Done with one brachingNode.");
+					}
+					else
+					{
+						// add the one after the current(a hairpin or eNode)
+						((BranchingNode)branchingNodes.peek()).children.add(current.next);
+						newchild = 1;
+					}
+				}
+			}
+			else 
+			{
+				current.child = current.next;
+				// System.out.println(current.getType());
+			}// end else if
+			current = current.next;
+		}//end
+
+
+
+		// For debugging purposes, show what junction goes with what children
+		/*
+		current = first; 
+
+		while(current != null) // Go until end of list
+		{
+			int lI, rI;
+			if(current.getType().equals("JunctionNode"))
+			{
+//				if ((current.leftIndex != ((Node)((BranchingNode)current).children.get(0)).leftIndex) || (current.rightIndex != ((Node)((BranchingNode)current).children.get(1)).rightIndex))
+				{
+					System.out.println(current.leftIndex+" "+current.rightIndex);
+					for(int i = 0; i < ((BranchingNode)current).children.size(); i++)
+					{
+						System.out.print("Child left index: " + ((Node)((BranchingNode)current).children.get(i)).leftIndex);
+						System.out.println(" Child right index: " + ((Node)((BranchingNode)current).children.get(i)).rightIndex);
+					}
+
+				}
+			}
+			current = current.next;
+		}
+		 */
+
+		stop = System.currentTimeMillis();
+		elapsed = stop - start1;
+//		System.out.println("Connecting nodes 3 time: " + elapsed + " milliseconds");
+
+		elapsed = stop - start;
+//		System.out.println("Node data added time: " + elapsed + " milliseconds");
+	}// end method addNodedataModelText
+
+
+	/**
+	 * This method reads a model file into a text string and then calls addNodeDataModelText
+	 * @param modelFileName a string to hold which model file is to be read
+	 */
+	void addNodeData(String modelFileName)
+	{
+		String modelText = "";
+		String nodeLine = "";
+
+		BufferedReader rdr;
+		
+		try {
+			if(!(modelFileName.contains("http")))
+			{
+				String curDir = System.getProperty("user.dir");
+		        curDir = curDir.replace(File.separator + "bin","");
+
+				try
+				{
+					File f2 = new File(curDir + File.separator + "models" + File.separator + modelFileName);
+					rdr = new BufferedReader(new FileReader(f2));
+				}
+				catch(FileNotFoundException e)
+				{
+					System.out.println("Reading model file from absolute path");
+					File f3 = new File(modelFileName);
+					rdr = new BufferedReader(new FileReader(f3));
+//					System.out.println("Sequence.addNodeData: Model file not found.");
+//					System.exit(0);
+				}
+			}
+			else
+			{
+				// if the model filename has http in it, use URL stuff, if not, look for a local file.
+				System.out.println("Working online...");
+				URL dirurl = new URL("http://rna.bgsu.edu/JAR3D/");
+		        URLConnection dircon = dirurl.openConnection();
+		        rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
+	
+		        String ln = rdr.readLine();
+				while(ln != null)
+					{
+					ln = rdr.readLine();
+					}
+	
+				dirurl = new URL(modelFileName);
+		        dircon = dirurl.openConnection();
+		        rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream())); 
+			}
+			
+			nodeLine = rdr.readLine();
+			nodeLine = nodeLine.replace(" ","");
+			
+			while(nodeLine != null)
+			{
+				nodeLine = nodeLine.replace(" ","");
+				modelText = modelText + nodeLine + "\n";
+				nodeLine = rdr.readLine();
+			}		
+			
+			addNodeDataModelText(modelText);
+			}
+		catch (IOException e) {
+			System.out.println("Sequence.addNodeData: Could not open model file");
+			System.out.println(e);
+		}
+	}
+	
+	
 	/**
 	 * This method is used to set up the sequence of nodes in a linked list type structure that
 	 * also has a branching structure, depending on whether the list is traversed using next
 	 * or child nodes
 	 * @param modelFileName a string to hold which model file is to be read
 	 */
-	void addNodeData(String modelFileName)
+	void addNodeDataOld(String modelFileName)
 	{
 		start = System.currentTimeMillis();
 		Node current = new Node();
