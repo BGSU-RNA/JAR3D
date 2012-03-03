@@ -20,6 +20,15 @@ public class Alignment {
 		return sequenceData;
 	}
 
+	/**
+	 * This method loads sequences from a FASTA file into a vector of Sequence objects called sData
+	 * It reads all columns of the FASTA file
+	 * @param fileName
+	 * @param StartCol
+	 * @param EndCol
+	 * @return
+	 */
+
 	public static Vector loadFasta(String fileName)
 	{
 		Vector sData = new Vector();
@@ -28,7 +37,8 @@ public class Alignment {
 	}
 
 	/**
-	 * This method
+	 * This method loads sequences from a FASTA file into a vector of Sequence objects called sData
+	 * It allows you to specify the starting and ending columns to read
 	 * @param fileName
 	 * @param StartCol
 	 * @param EndCol
@@ -42,6 +52,16 @@ public class Alignment {
 		return sData;
 	}
 
+	/**
+	 * This method loads sequences from a FASTA file into a vector of Sequence objects called sData
+	 * It allows you to specify the starting and ending columns to read
+	 * It converts DNA to RNA sequences if you set DNA = 1
+	 * @param fileName
+	 * @param StartCol
+	 * @param EndCol
+	 * @param DNA
+	 * @return
+	 */
 	
 	public static Vector loadFastaColumnsDNA(String fileName, int StartCol, int EndCol, int DNA)
 		{
@@ -149,7 +169,7 @@ public class Alignment {
 	}
 
 	/**
-	 * This method parses using a sequence supplied by a text field
+	 * This method sets up a vector of Sequence objects from a FASTA alignment supplied by a text field
 	 * @param fastaText
 	 * @param StartCol
 	 * @param EndCol
@@ -561,6 +581,51 @@ public class Alignment {
 		//System.out.println();
 
 		System.out.println("Alignment from Java parser:");
+		for(int j = 0; j < pData.size(); j++)
+		{
+			if(j == 0)
+			{
+				System.out.println("Mask");
+			}
+			else
+			{
+				System.out.print(">"+((Sequence)sData.elementAt(j)).organism + " ");
+				for(int x = 0; x < ((Sequence)sData.elementAt(j)).maxLogProbs.size(); x++)
+					System.out.print(((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(x)).get(0));
+				System.out.println();
+			}
+			for(int i = 0; i < mask.length; i++)
+			{
+				if (mask[i] == 0)
+				{
+					char a;
+					a = ((String)pData.get(j)).charAt(i);
+//					if ((a!='{') && (a!='}') && (a!='<') && (a!='>')) 
+						System.out.print(a);
+				}
+			}
+			System.out.println();
+		}
+
+	}
+
+	/**
+	 * This method lists out the alignment of each sequence to the model as a triple
+	 * @param pData contains plain string sequences
+	 * @param sData contains sequence objects
+	 */
+	public static void listAlignmentAsCorrespondences(Vector sData, int numSequences, String SeqName, String ModelName)
+	{
+		
+		Vector pData = new Vector();
+		
+		for (int i = 0; i < Math.min(numSequences+1,sData.size()); i++)
+		{
+			pData.add(((Sequence)sData.get(i)).parseData);
+		}
+
+		int[] mask = stripDash(pData);
+
 		for(int j = 0; j < pData.size(); j++)
 		{
 			if(j == 0)
