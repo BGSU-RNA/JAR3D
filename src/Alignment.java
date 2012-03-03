@@ -222,7 +222,7 @@ public class Alignment {
 	}
 
 	/**
-	 * This method reverses the sequences in sequenceData and returns
+	 * This method reverses the strand orders in sequenceData and returns a new vector of sequence data
 	 * @param numSequences
 	 * @param sequenceData
 	 * @return
@@ -300,7 +300,12 @@ public class Alignment {
 	}
 
 	/**
-	 * This method initiates parsing
+	 * This method initiates parsing.  It loops through all Sequence objects in sData, up to numSequences sequences.
+	 * It adds node data just once, to a new Sequence object called S.  Then it adds the organism and letters from each Sequence object.
+	 * Then it runs the parseSequence method of the Sequence class.
+	 * It runs through all nodes to store max log probability information
+	 * Finally, it calls the showParse method of the first node of the model, which accumulates a very, very wide version of the
+	 * alignments in row-column format.  Many columns of the alignment then need to get removed later.
 	 * @param sData
 	 * @param numSequences
 	 * @param nodeFileName
@@ -418,7 +423,7 @@ public class Alignment {
 
 
 	/**
-	 * This method strips out repetitive dashes used to align sequences
+	 * This method strips out repetitive dashes used to align sequences.  This is how the very, very wide alignment gets narrowed.
 	 * @param pData this is a vector of plain string sequences
 	 * @return
 	 */
