@@ -115,6 +115,10 @@ public class SimpleAlign {
 	}
 	
 	public static int[][] calcILEditDistances(Vector sD1,Vector sD2,boolean reverse){
+		return calcILEditDistances(sD1,sD2,reverse,false);
+	}
+	
+	public static int[][] calcILEditDistances(Vector sD1,Vector sD2,boolean reverse,boolean Verbose){
 		//calculates the edit distance between every sequence in fasta file seqFile1
 		//and every sequence in faste file seqFile2.  the first dim of the returned
 		//2d array corresponds to the files in seqFile1, the second to seqFile2
@@ -167,11 +171,23 @@ public class SimpleAlign {
 				leftDist = editDist(seqs1left[i],seqs2left[j]);
 				rightDist = editDist(seqs1right[i],seqs2right[j]);
 				EdDists[i][j]=leftDist+rightDist;
+				if(Verbose){
+					System.out.println(String.format("Finding minimum edit distance between %s and %s.", seqs1[i],seqs2[j]));
+					System.out.println(String.format("Or, without flanking pairs,%s*%s and %s*%s.", seqs1left[i],seqs1right[i],seqs1left[j],seqs1right[j]));
+					System.out.println(String.format("Left Edit Distance: %d",leftDist));
+					System.out.println(String.format("Right Edit Distance: %d",rightDist));
+					System.out.println(String.format("Total Edit Distance: %d",leftDist+rightDist));
+				}
 			}
 		}
 		return EdDists;
 	}
+	
 	public static int[][] calcHLEditDistances(Vector sD1,Vector sD2){
+		return calcHLEditDistances(sD1,sD2,false);
+	}
+	
+	public static int[][] calcHLEditDistances(Vector sD1,Vector sD2,boolean Verbose){
 		//calculates the edit distance between every sequence in fasta file seqFile1
 		//and every sequence in faste file seqFile2.  the first dim of the returned
 		//2d array corresponds to the files in seqFile1, the second to seqFile2
@@ -190,6 +206,11 @@ public class SimpleAlign {
 				seq1mf = seqs1[i].substring(1, seqs1[i].length()-2);
 				seq2mf = seqs2[j].substring(1, seqs2[j].length()-2);
 				EdDists[i][j]=editDist(seq1mf,seq2mf);
+				if(Verbose){
+					System.out.println(String.format("Finding minimum edit distance between %s and %s.", seqs1[i],seqs2[j]));
+					System.out.println(String.format("Or, without flanking pairs,%s and %s.", seq1mf,seq2mf));
+					System.out.println(String.format("Total Edit Distance: %d",EdDists[i][j]));
+				}
 			}
 		}
 		return EdDists;
