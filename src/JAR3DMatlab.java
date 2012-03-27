@@ -276,5 +276,19 @@ public class JAR3DMatlab {
 			S.addNodeData(nodeFileName);	                         // only add node data once
 		}
 	}
+	public static int[][] DisplayEditDists(String UserDir, String seqFile1, String seqFile2, String loopType){
+		System.setProperty("user.dir",UserDir);
+		
+		Vector seqData1 = Alignment.loadFasta(seqFile1);
+		Vector seqData2 = Alignment.loadFasta(seqFile1);
+		int[][] EditDistances;
+		if(loopType.equals("IL")){
+			boolean rev = false;
+			EditDistances = SimpleAlign.calcILEditDistances(seqData1,seqData2,rev,true);
+		}else{
+			EditDistances = SimpleAlign.calcHLEditDistances(seqData1,seqData2,true);
+		}
+		return EditDistances;
+	}
 	
 }
