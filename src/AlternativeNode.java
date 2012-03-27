@@ -14,7 +14,7 @@ public class AlternativeNode extends BranchingNode {
     LinkedList eNodes;
     
 	/**
-	 * This is the AlternativeNode construtor
+	 * This is the AlternativeNode constructor
 	 * @param prev is a pointer to the previous node
 	 * @param b is the number of branches for this alternative node
 	 * @param p is the array of probabilities to determine which branch should be chosen
@@ -81,7 +81,12 @@ public class AlternativeNode extends BranchingNode {
   			System.out.println("Alternative node out of range");
   	}
    	
-  	
+	/**
+	 * Write out where each nucleotide in the input sequence aligns to others.
+	 * For an Alternative node, columns must be filled in for each possible generation history,
+	 * but the non-optimal ones get the letters replaced by + symbols.
+	 */
+
 	public String showParse(String n)
   	{
   			String parse = "";
@@ -91,7 +96,7 @@ public class AlternativeNode extends BranchingNode {
   				if (i != optimalGen1.branch)
   				{
 //  				newChild = newChild.replace("-","+");
-  					newChild = newChild.replace("A","+");
+  					newChild = newChild.replace("A","+");  // replace letters with + symbol to indicate this branch was not used
   					newChild = newChild.replace("C","+");
   					newChild = newChild.replace("G","+");
   					newChild = newChild.replace("U","+");
@@ -106,7 +111,6 @@ public class AlternativeNode extends BranchingNode {
 			return parse;
   	}
   	
-  	
 	public String header()
   	{		
 			String parse = "";
@@ -119,4 +123,14 @@ public class AlternativeNode extends BranchingNode {
 			return parse;
   	}
 
+	/**
+	 * Write out what each nucleotide in the input sequence aligns to in the JAR3D model.
+	 * For an Alternative node, write out only the optimal generation history.
+	 * This has not been tested, as of 2012-03-05 when it was written.  At least it compiles!
+	 */
+
+	public String showCorrespondences(String letters)
+  	{
+		return ((Node)children.get(optimalGen1.branch)).showCorrespondences(letters);
+  	}
 }

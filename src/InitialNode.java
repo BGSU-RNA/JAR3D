@@ -119,7 +119,6 @@ public class InitialNode extends BasicNode {
   		}
   	}
   	
-  	
 	public String showParse(String n)
   	{
   			int a = optimalGen1.numLeftIns;
@@ -152,5 +151,23 @@ public class InitialNode extends BasicNode {
   				right = "-"+right;
   			
   		    return "[" + left + super.child.header() + right + "]";
+  	}
+
+	public String showCorrespondences(String letters)
+  	{
+  			int a = optimalGen1.numLeftIns;
+  			int b = optimalGen1.numRightIns;
+  			int i = optimalGen1.i;
+  			int j = optimalGen1.j;
+
+  			String left = "";
+  			for(int k = i; k < i + a; k++)
+  				left += "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_1_Insertion" + "\n";
+  			
+  			String right = "";
+  			for(int k = j-b+1; k <= j; k++)
+  				right = "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_2_Insertion" + "\n" + right;
+ 			
+  			return left + super.child.showCorrespondences(letters) + right;
   	}
 } // end class InitialNode
