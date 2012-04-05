@@ -347,6 +347,11 @@ public class Sequence {
 						current.number = nodeNumber;
 						nodeNumber++;
 						break;
+					case 'F':
+						current = new FixedNode(current, ((double[])numDatas.get(0))[0], (double[])numDatas.get(1), (int)((double[])numDatas.get(2))[0], (int)((double[])numDatas.get(3))[0],(int)((double[])numDatas.get(4))[0]);
+						current.number = nodeNumber;
+						nodeNumber++;
+						break;
 					case 'J':
 						current = new JunctionNode(current, (int)((double[])numDatas.get(0))[0], (int)((double[])numDatas.get(1))[0],(int)((double[])numDatas.get(2))[0]);
 						current.number = nodeNumber;
@@ -547,7 +552,7 @@ public class Sequence {
 
 				try
 				{
-					File f2 = new File(curDir + File.separator + "models" + File.separator + modelFileName);
+					File f2 = new File(curDir + File.separator + "Models" + File.separator + modelFileName);
 					rdr = new BufferedReader(new FileReader(f2));
 				}
 				catch(FileNotFoundException e)

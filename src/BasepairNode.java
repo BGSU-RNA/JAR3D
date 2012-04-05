@@ -262,7 +262,7 @@ public class BasepairNode extends BasicNode {
   			
   			String right = "SSS_Position_" + (j+1) + "_" + letters.charAt(j) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_2" + "\n";
 
-  			for(int k = j-b+1; k < j; k++)
+  			for(int k = j-1; k >= j-b; k--)
   				right = "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_2_Insertion" + "\n" + right;
  			
   			return left + super.child.showCorrespondences(letters) + right;
