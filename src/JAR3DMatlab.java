@@ -8,6 +8,33 @@ import java.util.*;
  */
 public class JAR3DMatlab {
 
+	/** 
+	 * MotifCorrespondences parses a fasta file of sequences against a model
+	 * and collects together correspondences between sequence positions and
+	 * JAR3D model positions, returning them as a string
+	 * @param fastaFileName
+	 * @param modelFileName
+	 * @return
+	 */
+	
+	public static String ModelCorrespondences(String fastaFileName, String modelFileName, int numSequences)
+	{
+		Vector sequenceData = Alignment.loadFasta(fastaFileName);
+		sequenceData = Alignment.doParse(sequenceData,numSequences,modelFileName,15);
+
+		Alignment.displayAlignmentFASTA(sequenceData, numSequences);
+		
+		String correspondences = "";
+
+		for (int i = 1; i < Math.min(numSequences+1,sequenceData.size()); i++)
+		{
+//			System.out.println(((Sequence)sequenceData.get(i)).correspondences);
+            correspondences += ((Sequence)sequenceData.get(i)).correspondences;
+		}
+
+		return correspondences;
+	}
+
 	public static Vector Align(String UserDir, String FastaFile, String ModelFile, int numSequences, int DNA, int range) 
 	{
 		System.setProperty("user.dir",UserDir);

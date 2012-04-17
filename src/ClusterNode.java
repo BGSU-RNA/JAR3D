@@ -497,7 +497,6 @@ public class ClusterNode extends BasicNode {
 		
   	}
 	
-	
 	public String header()
 	{		
 		String left = "";
@@ -519,4 +518,40 @@ public class ClusterNode extends BasicNode {
 			}
 		return "{" + left + super.child.header() + right + "}";
 	}
+
+	public String showCorrespondences(String letters)
+  	{
+		int[] insert = optimalGen1.insLengths;
+		int i = optimalGen1.i;
+		int j = optimalGen1.j;
+		
+  		if (optimalGen1.deleted)
+  		{
+			return super.child.showCorrespondences(letters);
+  		}
+  		else
+  		{
+  			String left = "SSS_Position_" + (i+1) + "_" + letters.charAt(i) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_1" + "\n";
+
+			for(int l = 0; l < numLeftInt-1; l++)
+				{
+					for (int k = i+1; k <= i+insert[l]; k++)
+		  				left += "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_" + (l+1) + "_" + (l+2) + "_Insertion" + "\n";
+					i += insert[l]+1;
+					left += "SSS_Position_" + (i+1) + "_" + letters.charAt(i) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_" + (l+2) + "\n";
+				}
+
+			String right = "SSS_Position_" + (j+1) + "_" + letters.charAt(j) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_" + (numLeftInt+numRightInt) + "\n";
+			
+			for(int l = numLeftInt+numRightInt-2; l >= numLeftInt; l--)
+				{
+					for (int k = j - 1; k >= j - insert[l]; k--)
+						right = "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_" + (l+1) + "_" + (l+2) + "_Insertion" + "\n" + right;
+					j = j - insert[l] - 1;
+					right = "SSS_Position_" + (j+1) + "_" + letters.charAt(j) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_" + (l+1) + "\n" + right;
+				}
+ 
+  			return left + super.child.showCorrespondences(letters) + right;
+  		}
+  	}
 }

@@ -169,7 +169,6 @@ if (k+1==j)
 			return parse;
   	}
   	
-  	
 	public String header()
   	{
   			String parse = "";
@@ -188,4 +187,21 @@ if (k+1==j)
 			return parse;
   	}
 
+	public String showCorrespondences(String letters)
+  	{
+		String left = "";
+		switch(branches)
+		{
+			case 2:
+				left = ((Node)children.get(0)).showCorrespondences(letters);
+				left += ((Node)children.get(1)).showCorrespondences(letters);
+				break;
+			case 3:
+				left = ((Node)children.get(0)).showCorrespondences(letters);
+				left += ((Node)children.get(1)).showCorrespondences(letters);
+				left += ((Node)children.get(2)).showCorrespondences(letters);
+				break;
+		}
+		return left;
+  	}
 }// end class JunctionNode

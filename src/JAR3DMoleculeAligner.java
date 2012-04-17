@@ -87,10 +87,8 @@ public class JAR3DMoleculeAligner {
 //		sequenceData = Alignment.doParse(sequenceData,numSequences,"16S_model_from_1j5e_mod_4.txt",30);
 //		sequenceData = Alignment.doParse(sequenceData,numSequences,"16S_model_from_1j5e.txt",30);
 
-
-		
-		
 		Alignment.displayAlignmentFASTA(sequenceData,numSequences);
+
 		
 //		Alignment.makeHTMLAlignment(sequenceData, numSequences);
 //		Vector aData = Alignment.getAlignment(parseData, sequenceData);

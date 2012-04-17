@@ -15,6 +15,7 @@ class Node {
 	public boolean visible, active;
 	public int rightIndex, leftIndex;
 	public double currentMaxLogProb;
+	public int number = 0;
 	
 	/**
 	 * This is the Node constructor
@@ -192,6 +193,18 @@ class Node {
 	public String showParse(String n)
   	{
 		return "Blank";
+  	}
+	
+	/**
+	 * This method is overloaded for each different node class
+	 * It scores a string of characters n to the model represented by the nodes in
+	 * this sequence
+	 * @param n
+	 * @return
+	 */
+	public String showCorrespondences(String letters)
+  	{
+		return "No node output\n";
   	}
 	
 	/**

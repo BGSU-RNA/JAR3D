@@ -70,7 +70,7 @@ public class Alignment {
 		String temp="";
 		String organism="";
 		String letters="";
-		sData.add(new Sequence("","")); // save space for header information to be added later as element 0 of this vector
+		sData.add(new Sequence(fileName,"")); // save space for header information to be added later as element 0 of this vector
 		BufferedReader rdr;
 		try {
 			String curDir = System.getProperty("user.dir");
@@ -322,7 +322,7 @@ public class Alignment {
 		Sequence S = new Sequence("","");                        // blank sequence to use repeatedly 
 		S.addNodeData(nodeFileName);	                         // only add node data once
 
-		((Sequence)sData.elementAt(0)).parseData = ((InitialNode)S.first).header();
+		((Sequence)sData.elementAt(0)).parseData = ((InitialNode)S.first).header(); // add a header line
 
 		Sequence firstS = (Sequence)sData.elementAt(1);          // first sequence, which matches the model
 		firstS.setNucleotides();
@@ -383,6 +383,31 @@ public class Alignment {
 			
 			((Sequence)sData.elementAt(i)).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 			
+			String correspondences = ((InitialNode)S.first).showCorrespondences(S.letters);
+
+			correspondences = correspondences.replace("JAR3D_aligns_to", "aligns_to_JAR3D");
+			
+			String SF = ((Sequence)sData.elementAt(0)).organism;    // where the file name got put
+			SF = SF.replace(".fasta","");
+			int a = SF.lastIndexOf("\\");
+			if (a >= 0)
+				SF = SF.substring(a+1);
+			a = SF.lastIndexOf("/");
+			if (a >= 0)
+				SF = SF.substring(a+1);
+			SF = SF.substring(0,6);                  // temporary way to fix file names
+			correspondences = correspondences.replace("SSS",SF+"_Sequence_"+i);
+			
+			String NF = nodeFileName.replace(".txt","");
+			a = NF.lastIndexOf("\\");
+			if (a >= 0)
+				NF = NF.substring(a+1);
+			a = NF.lastIndexOf("/");
+			if (a >= 0)
+				NF = NF.substring(a+1);
+			NF = NF.substring(0,6);                  // temporary way to fix file names
+			correspondences = correspondences.replace("MMM", NF);
+			((Sequence)sData.elementAt(i)).correspondences = correspondences;
 		}
 		return sData;
 	}

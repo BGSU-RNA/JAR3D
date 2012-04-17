@@ -1,16 +1,16 @@
 /**
- * This class is used to simulate the first node in a sequence or the first node after
- * a branching node (junction, alternative)
- * @author meg pirrung
+ * This class is used to code one single fixed nucleotide
+ * @author Craig Zirbel
  *
  */
-public class InitialNode extends BasicNode {
+public class FixedNode extends BasicNode {
 	InsertionDistribution lInsDist, rInsDist;
 	
 	// arrays of logs of all probabilities
 
     int alt;
     int interacttype;
+    int Position;                          // 1 is left, 2 is right
    
 	/**
 	 * This is the InitialNode constructor
@@ -20,19 +20,32 @@ public class InitialNode extends BasicNode {
 	 * @param rLenDist is the right length distribution matrix
 	 * @param rLetDist is the right letter distribution matrix
 	 */
-	InitialNode(Node prev, double[] lLenDist, double[] lLetDist, double[] rLenDist, double[] rLetDist, int lI, int rI)
+	FixedNode(Node prev, double dProb, double[] letDist, int posi, int lI, int rI)
 	{
-		super(prev, "InitialNode", lI, rI);
-		//	normalize is a function that makes sure all the array's elements add up to 1
-        lInsDist = new InsertionDistribution(lLenDist, lLetDist);
-        rInsDist = new InsertionDistribution(rLenDist, rLetDist);
-//      System.out.println("InitialNode: rLetDist length "+rLetDist.length);
+		super(prev, "FixedNode", lI, rI);
 
+		Position = posi;
+		
+		double probs[] = new double[2];
+		probs[0] = dProb;
+		probs[1] = 1-dProb;
+		
+		double zeroLength[] = new double[1];
+		zeroLength[0] = 1;
+		
+		if (Position == 1) {
+			lInsDist = new InsertionDistribution(probs, letDist);
+			rInsDist = new InsertionDistribution(zeroLength, letDist);
+		}
+		else {
+			lInsDist = new InsertionDistribution(zeroLength, letDist);
+			rInsDist = new InsertionDistribution(probs, letDist);
+		}
 	}
 
   	public String generate()
-  	{        
-  		return "[" + lInsDist.generate() + super.child.generate(true) + rInsDist.generate() + "]"; // true as a holder
+  	{       
+  		return lInsDist.generate() + super.child.generate(true) + rInsDist.generate();
   	}
 
 	
@@ -112,7 +125,7 @@ public class InitialNode extends BasicNode {
   		}
   		else
   		{
-  			System.out.println("InitialNode.traceback: Initial node out of range");
+  			System.out.println("FixedNode.traceback: Fixed node out of range");
   			System.out.println("  i="+i+" j="+j+" iMin="+super.iMin+" iMax="+super.iMax+" jMin="+super.jMin+" jMax="+super.jMax);
   			System.out.println("  Indices "+leftIndex+" "+rightIndex);
   			System.out.println("  Previous was " + super.previous.mytype + " iMax=" + super.previous.iMax + " jMin=" + super.previous.jMin);
@@ -136,21 +149,21 @@ public class InitialNode extends BasicNode {
   			for(int g = 0; g < rInsDist.lengthDist.length - rSize; g++)
   				right = "-"+right;
   			
-  		    return "[" + left + super.child.showParse(n) + right + "]";
+  		    return left + super.child.showParse(n) + right;
   	}
   	
   	
 	public String header()
   	{		
-  			String left = "[";
+  			String left = "F";
   			for(int f = 0; f < lInsDist.lengthDist.length-1; f++)
   				left += "-";
   			
-  			String right = "]";
+  			String right = "F";
   			for(int g = 0; g < rInsDist.lengthDist.length-1; g++)
   				right = "-"+right;
   			
-  		    return "[" + left + super.child.header() + right + "]";
+  		    return left + super.child.header() + right;
   	}
 
 	public String showCorrespondences(String letters)
@@ -162,12 +175,12 @@ public class InitialNode extends BasicNode {
 
   			String left = "";
   			for(int k = i; k < i + a; k++)
-  				left += "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_1_Insertion" + "\n";
+  				left += "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_1" + "\n";
   			
   			String right = "";
   			for(int k = j-b+1; k <= j; k++)
-  				right = "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_2_Insertion" + "\n" + right;
+  				right = "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_2" + "\n" + right;
  			
   			return left + super.child.showCorrespondences(letters) + right;
   	}
-} // end class InitialNode
+} // end class FixedNode

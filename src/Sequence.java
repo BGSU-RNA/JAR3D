@@ -29,6 +29,7 @@ public class Sequence {
 	int code[];                // code for letters A, C, G, U
 	Vector maxLogProbs;
     String parseData;
+    String correspondences;
     
 	/**
 	 * Constructor for Sequence class
@@ -224,7 +225,7 @@ public class Sequence {
 		boolean isHairpin = true;
 		double[] nData;
 		long start1 = System.currentTimeMillis();
-
+		int nodeNumber = 1;
 		int lineNum = 0;
 				
 		String[] modelArray;
@@ -298,6 +299,8 @@ public class Sequence {
 						{
 						case 'i':
 							current = new InitialNode(current, (double[])numDatas.get(0), (double[])numDatas.get(1), (double[])numDatas.get(2), (double[])numDatas.get(3),(int)((double[])numDatas.get(4))[0],(int)((double[])numDatas.get(5))[0]);
+							current.number = nodeNumber;
+							nodeNumber++;
 							if (flag)
 							{
 								first = current;
@@ -341,16 +344,29 @@ public class Sequence {
 							}
 						}
 						current = new BasepairNode(current, ((double[])numDatas.get(0))[0], pairProb, (double[])numDatas.get(2), (double[])numDatas.get(3), (double[])numDatas.get(4), (double[])numDatas.get(5), (int)((double[])numDatas.get(6))[0],(int)((double[])numDatas.get(7))[0]);
+						current.number = nodeNumber;
+						nodeNumber++;
+						break;
+					case 'F':
+						current = new FixedNode(current, ((double[])numDatas.get(0))[0], (double[])numDatas.get(1), (int)((double[])numDatas.get(2))[0], (int)((double[])numDatas.get(3))[0],(int)((double[])numDatas.get(4))[0]);
+						current.number = nodeNumber;
+						nodeNumber++;
 						break;
 					case 'J':
 						current = new JunctionNode(current, (int)((double[])numDatas.get(0))[0], (int)((double[])numDatas.get(1))[0],(int)((double[])numDatas.get(2))[0]);
+						current.number = nodeNumber;
+						nodeNumber++;
 						break;
 					case 'H':
 						current = new HairpinNode(current, (int)((double[])numDatas.get(0))[0], (int)((double[])numDatas.get(1))[0], (int)((double[])numDatas.get(2))[0], ((double[])numDatas.get(3))[0]);
+						current.number = nodeNumber;
+						nodeNumber++;
 						isHairpin = true;
 						break;
 					case 'C':
 						current = new ClusterNode(current, ((double[])numDatas.get(0))[0], (int)((double[])numDatas.get(1))[0], (int)((double[])numDatas.get(2))[0], (int)((double[])numDatas.get(3))[0], (int)((double[])numDatas.get(4))[0], ((double[])numDatas.get(5))[0]);
+						current.number = nodeNumber;
+						nodeNumber++;
 						isHairpin = false;
 						break;
 					case 'A':
@@ -361,6 +377,8 @@ public class Sequence {
 							priorProb[i] = ((double[])numDatas.get(1))[i];
 						}
 						current = new AlternativeNode(current,numAlternatives,priorProb,(int)((double[])numDatas.get(2))[0],(int)((double[])numDatas.get(3))[0]);
+						current.number = nodeNumber;
+						nodeNumber++;
 					default:
 					}
 				}
@@ -534,7 +552,7 @@ public class Sequence {
 
 				try
 				{
-					File f2 = new File(curDir + File.separator + "models" + File.separator + modelFileName);
+					File f2 = new File(curDir + File.separator + "Models" + File.separator + modelFileName);
 					rdr = new BufferedReader(new FileReader(f2));
 				}
 				catch(FileNotFoundException e)

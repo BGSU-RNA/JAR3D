@@ -31,11 +31,11 @@ public class BasepairNode extends BasicNode {
     InsertionDistribution lInsDist, rInsDist;
     
 	/**
-	 * This is the contructor for BasepairNodes
+	 * This is the constructor for BasepairNodes
 	 * @param prev contains a pointer to the previous node
 	 * @param dProb is the deletion probability for this node
 	 * @param pProb is the pair probability matrix
-	 * @param lLenDist is the Left Length distrubution matrix
+	 * @param lLenDist is the Left Length distribution matrix
 	 * @param lLetDist is the Left Letter distribution matrix
 	 * @param rLenDist is the Right Length distribution matrix
 	 * @param rLetDist is the Right Letter distribution matrix
@@ -192,8 +192,7 @@ public class BasepairNode extends BasicNode {
   			
   		}
   	}
-   	
-  	
+    	
 	public String showParse(String n)
   	{
   		// I think that the one that should be the deleted one to keep is optimalGen2?
@@ -229,8 +228,7 @@ public class BasepairNode extends BasicNode {
   			return "(" + left + super.child.showParse(n) + right + ")";
   		}
   	}
-  	
-  	
+  	  	
 	public String header()
   	{
 		String left = "(";
@@ -244,4 +242,30 @@ public class BasepairNode extends BasicNode {
 		return "(" + left + super.child.header() + right + ")";
   	}
 
+	public String showCorrespondences(String letters)
+  	{
+  		if (optimalGen1.deleted)
+  		{
+  			return super.child.showCorrespondences(letters);
+  		}
+  		else
+  		{
+  			int a = optimalGen1.numLeftIns;
+  			int b = optimalGen1.numRightIns;
+  			int i = optimalGen1.i;
+  			int j = optimalGen1.j;
+  			
+  			String left = "SSS_Position_" + (i+1) + "_" + letters.charAt(i) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_1" + "\n";
+
+  			for(int k = i+1; k <= i + a; k++)
+  				left += "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_1_Insertion" + "\n";
+  			
+  			String right = "SSS_Position_" + (j+1) + "_" + letters.charAt(j) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_2" + "\n";
+
+  			for(int k = j-1; k >= j-b; k--)
+  				right = "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_2_Insertion" + "\n" + right;
+ 			
+  			return left + super.child.showCorrespondences(letters) + right;
+  		}
+  	}
 } // class
