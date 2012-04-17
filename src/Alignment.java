@@ -2,6 +2,7 @@
 import java.io.*;
 import java.util.*;
 import com.almworks.sqlite4java.*;
+import java.sql.*;
 
 /**
  * This is the Alignment class, it has methods that are used to facilitate aligning sequences
@@ -1392,7 +1393,12 @@ public class Alignment {
 	    double[] scores = new double[2*modNames.size()];       // all scores computed
 
 	    Vector rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
-		
+	    
+	    //variables for DB connection
+	    java.sql.Connection myConnection;
+	    Statement stat;
+	    String dbURL;
+	    
 		if(((String)modNames.get(0)).contains("http"))         // look online for models
 		{
 		// remove http:// from model names
@@ -1419,9 +1425,7 @@ public class Alignment {
 			// System.out.println("Alignment.getSortedILAlignment " + modNames.get(k));
 			rsData = Alignment.doParse(rsData,numSequences,(String)modNames.get(k),range);
 		}
-//		sData.removeElementAt(0);		
-//		rsData.removeElementAt(0);
-
+		
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
@@ -1457,8 +1461,34 @@ public class Alignment {
 		String id = Fname.replace(".fasta","");
 		sqlcmd = String.format("insert into query (id, sequences, numseqs, gset) values('%s','%s',%d,'iljun6') ", id,Fname,sData.size()-1);
 		try {
-			//System.out.println(sqlcmd);
+			//write to sqlite
 			db.exec(sqlcmd);
+			//create driver
+			Class.forName("com.mysql.jdbc.Driver").newInstance(); 
+
+			//database connection code
+			//read username and password from file here
+			FileInputStream fstream = new FileInputStream("jar3d-mysql-info.txt");
+			DataInputStream in = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			String strLine;
+			strLine = br.readLine();
+			String username = strLine;
+			strLine = br.readLine();
+			String password = strLine;
+			in.close();
+
+			//URL - ALTER TO CONNECT TO YOUR DATABASE
+			dbURL = "jdbc:mysql://somedomain.com/jar3d?user="
+				+ username + "&password=" + password;
+
+			//create the connection - ALTER FOR YOUR DBMS
+			myConnection =
+				DriverManager.getConnection(dbURL);
+			//create statement handle for executing queries
+			stat = myConnection.createStatement();
+			//write to mysql
+			stat.execute(sqlcmd);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

@@ -212,4 +212,53 @@ public class webJAR3D {
 		}
 		return Signatures;
 	}
+	
+	public static HashMap<String,MotifGroup> loadMotifGroups(String folder, String modelType){
+		char fsep = File.separatorChar;
+		String modelFolder = folder + fsep + modelType + "_models";
+		
+		HashMap<String,MotifGroup> Motifs = new HashMap<String,MotifGroup>();
+		
+		String listFile;
+		listFile = modelFolder + fsep + "all.txt";
+		String hashFileName = modelFolder + fsep + "all.grps";
+		File hashFile = new File(hashFileName);
+		if(hashFile.exists()){
+			System.out.println("Reading exsisting java object file");
+			try{
+				FileInputStream fis = new FileInputStream(hashFileName);
+				ObjectInputStream in = new ObjectInputStream(fis);
+				Motifs = (HashMap<String,MotifGroup>)in.readObject();
+				in.close();
+			}catch (Exception e1){
+				System.out.println("Error reading file " + hashFileName + "\n"+e1);
+			}
+			return Motifs;
+		}else{
+			System.out.println("Reading group files and writing java object file");
+			try{
+				FileReader inStream = new FileReader(listFile);
+				BufferedReader in = new BufferedReader(inStream);
+				String lineS;
+				while((lineS = in.readLine()) != null){
+					lineS = lineS.substring(0, lineS.length()-10);
+					MotifGroup group = new MotifGroup(folder,modelType,lineS);
+					Motifs.put(lineS, group);
+				}
+				in.close();
+			}
+			catch (Exception e1){
+				System.out.println("Error reading files"+"\n"+e1);
+			}
+			try{
+				FileOutputStream fos = new FileOutputStream(hashFileName);
+				ObjectOutputStream out = new ObjectOutputStream(fos);
+				out.writeObject(Motifs);
+				out.close();
+			}catch (Exception e1){
+				System.out.println("Error writing hashTable file"+"\n"+e1);
+			}
+			return Motifs;
+		}
+	}
 }
