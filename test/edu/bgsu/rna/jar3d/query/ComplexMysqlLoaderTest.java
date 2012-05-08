@@ -3,6 +3,8 @@ package edu.bgsu.rna.jar3d.query;
 import static org.junit.Assert.*;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -10,20 +12,21 @@ import org.junit.Test;
 import edu.bgsu.rna.jar3d.query.DBLoader;
 import edu.bgsu.rna.jar3d.query.Query;
 
-public class EasyMysqlQueryTest {
+
+public class ComplexMysqlLoaderTest {
 
 	private QueryLoader loader;
 	private Query query;
 
 	@Before
-	public void setUp() throws SQLException, QueryLoadingFailed {
+	public void setUp() throws QueryLoadingFailed, SQLException {
 		loader = new DBLoader("joe", "hacker", "jdbc:mysql://localhost:3306/jar3d");
-		query = loader.load("04279bc5-b6fe-4312-859e-35a68630d335");
+		query = loader.load("6d4f3d19-3940-48d9-883e-2c8c8e945625");
 	}
 
 	@Test
 	public void testEasyLoad() {
-		assertEquals(query.getId(), "04279bc5-b6fe-4312-859e-35a68630d335");
+		assertEquals(query.getId(), "6d4f3d19-3940-48d9-883e-2c8c8e945625");
 	}
 	
 	@Test
@@ -48,12 +51,24 @@ public class EasyMysqlQueryTest {
 	
 	@Test
 	public void testLoopCount() {
-		assertEquals(query.loopCount(), 1);
+		assertEquals(query.loopCount(), 2);
 	}
 	
 	@Test
-	public void testLoopSequence() {
-		String sequence = query.getLoops().get(0).getSequences().get(0);
-		assertEquals(sequence, "GAAAC*GGACC");
+	public void testLoopType() {
+		assertEquals(query.getLoop(1).getType(), "HL");
+	}
+
+	@Test
+	public void testLoopSequences() {
+		List<String> sequences = new ArrayList<String>();
+		sequences.add("CUUUG");
+		sequences.add("CUUUG");
+		sequences.add("CUUUG");
+		List<String> found = new ArrayList<String>();
+		for(String sequence: query.getLoop(1)) {
+			found.add(sequence);
+		}
+		assertEquals(found, sequences);
 	}
 }
