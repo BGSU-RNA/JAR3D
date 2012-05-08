@@ -34,7 +34,7 @@ public class MysqlQuery extends AbstractQuery {
     public MysqlQuery(String username, String password, String dbConnection, String queryId) throws SQLException {
         connection = DriverManager.getConnection(dbConnection, username, password);
         String querySql = "SELECT group_set, model_type, structured_models_only FROM query_info WHERE query_id = ?;";
-        String loopSql = "SELECT loop_sequence, loop_type FROM query_sequences WHERE query_id = ? and loop_id = ?;";
+        String loopSql = "SELECT id, loop_sequence, loop_type FROM query_sequences WHERE query_id = ? and loop_id = ?;";
         sqlForQueryInfo = connection.prepareStatement(querySql);
         sqlForLoops = connection.prepareStatement(loopSql);
         id = queryId;
@@ -46,17 +46,19 @@ public class MysqlQuery extends AbstractQuery {
     	sqlForLoops.setString(1, id);
     	sqlForLoops.setLong(2, index);
     	ResultSet results = sqlForLoops.executeQuery();
+    	long id = -1;
     	
     	String type = null;
     	List<String> sequences = new ArrayList<String>();
     	while (results.next()) {
     		String sequence = results.getString("loop_sequence");
     		type = results.getString("loop_type");
+    		id = results.getLong("id");
     		sequences.add(sequence);
     	}
     	results.close();
 
-    	return new BasicLoop(sequences, type);
+    	return new BasicLoop(id, sequences, type);
     }
 
     private void loadLoops() throws SQLException {

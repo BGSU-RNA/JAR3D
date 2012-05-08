@@ -9,9 +9,12 @@ public class BasicLoop implements Loop {
 	
 	private String type;
 	
-	public BasicLoop(List<String> loops, String type) {
+	private final long id;
+	
+	public BasicLoop(long id, List<String> loops, String type) {
 		this.loops = loops;
 		this.type = type;
+		this.id = id;
 	}
 
 	public List<String> getSequences() {
@@ -24,5 +27,9 @@ public class BasicLoop implements Loop {
 
 	public Iterator<String> iterator() {
 		return loops.iterator();
+	}
+
+	public long getId() {
+		return id;
 	}
 }
