@@ -1134,6 +1134,67 @@ public class Sequence {
 	}
 	return modelNames;
 	}
+	
+	//Overloaded getModelNames for the new file system
+	public static Vector getModelNames(String folder, String modelType, boolean Structured)
+	{
+		Vector modelNames = new Vector();
+		char fsep = File.separatorChar;
+		String listName;
+		if(Structured){
+			listName = folder + fsep + modelType + "_models" + fsep + "structured.txt";
+		}else{
+			listName = folder + fsep + modelType + "_models" + fsep + "all.txt";
+		}
+
+	try {
+		String curDir = System.getProperty("user.dir");
+        curDir = curDir.replace(File.separator + "bin","");
+
+//		System.out.println("Sequence.getModelNames: Current directory is "+curDir);
+//        File f1 = new File (curDir + "\\models");
+//	    File[] modfiles = f1.listFiles();
+
+		BufferedReader rdr;
+
+		File f2 = new File(listName);
+		rdr = new BufferedReader(new FileReader(f2));
+
+		String fileLine = "";
+		fileLine = rdr.readLine();
+//		System.out.println(fileLine);
+		
+		while(fileLine != null)
+		{
+//			System.out.println(fileLine);
+			//remove _model.txt from file name to get group name
+			fileLine = fileLine.substring(0,fileLine.length()-10);
+			modelNames.add(fileLine);
+			fileLine = rdr.readLine();
+		}
+
+		}
+	catch (Exception e) {
+		try{
+			System.out.println("Couldn't find model files locally, looking online.");
+			URL dirurl = new URL("http://rna.bgsu.edu/JAR3D/models/"+listName);
+	        URLConnection dircon = dirurl.openConnection();
+	        BufferedReader rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
+	        String ln = rdr.readLine();
+			while(ln != null)
+				{
+					modelNames.add("http://rna.bgsu.edu/JAR3D/models/" + ln);
+					ln = rdr.readLine();
+				}
+		}
+		catch (Exception ex)
+		{
+			System.out.println(ex.getMessage());
+		}
+	}
+	return modelNames;
+	}
+
 
 	/**
 	 * This method reads a text file and returns the lines as a vector

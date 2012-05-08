@@ -2,6 +2,7 @@
 import java.io.*;
 import java.util.*;
 import com.almworks.sqlite4java.*;
+import java.sql.*;
 
 /**
  * This is the Alignment class, it has methods that are used to facilitate aligning sequences
@@ -1417,7 +1418,12 @@ public class Alignment {
 	    double[] scores = new double[2*modNames.size()];       // all scores computed
 
 	    Vector rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
-		
+	    
+	    //variables for MySQL DB connection
+	    java.sql.Connection myConnection;
+	    Statement stat;
+	    String dbURL;
+	    
 		if(((String)modNames.get(0)).contains("http"))         // look online for models
 		{
 		// remove http:// from model names
@@ -1444,9 +1450,7 @@ public class Alignment {
 			// System.out.println("Alignment.getSortedILAlignment " + modNames.get(k));
 			rsData = Alignment.doParse(rsData,numSequences,(String)modNames.get(k),range);
 		}
-//		sData.removeElementAt(0);		
-//		rsData.removeElementAt(0);
-
+		
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
@@ -1482,8 +1486,34 @@ public class Alignment {
 		String id = Fname.replace(".fasta","");
 		sqlcmd = String.format("insert into query (id, sequences, numseqs, gset) values('%s','%s',%d,'iljun6') ", id,Fname,sData.size()-1);
 		try {
-			//System.out.println(sqlcmd);
+			//write to sqlite
 			db.exec(sqlcmd);
+			//create driver
+			Class.forName("com.mysql.jdbc.Driver").newInstance(); 
+
+			//database connection code
+			//read username and password from file here
+			FileInputStream fstream = new FileInputStream("jar3d-mysql-info.txt");
+			DataInputStream in = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			String strLine;
+			strLine = br.readLine();
+			String username = strLine;
+			strLine = br.readLine();
+			String password = strLine;
+			in.close();
+
+			//URL - ALTER TO CONNECT TO YOUR DATABASE
+			dbURL = "jdbc:mysql://somedomain.com/jar3d?user="
+				+ username + "&password=" + password;
+
+			//create the connection - ALTER FOR YOUR DBMS
+			myConnection =
+				DriverManager.getConnection(dbURL);
+			//create statement handle for executing queries
+			stat = myConnection.createStatement();
+			//write to mysql
+			stat.execute(sqlcmd);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -1934,6 +1964,284 @@ public class Alignment {
 				scores[m] = tempo;
 		}
 		return scores;
-	}	
+	}
+	
+	//Takes a JAR3D query and submits results to MySQL database
+	public static double[] doILdbQuery(String id, Vector sData, Vector modNames, HashMap groupData, int numSequences, int range)
+	{
+		Vector alignmentVect = new Vector();                   // alignment lines to output
+		Vector pData = new Vector();                           // parse data
+		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
+		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
+		double[] modelScores = new double[modNames.size()];
+		double[] rmodelScores = new double[modNames.size()];
+		double[][] modelScoreMat = new double[modNames.size()][sData.size()];
+		double[][] rmodelScoreMat = new double[modNames.size()][sData.size()];
+		Vector shortModNames = new Vector();                   // for easier display
+		int[] reversed = new int[modNames.size()];             // is best model reversed?
+		double[] scores = new double[2*modNames.size()];
+		String sqlcmd;
+		
+		Vector rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
+
+		//variables for MySQL DB connection
+	    java.sql.Connection myConnection;
+	    Statement stat;
+	    String dbURL;
+	    
+	    shortModNames = new Vector(modNames);
+	    
+	    MotifGroup group;
+	    for(int k = 0; k < modNames.size(); k++)
+		{
+	    	group = (MotifGroup)groupData.get((String)modNames.get(k));
+			// System.out.println("Alignment.getSortedILAlignment " + modNames.get(k));
+			sData  = Alignment.doParse(sData,numSequences,group.Model,range,Boolean.TRUE);
+			// System.out.println("Alignment.getSortedILAlignment " + modNames.get(k));
+			rsData = Alignment.doParse(rsData,numSequences,group.Model,range,Boolean.TRUE);
+		}
+		
+	    // add up model scores for each sequence
+		for(int m = 0; m < sData.size(); m++)
+		{
+			for(int x = 0; x < ((Sequence)sData.elementAt(m)).maxLogProbs.size(); x++)
+			{
+				// there is no good reason for having to do these crazy manipulations
+				// in order to get the value of a double variable, but at least this works
+				String temp = String.valueOf(((Vector)((Sequence)sData.elementAt(m)).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+				double tempo = Double.parseDouble(temp);   
+				modelSums[x] += tempo;
+				modelScoreMat[x][m] = tempo;
+
+				temp = String.valueOf(((Vector)((Sequence)rsData.elementAt(m)).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+				tempo = Double.parseDouble(temp);
+				rmodelSums[x] += tempo;
+				rmodelScoreMat[x][m] = tempo;
+			}
+			// System.out.println("");
+		}
+		for(int g = 0; g < modelSums.length; g++)
+		{
+			modelScores[g] = (modelSums[g]/(sData.size()-1));
+			rmodelScores[g] = (rmodelSums[g]/(sData.size()-1));
+			scores[2*g]   = Math.max(modelScores[g],-9999);
+			scores[2*g+1] = Math.max(rmodelScores[g],-9999);
+		
+			if(rmodelScores[g] > modelScores[g])          // choose between forward and reversed for each model
+			{
+				modelScores[g] = rmodelScores[g];
+				shortModNames.set(g, shortModNames.get(g)+" reversed");
+		        reversed[g] = 1;
+			}
+			else {
+				reversed[g] = 0;
+			}
+		}
+		Formatter fmt = new Formatter();
+		
+		// re-sort models & their totals
+		// weird indexing array to keep track of the order things should be in
+		// it starts out as [0 1 2 3 4 5]
+		// then gets re-sorted according to modelScores
+		// ie [0 2 3 1 5 4] means that in other vectors, their index 0 is the first
+		// index 3 is second, 2 is the third, ect
+
+		int[] indices = new int[modNames.size()];
+		for(int k = 0; k < modNames.size(); k++)
+			indices[k] = k;
+		
+		// the following block of code sorts modelScores in an inefficient way
+		for(int a = 0; a < modelScores.length; a++){
+	            int max = a; //array position of largest element
+	            for(int b = a; b < modelScores.length; b++)
+	            {
+	                if(modelScores[b] > modelScores[max])
+	                	max = b;
+	            }
+	            // exchange scores
+	            double dtemp = modelScores[max];
+	            modelScores[max] = modelScores[a];
+	            modelScores[a] = dtemp;
+	            
+	            // exchange indices for use with vectors
+	            int itemp = indices[max];
+	            indices[max] = indices[a];
+	            indices[a] = itemp;    
+		}
+
+		int numInputSeqs = sData.size()-1;
+		for(int g = 0; g < numInputSeqs; g++)
+		{
+			int index = indices[g];
+			String groupName = (String)shortModNames.get(index);
+			String sig;
+			boolean rev;
+			double[] groupScores = new double[sData.size()];
+			group = (MotifGroup)groupData.get(groupName);
+			if (reversed[index] == 0){  //not reversed
+				rev = Boolean.FALSE;
+				sig = group.Signature[0]; 
+				for(int col = 1; col < numInputSeqs+1; col++)
+				{
+					groupScores[col-1] = modelScoreMat[index][col];
+				}
+			}
+			else{  //reversed
+				rev = Boolean.TRUE;
+				sig = group.Signature[1];
+				for(int col = 1; col < numInputSeqs+1; col++)
+				{
+					groupScores[col-1] = rmodelScoreMat[index][col];
+				}
+			}
+			double medianLL = ArrayMath.median(groupScores);
+			double[] quants = webJAR3D.getQuantilesA(groupScores, group);
+			double meanQuant = 100*ArrayMath.mean(quants);
+			double medianQuant = 100*ArrayMath.median(quants);
+			//Calculate edit distances
+			Vector modsData = Alignment.parseFastaText(group.Sequences,0,0);
+			int[][] EditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rev);
+			int[] minDist = new int[EditDistances.length];
+			for(int i =0; i < EditDistances.length; i ++){
+				minDist[i] = ArrayMath.min(EditDistances[i]);
+			}
+			double meanMinDist = ArrayMath.mean(minDist);
+			double medianMinDist = ArrayMath.median(minDist);
+			int decimals = 6;
+			if(medianQuant >= .9){
+				sqlcmd = String.format("insert into bygroup (id, meanscore, meanpercentile, meaneditdist, medianscore, medianpercentile, medianeditdist, signature, rotation, groupnum) values('%s', %f, %f, %f, %f, %f, %f,'%s',%d,%s) ", id,modelScores[g],meanQuant,meanMinDist,medianLL,medianQuant,medianMinDist,sig,reversed[index],groupName);
+				try {
+					System.out.println(sqlcmd);
+					//db.exec(sqlcmd);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+					System.out.println("Could not insert into JAR3D.db bygroup table");
+					System.out.println(e1.toString());
+				}
+				for(int m = 1; m < sData.size(); m++)
+				{
+					Sequence current = (Sequence)(sData.elementAt(m));
+					String currentL = current.letters;
+					sqlcmd = String.format("insert into bysequence (id, seqnum, sequence, score, percentile, editdist, rotation, groupnum) values('%s', %d, '%s', %f, %f, %d, %d, %s) ", id,m,currentL,groupScores[m-1],quants[m-1],minDist[m-1],reversed[index],groupName);
+					try {
+						System.out.println(sqlcmd);
+						//db.exec(sqlcmd);
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+						System.out.println("Could not insert into JAR3D.db byseqeunce table");
+						System.out.println(e1.toString());
+					}
+				}
+			}
+		}
+		
+		return scores;
+	}
+	
+	//Overloaded doParse that can take group data as a string instead of a file name
+	public static Vector doParse(Vector sData, int numSequences, String nodeInfo, int range, boolean fullModelText)
+	{
+		long start, stop, elapsed;
+		Node current;
+		Vector mProbs = new Vector();
+
+		Sequence S = new Sequence("","");                    // blank sequence to use repeatedly
+		if(fullModelText){
+			S.addNodeDataModelText(nodeInfo);				 // add model data from string
+		}else{
+			S.addNodeData(nodeInfo);	                     // add model data from file
+		}
+
+		((Sequence)sData.elementAt(0)).parseData = ((InitialNode)S.first).header(); // add a header line
+
+		Sequence firstS = (Sequence)sData.elementAt(1);          // first sequence, which matches the model
+		firstS.setNucleotides();
+		firstS.setArrays();
+		
+		for (int i = 1; i < Math.min(sData.size(),numSequences+1); i++) 
+		{
+			S.organism = ((Sequence)sData.elementAt(i)).organism;             // focus on one sequence
+			S.letters  = ((Sequence)sData.elementAt(i)).letters;
+			
+			// System.out.println("Alignment.doParse: " + S.letters);
+			
+			S.setNucleotides();                                    // strip dashes from sequence
+			S.setArrays();                                         // define cti, itc, convert letters to numbers
+
+			// keep copies of cti and itc for the first sequence, which must match the model
+			S.ctiFirst = new int[firstS.cti.length];            
+			S.itcFirst = new int[firstS.itc.length];
+			
+			for (int j = 0; j < S.ctiFirst.length; j++)
+				S.ctiFirst[j] = firstS.cti[j];
+			for (int j = 0; j < S.itcFirst.length; j++)
+				S.itcFirst[j] = firstS.itc[j];
+
+			start = System.currentTimeMillis();
+			S.parseSequence(range);                             	      // parse this sequence
+			stop = System.currentTimeMillis();
+			elapsed = stop - start;
+
+//			System.out.println("Alignment.doParse parsing took "+elapsed/1000+" seconds");
+			// We also need to store the parse information somewhere!  All we have is a parse sequence.
+			// We need to store the max log probabilities too
+			//	pData.add(((InitialNode)S.first).showParse(S.nucleotides) + " " + ((Vector)(((Sequence)sData.elementAt(i)).maxLogProbs.get(0))).get(0));
+
+			mProbs = new Vector();
+			current = S.first;
+//System.out.println(((InitialNode)S.first).showParse(S.nucleotides)+" ");
+			while(current != null)
+			{
+				mProbs.add(new Double(current.optimalMaxLogProb));
+//System.out.println(current.mytype+" "+current.optimalMaxLogProb);
+				current =  current.next;
+			}
+			((Sequence)sData.elementAt(i)).maxLogProbs.add(mProbs);
+			if (S.first.optimalMaxLogProb < -99999999)
+			{
+//				System.out.println("Alignment.doParse: No good parse found, score "+S.first.optimalMaxLogProb);
+				current = S.first.next;
+				while (current != null)
+				{
+					if (current.previous.currentMaxLogProb < -99999999 && current.currentMaxLogProb > -999999999)
+					{
+//						System.out.println("Alignment.doParse: best max Log Prob "+current.previous.currentMaxLogProb+" at "+current.previous.mytype+" "+(current.previous.leftIndex+1)+" "+(current.previous.rightIndex+1));
+					}
+					current = current.next;				
+				}
+			}
+			
+			((Sequence)sData.elementAt(i)).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
+			
+//			String correspondences = ((InitialNode)S.first).showCorrespondences(S.letters);
+//
+//			correspondences = correspondences.replace("JAR3D_aligns_to", "aligns_to_JAR3D");
+//			
+//			String SF = ((Sequence)sData.elementAt(0)).organism;    // where the file name got put
+//			SF = SF.replace(".fasta","");
+//			int a = SF.lastIndexOf("\\");
+//			if (a >= 0)
+//				SF = SF.substring(a+1);
+//			a = SF.lastIndexOf("/");
+//			if (a >= 0)
+//				SF = SF.substring(a+1);
+//			SF = SF.substring(0,6);                  // temporary way to fix file names
+//			correspondences = correspondences.replace("SSS",SF+"_Sequence_"+i);
+//			
+//			String NF = nodeFileName.replace(".txt","");
+//			a = NF.lastIndexOf("\\");
+//			if (a >= 0)
+//				NF = NF.substring(a+1);
+//			a = NF.lastIndexOf("/");
+//			if (a >= 0)
+//				NF = NF.substring(a+1);
+//			NF = NF.substring(0,6);                  // temporary way to fix file names
+//			correspondences = correspondences.replace("MMM", NF);
+//			((Sequence)sData.elementAt(i)).correspondences = correspondences;
+		}
+		return sData;
+	}
 
 }

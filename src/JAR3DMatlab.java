@@ -183,6 +183,45 @@ public class JAR3DMatlab {
         }
 	    return S;
 	}
+	
+	//Overloaded MotifParse for new file system
+	//Query should be either the full filename for the query fasta file or the full text
+	//folder should be the folder with the data for the models, including loopType and version
+	//modelType indicates which models to use, for example "bp".  Should be the prefix before the first "_" in model folder
+	//structured is a boolean which indicates whether to use only structured models or all models
+	public static double[] MotifParse(String QueryID, String QueryTxt, String folder, String loopType, String modelType, boolean structured) 
+	{
+		int numSequences = 10000;                            // make sure this is larger than needed	
+		String FASTAName = "";
+		Vector sData;
+		Vector scores = new Vector();
+        
+        double[] S;
+        double[] newscores;
+        
+		System.setProperty("user.dir",folder);
+
+		sData = Alignment.parseFastaText(QueryTxt,0,0);
+        
+        Vector modelNames = Sequence.getModelNames(folder, modelType, structured);
+        
+        HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, modelType);
+        if (loopType.equals("IL"))
+        {
+            S = new double[2*modelNames.size()];
+    	    newscores = new double[2*modelNames.size()];
+        	newscores = Alignment.doILdbQuery(QueryID, sData, modelNames, groupData, numSequences, 20);
+           	for (int g=0; g < 2*modelNames.size(); g++)
+           		S[g] = newscores[g];
+        }else {  // if not IL assume HL
+        	S = new double[modelNames.size()];
+//	    	newscores = new double[modelNames.size()];
+//          newscores = Alignment.makeSortedHLAlignmentHTML(sData,modelNames,numSequences,100,SeqFile,20);
+//       	for (int g=0; g < modelNames.size(); g++)
+//       		S[g] = newscores[g];
+        }
+	    return S;
+	}
 
     public static Vector Display(Vector sData)
     {
