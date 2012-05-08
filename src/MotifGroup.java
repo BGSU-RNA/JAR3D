@@ -13,10 +13,10 @@ public class MotifGroup implements java.io.Serializable{
 	 */
 	private static final long serialVersionUID = 1L;
 	String loopType;
-	String Sequences;		//Sequences seen in 3d structure
+	String Sequences;		//Sequences seen in 3d structure - fasta format
 	String Model;			//Model data in text format
 	String Distribution;    //Distribution file in text format
-    String Signature;
+    String[] Signature;
     int conserved;
 
     //Constructor that takes string folder, the full path to the folder with model 
@@ -60,7 +60,16 @@ public class MotifGroup implements java.io.Serializable{
     		fstream = new FileInputStream(dataFile);
     		in = new DataInputStream(fstream);
     		br = new BufferedReader(new InputStreamReader(in));
-    		Signature = br.readLine();
+    		String Signatures = br.readLine();
+    		Signature = new String[2];
+    		int breakpoint = Signatures.indexOf(" ");
+    		int j = 0;
+    		while(breakpoint >= 0){
+    			Signature[j] = Signatures.substring(0, breakpoint);
+    			Signatures = Signatures.substring(breakpoint+1);
+    			j = j++;
+    			breakpoint = Signatures.indexOf(" ");
+    		}
     		String conint = br.readLine();
     		conserved = Integer.parseInt(conint);
     		in.close();
