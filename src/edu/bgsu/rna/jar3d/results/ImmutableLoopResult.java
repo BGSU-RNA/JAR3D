@@ -1,10 +1,13 @@
 package edu.bgsu.rna.jar3d.results;
 
+
 import java.util.List;
+
+import edu.bgsu.rna.jar3d.ArrayMath;
 
 public final class ImmutableLoopResult implements LoopResult {
 
-	private final String loopId;
+	private final int loopId;
 	
 	private final String modelId;
 	
@@ -12,7 +15,7 @@ public final class ImmutableLoopResult implements LoopResult {
 	
 	private double meanEditDistance;
 	
-	private  double meanScore;
+	private double meanScore;
 	
 	private double meanPercentile;
 	
@@ -26,7 +29,7 @@ public final class ImmutableLoopResult implements LoopResult {
 	
 	private final List<SequenceResult> sequenceResults;
 	
-	public ImmutableLoopResult(String loopId, String modelId, boolean rotation, String signature, List<SequenceResult> sequenceResults) {
+	public ImmutableLoopResult(int loopId, String modelId, boolean rotation, String signature, List<SequenceResult> sequenceResults) {
 		this.sequenceResults = sequenceResults;
 		this.modelId = modelId;
 		this.loopId = loopId;
@@ -36,10 +39,25 @@ public final class ImmutableLoopResult implements LoopResult {
 	}
 	
 	private void computeData() {
-		
+		int numSeqs = this.sequenceResults.size();
+		double[] scores = new double[numSeqs];
+		double[] percentiles = new double[numSeqs];
+		int[] edDists = new int[numSeqs];
+		for(int i = 0;i<numSeqs;i++){
+			SequenceResult seqR = this.sequenceResults.get(i);
+			scores[i] = seqR.score();
+			percentiles[i] = seqR.percentile();
+			edDists[i] = seqR.editDistance();
+		}
+		this.medianScore = ArrayMath.median(scores);
+		this.meanScore = ArrayMath.mean(scores);
+		this.meanPercentile = 100*ArrayMath.mean(percentiles);
+		this.medianPercentile = 100*ArrayMath.median(percentiles);
+		this.meanEditDistance = ArrayMath.mean(edDists);
+		this.medianEditDistance = ArrayMath.median(edDists);
 	}
 	
-	public String loopId() {
+	public int loopId() {
 		return loopId;
 	}
 

@@ -1,3 +1,4 @@
+package edu.bgsu.rna.jar3d;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.io.FileOutputStream;
