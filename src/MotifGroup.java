@@ -70,6 +70,7 @@ public class MotifGroup implements java.io.Serializable{
     			j = j++;
     			breakpoint = Signatures.indexOf(" ");
     		}
+    		Signature[j] = Signatures;
     		String conint = br.readLine();
     		conserved = Integer.parseInt(conint);
     		in.close();

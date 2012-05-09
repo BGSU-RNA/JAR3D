@@ -1990,7 +1990,7 @@ public class Alignment {
 	    String dbURL;
 	    
 	    shortModNames = new Vector(modNames);
-	    
+//Parse all sequences against all groups	    
 	    MotifGroup group;
 	    for(int k = 0; k < modNames.size(); k++)
 		{
@@ -2001,7 +2001,7 @@ public class Alignment {
 			rsData = Alignment.doParse(rsData,numSequences,group.Model,range,Boolean.TRUE);
 		}
 		
-	    // add up model scores for each sequence
+//Add up model scores for each sequence, find mean score, compare regular and reversed scores
 		for(int m = 0; m < sData.size(); m++)
 		{
 			for(int x = 0; x < ((Sequence)sData.elementAt(m)).maxLogProbs.size(); x++)
@@ -2037,7 +2037,6 @@ public class Alignment {
 				reversed[g] = 0;
 			}
 		}
-		Formatter fmt = new Formatter();
 		
 		// re-sort models & their totals
 		// weird indexing array to keep track of the order things should be in
@@ -2069,6 +2068,7 @@ public class Alignment {
 	            indices[a] = itemp;    
 		}
 
+//Calculate extra information (quantiles, edit distances) and out put
 		int numInputSeqs = sData.size()-1;
 		for(int g = 0; g < numInputSeqs; g++)
 		{
