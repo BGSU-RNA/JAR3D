@@ -1,3 +1,4 @@
+package edu.bgsu.rna.jar3d;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;

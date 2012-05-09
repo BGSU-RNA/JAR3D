@@ -6,7 +6,7 @@ public interface LoopResult {
 
 //	"insert into bygroup (id, meanscore, meanpercentile, meaneditdist, medianscore, medianpercentile, medianeditdist, signature, rotation, groupnum) values('%s', %f, %f, %f, %f, %f, %f,'%s',%d,%s) ", id,modelScores[g],meanQuant,meanMinDist,medianLL,medianQuant,medianMinDist,sig,reversed[index],groupName);
 
-	public String loopId();
+	public int loopId();
 
 	public String modelId();
 
