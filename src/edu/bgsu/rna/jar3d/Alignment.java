@@ -6,6 +6,7 @@ import java.util.*;
 import com.almworks.sqlite4java.*;
 
 import edu.bgsu.rna.jar3d.results.ImmutableLoopResult;
+import edu.bgsu.rna.jar3d.results.LoopResult;
 import edu.bgsu.rna.jar3d.results.MutableSequenceResults;
 import edu.bgsu.rna.jar3d.results.SequenceResult;
 
@@ -2110,7 +2111,7 @@ public class Alignment {
 			for(int i =0; i < EditDistances.length; i ++){
 				minDist[i] = ArrayMath.min(EditDistances[i]);
 			}
-			Vector loopRes = new Vector();
+			List<LoopResult> loopRes = new ArrayList<LoopResult>();
 			if(Boolean.TRUE){   //put goodness of fit checks here later?
 				Vector seqRes = new Vector();
 				for(int m = 1; m < sData.size(); m++)
@@ -2121,7 +2122,7 @@ public class Alignment {
 							minDist[m],rev);
 					seqRes.add(seqR);
 				}
-				ImmutableLoopResult loopR = new ImmutableLoopResult(loopID,groupName,rev,sig,seqRes);
+				LoopResult loopR = new ImmutableLoopResult(loopID,groupName,rev,sig,seqRes);
 				loopRes.add(loopR);
 			}
 		}
