@@ -8,5 +8,7 @@ public interface ResultsSaver {
 
 	public void save(LoopResult results);
 	
+	public void save(LoopResult results, boolean status);
+
 	public void cleanUp();
 }

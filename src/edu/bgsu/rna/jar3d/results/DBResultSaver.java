@@ -21,11 +21,12 @@ public class DBResultSaver implements ResultsSaver {
         insertLoopResult = connection.prepareStatement(loopResultSQL);
         insertSequenceResult = connection.prepareStatement(sequenceResultSQL);
 	}
-
-	public void save(LoopResult results) {
+	
+	public void save(LoopResult results, boolean status) {
 		// TODO Do all sequences at once for speed up?
+		// TODO When save a sequence update time.
 		for(SequenceResult sequenceResult: results.sequenceResults()) {
-			saveSequenceResult(sequenceResult);
+			saveSequenceResult(sequenceResult, status);
 		}
 
 		try {
@@ -48,7 +49,7 @@ public class DBResultSaver implements ResultsSaver {
 	}
 //	"insert into bysequence (id, seqnum, sequence, score, percentile, editdist, rotation, groupnum) values('%s', %d, '%s', %f, %f, %d, %d, %s) ", id,m,currentL,groupScores[m-1],quants[m-1],minDist[m-1],reversed[index],groupName);
 
-	private void saveSequenceResult(SequenceResult result) {
+	private void saveSequenceResult(SequenceResult result, boolean status) {
 		try {
 			insertSequenceResult.setString(1, result.groupId());
 			insertSequenceResult.setString(3, result.sequence());
@@ -83,5 +84,9 @@ public class DBResultSaver implements ResultsSaver {
 		for(LoopResult result: results) {
 			save(result);
 		}
+	}
+
+	public void save(LoopResult results) {
+		save(results, true);
 	}
 }
