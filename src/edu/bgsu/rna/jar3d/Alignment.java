@@ -1975,7 +1975,7 @@ public class Alignment {
 	}
 	
 	//Takes a JAR3D query and submits results to MySQL database
-	public static double[] doILdbQuery(int loopID, Vector sData, Vector modNames, HashMap groupData, int numSequences, int range)
+	public static List doILdbQuery(int loopID, Vector sData, Vector modNames, HashMap groupData, int numSequences, int range)
 	{
 		Vector alignmentVect = new Vector();                   // alignment lines to output
 		Vector pData = new Vector();                           // parse data
@@ -1988,7 +1988,7 @@ public class Alignment {
 		Vector shortModNames = new Vector();                   // for easier display
 		int[] reversed = new int[modNames.size()];             // is best model reversed?
 		double[] scores = new double[2*modNames.size()];
-		String sqlcmd;
+		Vector loopRes = new Vector();
 		
 		Vector rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
 	    
@@ -2088,7 +2088,6 @@ public class Alignment {
 			for(int i =0; i < EditDistances.length; i ++){
 				minDist[i] = ArrayMath.min(EditDistances[i]);
 			}
-			List<LoopResult> loopRes = new ArrayList<LoopResult>();
 			if(Boolean.TRUE){   //put goodness of fit checks here later?
 				Vector seqRes = new Vector();
 				for(int m = 1; m < sData.size(); m++)
@@ -2102,7 +2101,7 @@ public class Alignment {
 			}
 		}
 		
-		return scores;
+		return loopRes;
 	}
 	
 	//Overloaded doParse that can take group data as a string instead of a file name
