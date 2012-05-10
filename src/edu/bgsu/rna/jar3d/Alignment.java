@@ -2057,7 +2057,7 @@ public class Alignment {
 
 //Calculate extra information (quantiles, edit distances) and out put
 		int numInputSeqs = sData.size()-1;
-		for(int g = 0; g < numInputSeqs; g++)
+		for(int g = 0; g < modNames.size(); g++)
 		{
 			int index = indices[g];
 			String groupName = (String)tinyModNames.get(index);
@@ -2105,7 +2105,6 @@ public class Alignment {
 				loopRes.add(loopR);
 			}
 		}
-		
 		return loopRes;
 	}
 	
