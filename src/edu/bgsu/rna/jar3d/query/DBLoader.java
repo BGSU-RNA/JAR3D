@@ -18,7 +18,7 @@ public class DBLoader implements QueryLoader {
     private PreparedStatement sqlForQueryInfo;
 
     private PreparedStatement sqlForLoops;
-        
+
     public DBLoader(String username, String password, String dbConnection) throws SQLException {
         connection = DriverManager.getConnection(dbConnection, username, password);
         String querySql = "SELECT group_set, model_type, structured_models_only FROM query_info WHERE query_id = ?;";
