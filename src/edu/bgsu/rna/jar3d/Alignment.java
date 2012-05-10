@@ -1993,6 +1993,7 @@ public class Alignment {
 		Vector rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
 	    
 	    shortModNames = new Vector(modNames);
+	    Vector tinyModNames = new Vector(shortModNames);
 //Parse all sequences against all groups	    
 	    MotifGroup group;
 	    for(int k = 0; k < modNames.size(); k++)
@@ -2058,7 +2059,7 @@ public class Alignment {
 		for(int g = 0; g < numInputSeqs; g++)
 		{
 			int index = indices[g];
-			String groupName = (String)shortModNames.get(index);
+			String groupName = (String)tinyModNames.get(index);
 			String sig;
 			boolean rev;
 			double[] groupScores = new double[sData.size()];
