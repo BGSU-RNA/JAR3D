@@ -9,7 +9,7 @@ public interface QueryLoader {
 	 * @return The requested query. 
 	 */
 	public Query load(String queryId) throws QueryLoadingFailed;
-	
+
 	/**
 	 * Perform any clean up needed, such as closing connections etc.
 	 */
