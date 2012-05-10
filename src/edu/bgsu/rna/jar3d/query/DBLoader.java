@@ -22,7 +22,7 @@ public class DBLoader implements QueryLoader {
     public DBLoader(String username, String password, String dbConnection) throws SQLException {
         connection = DriverManager.getConnection(dbConnection, username, password);
         String querySql = "SELECT group_set, model_type, structured_models_only FROM query_info WHERE query_id = ?;";
-        String loopSql = "SELECT id, loop_sequence, loop_type FROM query_sequences WHERE query_id = ? and loop_id = ?;";
+        String loopSql = "SELECT loop_id, loop_sequence, loop_type FROM query_sequences WHERE query_id = ? and loop_id = ?;";
         sqlForQueryInfo = connection.prepareStatement(querySql);
         sqlForLoops = connection.prepareStatement(loopSql);
     }
@@ -38,7 +38,7 @@ public class DBLoader implements QueryLoader {
     	while (results.next()) {
     		String sequence = results.getString("loop_sequence");
     		type = results.getString("loop_type");
-    		id = results.getLong("id");
+    		id = results.getLong("loop_id");
     		sequences.add(sequence);
     	}
     	results.close();

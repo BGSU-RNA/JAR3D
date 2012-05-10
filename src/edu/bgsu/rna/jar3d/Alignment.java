@@ -5,6 +5,7 @@ import java.util.*;
 
 import com.almworks.sqlite4java.*;
 
+import edu.bgsu.rna.jar3d.query.Query;
 import edu.bgsu.rna.jar3d.results.ImmutableLoopResult;
 import edu.bgsu.rna.jar3d.results.LoopResult;
 import edu.bgsu.rna.jar3d.results.MutableSequenceResults;
@@ -1975,7 +1976,7 @@ public class Alignment {
 	}
 	
 	//Takes a JAR3D query and submits results to MySQL database
-	public static List doILdbQuery(int loopID, Vector sData, Vector modNames, HashMap groupData, int numSequences, int range)
+	public static List doILdbQuery(int loopID, Query query, Vector sData, Vector modNames, HashMap groupData, int numSequences, int range)
 	{
 		Vector alignmentVect = new Vector();                   // alignment lines to output
 		Vector pData = new Vector();                           // parse data
@@ -2091,14 +2092,17 @@ public class Alignment {
 			}
 			if(Boolean.TRUE){   //put goodness of fit checks here later?
 				Vector seqRes = new Vector();
-				for(int m = 1; m < sData.size(); m++)
+				for(int m = 0; m < sData.size() - 1; m++)
 				{
-//					MutableSequenceResults seqR = new MutableSequenceResults(groupName, groupScores[m],quants[m],
-//							minDist[m],rev);
-//					seqRes.add(seqR);
+					MutableSequenceResults seqR = new MutableSequenceResults(groupName, groupScores[m],quants[m],
+							minDist[m],rev);
+					seqR.setQuery(query);
+					seqR.setSequenceId(String.valueOf(m));
+					seqRes.add(seqR);
 				}
-//				LoopResult loopR = new ImmutableLoopResult(loopID,groupName,rev,sig,seqRes);
-//				loopRes.add(loopR);
+				ImmutableLoopResult loopR = new ImmutableLoopResult(loopID,groupName,rev,sig,seqRes, "");
+				loopR.setQuery(query);
+				loopRes.add(loopR);
 			}
 		}
 		

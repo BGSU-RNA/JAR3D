@@ -24,8 +24,8 @@ public class DBResultSaver implements ResultsSaver {
 	
 	public DBResultSaver(String username, String password, String db) throws SQLException {
         connection = DriverManager.getConnection(db, username, password);
-        String loopResultSQL = "insert into jar3d_results_by_loop (query_id, loop_id, motif_id, meanscore, meanpercentile, meaneditdist, medianscore, medianpercentile, medianeditdist, signature, rotation, correspondences) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-        String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (id, seq_id, loop_id, score, percentile, editdist, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?);";
+        String loopResultSQL = "insert into jar3d_results_by_loop (query_id, loop_id, motif_id, meanscore, meanpercentile, meaneditdist, medianscore, medianpercentile, medianeditdist, signature, rotation, correspondences) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (query_id, seq_id, loop_id, score, percentile, editdist, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?);";
         String updateLoopSQL = "UPDATE jar3d_query_info SET status=1 WHERE query_id = ?;";
         String updateSequenceSQL = "UPDATE jar3d_query_sequences SET status=1 WHERE query_id = ? and seq_id = ? and loop_id = ?;";
         String failureSQL = "UPDATE jar3d_query_sequences SET status=-1 WHERE query_id = ? and loop_id = ?;";
@@ -50,6 +50,7 @@ public class DBResultSaver implements ResultsSaver {
 		}
 
 		try {
+
 			insertLoopResult.setString(1, results.queryId());
 			insertLoopResult.setInt(2, results.loopId());
 			insertLoopResult.setString(3, results.modelId());
@@ -103,6 +104,7 @@ public class DBResultSaver implements ResultsSaver {
 		}
 		
 		try {
+			System.out.println(insertSequenceResult);
 			int count = insertSequenceResult.executeUpdate();
 			
 			if (count == 0) {
