@@ -8,9 +8,33 @@ import java.util.Vector;
 
 import edu.bgsu.rna.jar3d.query.Loop;
 import edu.bgsu.rna.jar3d.query.Query;
+import edu.bgsu.rna.jar3d.query.DBLoader;
+import edu.bgsu.rna.jar3d.results.DBResultSaver;
 import edu.bgsu.rna.jar3d.results.LoopResult;
 
 public class JAR3Database {
+	
+	public static void main(String[] args) {
+		Query q;
+		String base = args[0];
+		String QueryID = args[1];
+		String usrName = args[2];
+		String pswd = args[3];
+		String dbConnection = "jdbc:mysql://localhost:3306/jar3d";
+		try{
+			DBLoader db = new DBLoader(usrName,pswd,dbConnection);
+			q = db.load(QueryID);
+			List<List<LoopResult>> allResults = JAR3Database.MotifParse(args[0], q);
+			DBResultSaver rs = new DBResultSaver(usrName,pswd,dbConnection);
+			for(List<LoopResult> results: allResults){
+				rs.save(results);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			System.out.println("Failed to load query");
+		}		
+	}
 	
 	public static List<List<LoopResult>> MotifParse(String base, Query query) {
 		List<List<LoopResult>> allResults = new ArrayList<List<LoopResult>>();
