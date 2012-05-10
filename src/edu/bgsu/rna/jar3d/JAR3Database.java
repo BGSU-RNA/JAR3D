@@ -24,7 +24,7 @@ public class JAR3Database {
 		try{
 			DBLoader db = new DBLoader(usrName,pswd,dbConnection);
 			q = db.load(QueryID);
-			List<List<LoopResult>> allResults = JAR3Database.MotifParse(args[0], q);
+			List<List<LoopResult>> allResults = JAR3Database.MotifParse(base, q);
 			DBResultSaver rs = new DBResultSaver(usrName,pswd,dbConnection);
 			for(List<LoopResult> results: allResults){
 				rs.save(results);
