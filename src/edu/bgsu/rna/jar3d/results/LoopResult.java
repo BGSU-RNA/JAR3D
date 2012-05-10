@@ -2,10 +2,14 @@ package edu.bgsu.rna.jar3d.results;
 
 import java.util.List;
 
+import edu.bgsu.rna.jar3d.query.Query;
+
 public interface LoopResult {
 
-//	"insert into bygroup (id, meanscore, meanpercentile, meaneditdist, medianscore, medianpercentile, medianeditdist, signature, rotation, groupnum) values('%s', %f, %f, %f, %f, %f, %f,'%s',%d,%s) ", id,modelScores[g],meanQuant,meanMinDist,medianLL,medianQuant,medianMinDist,sig,reversed[index],groupName);
-
+	public Query query();
+	
+	public String queryId();
+		
 	public int loopId();
 
 	public String modelId();
@@ -25,6 +29,8 @@ public interface LoopResult {
 	public String signature();
 
 	public boolean isRotated();
+	
+	public String correspondencies();
 
 	public List<SequenceResult> sequenceResults();
 }

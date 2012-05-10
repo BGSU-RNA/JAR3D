@@ -1,11 +1,9 @@
 package edu.bgsu.rna.jar3d.results;
 
+import edu.bgsu.rna.jar3d.query.Query;
+
 
 public class MutableSequenceResults implements SequenceResult {
-
-	private String groupId;
-	
-	private String sequence;
 	
 	private double score;
 	
@@ -15,20 +13,62 @@ public class MutableSequenceResults implements SequenceResult {
 	
 	private boolean rotation;
 	
+	private Query query;
+	
+	private int loopId;
+	
+	private String sequenceId;
+	
+	private String motifId;
+
 	/**
-	 * @param groupId the groupId to set
+	 * Create a new MutableSequenceResults. This contains the information for
+	 * running a single sequence against a single model.
+	 * 
+	 * @param motifId The ID of the motif used to build the model.
+	 * @param score The score.
+	 * @param percentile Percentile of the sequence.
+	 * @param editDistance The edit distance.
+	 * @param rotation True if the sequence was rotated relative to the model.
 	 */
-	public void setGroupId(String groupId) {
-		this.groupId = groupId;
+	public MutableSequenceResults(String motifId, double score, double percentile,
+			int editDistance, boolean rotation) {
+		
+		this.motifId = motifId;
+		this.score = score;
+		this.percentile = percentile;
+		this.editDistance = editDistance;
+		this.rotation = rotation;
+	}
+	
+	/**
+	 * @param query the query to set
+	 */
+	public void setQuery(Query query) {
+		this.query = query;
 	}
 
 	/**
-	 * @param sequence the sequence to set
+	 * @param loopId the loopId to set
 	 */
-	public void setSequence(String sequence) {
-		this.sequence = sequence;
+	public void setLoopId(int loopId) {
+		this.loopId = loopId;
 	}
 
+	/**
+	 * @param sequenceId the sequenceId to set
+	 */
+	public void setSequenceId(String sequenceId) {
+		this.sequenceId = sequenceId;
+	}
+
+	/**
+	 * @param motifId the motifId to set
+	 */
+	public void setMotifId(String motifId) {
+		this.motifId = motifId;
+	}
+	
 	/**
 	 * @param score the score to set
 	 */
@@ -57,25 +97,6 @@ public class MutableSequenceResults implements SequenceResult {
 		this.rotation = rotation;
 	}
 
-	public MutableSequenceResults(String groupId, String sequence, double score, double percentile,
-			int editDistance, boolean rotation) {
-		
-		this.groupId = groupId;
-		this.sequence = sequence;
-		this.score = score;
-		this.percentile = percentile;
-		this.editDistance = editDistance;
-		this.rotation = rotation;
-	}
-	
-	public String groupId() {
-		return groupId;
-	}
-
-	public String sequence() {
-		return sequence;
-	}
-
 	public double score() {
 		return score;
 	}
@@ -90,5 +111,25 @@ public class MutableSequenceResults implements SequenceResult {
 
 	public boolean isRotated() {
 		return rotation;
+	}
+
+	public Query query() {
+		return query;
+	}
+
+	public int loopId() {
+		return loopId;
+	}
+
+	public String queryId() {
+		return query().getId();
+	}
+
+	public String sequenceId() {
+		return sequenceId;
+	}
+
+	public String motifId() {
+		return motifId;
 	}
 }

@@ -1991,11 +1991,6 @@ public class Alignment {
 		String sqlcmd;
 		
 		Vector rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
-
-		//variables for MySQL DB connection
-	    java.sql.Connection myConnection;
-	    Statement stat;
-	    String dbURL;
 	    
 	    shortModNames = new Vector(modNames);
 //Parse all sequences against all groups	    
@@ -2057,24 +2052,6 @@ public class Alignment {
 		for(int k = 0; k < modNames.size(); k++)
 			indices[k] = k;
 		
-		// the following block of code sorts modelScores in an inefficient way
-//		for(int a = 0; a < modelScores.length; a++){
-//	            int max = a; //array position of largest element
-//	            for(int b = a; b < modelScores.length; b++)
-//	            {
-//	                if(modelScores[b] > modelScores[max])
-//	                	max = b;
-//	            }
-//	            // exchange scores
-//	            double dtemp = modelScores[max];
-//	            modelScores[max] = modelScores[a];
-//	            modelScores[a] = dtemp;
-//	            
-//	            // exchange indices for use with vectors
-//	            int itemp = indices[max];
-//	            indices[max] = indices[a];
-//	            indices[a] = itemp;    
-//		}
 
 //Calculate extra information (quantiles, edit distances) and out put
 		int numInputSeqs = sData.size()-1;
@@ -2116,14 +2093,12 @@ public class Alignment {
 				Vector seqRes = new Vector();
 				for(int m = 1; m < sData.size(); m++)
 				{
-					Sequence current = (Sequence)(sData.elementAt(m));
-					String currentL = current.letters;
-					MutableSequenceResults seqR = new MutableSequenceResults(groupName,currentL,groupScores[m],quants[m],
-							minDist[m],rev);
-					seqRes.add(seqR);
+//					MutableSequenceResults seqR = new MutableSequenceResults(groupName, groupScores[m],quants[m],
+//							minDist[m],rev);
+//					seqRes.add(seqR);
 				}
-				LoopResult loopR = new ImmutableLoopResult(loopID,groupName,rev,sig,seqRes);
-				loopRes.add(loopR);
+//				LoopResult loopR = new ImmutableLoopResult(loopID,groupName,rev,sig,seqRes);
+//				loopRes.add(loopR);
 			}
 		}
 		

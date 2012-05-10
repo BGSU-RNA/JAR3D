@@ -1,7 +1,12 @@
-package edu.bgsu.rna.jar3d.query;
+package edu.bgsu.rna.jar3d;
 
 import java.sql.SQLException;
 
+import edu.bgsu.rna.jar3d.query.DBLoader;
+import edu.bgsu.rna.jar3d.query.Loop;
+import edu.bgsu.rna.jar3d.query.Query;
+import edu.bgsu.rna.jar3d.query.QueryLoader;
+import edu.bgsu.rna.jar3d.query.QueryLoadingFailed;
 import edu.bgsu.rna.jar3d.results.DBResultSaver;
 import edu.bgsu.rna.jar3d.results.LoopResult;
 import edu.bgsu.rna.jar3d.results.ResultsSaver;
@@ -40,19 +45,19 @@ public class WorkerMain {
 			System.exit(-1);
 		}
 		
-		for(Loop loop: query) {
-			LoopResult result;
-			boolean success = true;
-			try {
-				result = Alignment.analyze(loop);
-			} catch(Exception e) {
-				System.out.println(e.getMessage());
-				e.printStackTrace();
-				success = false;
-			}
-			saver.save(result, success);
-
-		}
+//		for(Loop loop: query) {
+//			LoopResult result;
+//			boolean success = true;
+//			try {
+////				result = Alignment.analyze(loop);
+//			} catch(Exception e) {
+//				System.out.println(e.getMessage());
+//				e.printStackTrace();
+//				success = false;
+//			}
+////			saver.save(result, success);
+//
+//		}
 		saver.cleanUp();
 		System.exit(0); // Not needed but hey.
 	}

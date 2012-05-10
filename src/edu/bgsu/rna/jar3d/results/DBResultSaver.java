@@ -6,6 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+import edu.bgsu.rna.jar3d.query.Loop;
+
 public class DBResultSaver implements ResultsSaver {
 
 	private final Connection connection;
@@ -13,65 +15,107 @@ public class DBResultSaver implements ResultsSaver {
     private PreparedStatement insertLoopResult;
     
     private PreparedStatement insertSequenceResult;
+    
+    private PreparedStatement updateSequenceQuery;
+    
+    private PreparedStatement updateLoopQuery;
+    
+    private PreparedStatement markLoopFailure;
 	
 	public DBResultSaver(String username, String password, String db) throws SQLException {
         connection = DriverManager.getConnection(db, username, password);
-        String loopResultSQL = "insert into bygroup (id, meanscore, meanpercentile, meaneditdist, medianscore, medianpercentile, medianeditdist, signature, rotation, groupnum) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-        String sequenceResultSQL = "insert into bysequence (id, seqnum, sequence, score, percentile, editdist, rotation, groupnum) values(?, ?, ?, ?, ?, ?, ?, ?);";
+        String loopResultSQL = "insert into jar3d_results_by_loop (query_id, loop_id, motif_id, meanscore, meanpercentile, meaneditdist, medianscore, medianpercentile, medianeditdist, signature, rotation, correspondences) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (id, seq_id, loop_id, score, percentile, editdist, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?);";
+        String updateLoopSQL = "UPDATE jar3d_query_info SET status=1 WHERE query_id = ?;";
+        String updateSequenceSQL = "UPDATE jar3d_query_sequences SET status=1 WHERE query_id = ? and seq_id = ? and loop_id = ?;";
+        String failureSQL = "UPDATE jar3d_query_sequences SET status=-1 WHERE query_id = ? and loop_id = ?;";
         insertLoopResult = connection.prepareStatement(loopResultSQL);
         insertSequenceResult = connection.prepareStatement(sequenceResultSQL);
+        updateLoopQuery = connection.prepareStatement(updateLoopSQL);
+        updateSequenceQuery = connection.prepareStatement(updateSequenceSQL);
+        markLoopFailure = connection.prepareStatement(failureSQL);
 	}
 	
-	public void save(LoopResult results, boolean status) {
+	/**
+	 * Save the information for a single loop run against a single model. This
+	 * save the aggregate and sequence level information. 
+	 * 
+	 * @param results The loop results.
+	 */
+	public void save(LoopResult results)  throws SaveFailed {
 		// TODO Do all sequences at once for speed up?
 		// TODO When save a sequence update time.
 		for(SequenceResult sequenceResult: results.sequenceResults()) {
-			saveSequenceResult(sequenceResult, status);
+			saveSequenceResult(sequenceResult);
 		}
 
 		try {
-			insertLoopResult.setString(1, results.loopId());
+			insertLoopResult.setString(1, results.queryId());
+			insertLoopResult.setInt(2, results.loopId());
+			insertLoopResult.setString(3, results.modelId());
+			insertLoopResult.setFloat(4, (float)results.meanScore());
+			insertLoopResult.setFloat(5, (float)results.meanPercentile());
+			insertLoopResult.setFloat(6, (float)results.meanEditDistance());
+			insertLoopResult.setFloat(7, (float)results.medianScore());
+			insertLoopResult.setFloat(8, (float)results.medianPercentile());
+			insertLoopResult.setFloat(9, (float)results.meanEditDistance());
+			insertLoopResult.setString(10, results.signature());
+			insertLoopResult.setInt(11, rotationInt(results.isRotated()));
+			insertLoopResult.setString(12, results.correspondencies());
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new SaveFailed("Could not generate loop sql.", e);
 		}
 		
 		try {
 			int count = insertLoopResult.executeUpdate();
 			
 			if (count == 0) {
-				// Throw something - no rows updated.
+				throw new SaveFailed("Update count wrong");
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new SaveFailed("Save failed.", e);
 		}
 	}
-//	"insert into bysequence (id, seqnum, sequence, score, percentile, editdist, rotation, groupnum) values('%s', %d, '%s', %f, %f, %d, %d, %s) ", id,m,currentL,groupScores[m-1],quants[m-1],minDist[m-1],reversed[index],groupName);
 
-	private void saveSequenceResult(SequenceResult result, boolean status) {
+	/**
+	 * Save a the results for a single sequence.
+	 * 
+	 * @param result The results of analyzing a single sequence.
+	 * @throws SaveFailed If any problem occurs. s
+	 */
+	private void saveSequenceResult(SequenceResult result) throws SaveFailed {
 		try {
-			insertSequenceResult.setString(1, result.groupId());
-			insertSequenceResult.setString(3, result.sequence());
-			insertSequenceResult.setInt(6, result.editDistance());
+			int rotated = 0;
+			if (result.isRotated()) {
+				rotated = 1;
+			}
 
+			insertSequenceResult.setString(1, result.queryId());
+			insertSequenceResult.setString(2, result.sequenceId());
+			insertSequenceResult.setInt(3, result.loopId());
+			insertSequenceResult.setFloat(4, (float)result.score());
+			insertSequenceResult.setFloat(5, (float)result.percentile());
+			insertSequenceResult.setInt(6, result.editDistance());
+			insertSequenceResult.setInt(7, rotated);
+			insertSequenceResult.setString(8, result.motifId());
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new SaveFailed("Could not generate save sequence sql.", e);
 		}
 		
 		try {
 			int count = insertSequenceResult.executeUpdate();
 			
 			if (count == 0) {
-				// Throw something
+				throw new SaveFailed("Saving should have updated at least 1 row.");
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new SaveFailed("Could not save sequence.", e);
 		}
 	}
-
+	
+	/**
+	 * Close the database connection.
+	 */
 	public void cleanUp() {
 		try {
 			connection.close();
@@ -79,14 +123,34 @@ public class DBResultSaver implements ResultsSaver {
 			e.printStackTrace();
 		}
 	}
+	
+	private int rotationInt(boolean rotation) {
+		if (rotation) {
+			return 1;
+		}
+		return 0;
+	}
 
-	public void save(List<LoopResult> results) {
+	/**
+	 * Save results for parsing a single model against a several loop. This will
+	 * save the aggregate and and individual information. 
+	 * 
+	 * @param results The results of parsing a whole loop.
+	 * @throws SaveFailed if any problem occurs. 
+	 */
+	public void save(List<LoopResult> results) throws SaveFailed {
 		for(LoopResult result: results) {
 			save(result);
 		}
 	}
 
-	public void save(LoopResult results) {
-		save(results, true);
+	/**
+	 * Mark that we could not process the loop for some reason.
+	 * 
+	 * @param loop The loop to mark.
+	 */
+	public void markFailure(Loop loop) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -4,9 +4,12 @@ package edu.bgsu.rna.jar3d.results;
 import java.util.List;
 
 import edu.bgsu.rna.jar3d.ArrayMath;
+import edu.bgsu.rna.jar3d.query.Query;
 
 public final class ImmutableLoopResult implements LoopResult {
 
+	private Query query;
+	
 	private final int loopId;
 	
 	private final String modelId;
@@ -29,12 +32,17 @@ public final class ImmutableLoopResult implements LoopResult {
 	
 	private final List<SequenceResult> sequenceResults;
 	
-	public ImmutableLoopResult(int loopId, String modelId, boolean rotation, String signature, List<SequenceResult> sequenceResults) {
+	private String correspondices;
+	
+	public ImmutableLoopResult(int loopId, String modelId, boolean rotation, 
+			String signature, List<SequenceResult> sequenceResults, 
+			String correspondecies) {
 		this.sequenceResults = sequenceResults;
 		this.modelId = modelId;
 		this.loopId = loopId;
 		this.rotation = rotation;
 		this.signature = signature;
+		this.correspondices = correspondecies;
 		computeData();
 	}
 	
@@ -99,6 +107,19 @@ public final class ImmutableLoopResult implements LoopResult {
 
 	public List<SequenceResult> sequenceResults() {
 		return sequenceResults;
+	}
+
+	public Query query() {
+		return query;
+	}
+
+	public String queryId() {
+		return query().getId();
+	}
+
+	public String correspondencies() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
