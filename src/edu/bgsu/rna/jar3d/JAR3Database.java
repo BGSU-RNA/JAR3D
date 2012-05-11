@@ -20,7 +20,8 @@ public class JAR3Database {
 		String QueryID = args[1];
 		String usrName = args[2];
 		String pswd = args[3];
-		String dbConnection = "jdbc:mysql://localhost:3306/jar3d";
+		String dbName = args[4];
+		String dbConnection = "jdbc:mysql://localhost:3306/" + dbName;
 		try{
 			DBLoader db = new DBLoader(usrName,pswd,dbConnection);
 			q = db.load(QueryID);
@@ -28,7 +29,7 @@ public class JAR3Database {
 			DBResultSaver rs = new DBResultSaver(usrName,pswd,dbConnection);
 			System.out.println(allResults);
 			for(List<LoopResult> results: allResults){
-				System.out.println("Saving: " + results.get(0).loopId());
+//				System.out.println("Saving: " + results.get(0).loopId());
 				rs.save(results);
 			}
 

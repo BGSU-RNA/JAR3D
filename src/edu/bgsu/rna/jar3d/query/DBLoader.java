@@ -21,8 +21,8 @@ public class DBLoader implements QueryLoader {
 
     public DBLoader(String username, String password, String dbConnection) throws SQLException {
         connection = DriverManager.getConnection(dbConnection, username, password);
-        String querySql = "SELECT group_set, model_type, structured_models_only FROM query_info WHERE query_id = ?;";
-        String loopSql = "SELECT loop_id, loop_sequence, loop_type FROM query_sequences WHERE query_id = ? and loop_id = ?;";
+        String querySql = "SELECT group_set, model_type, structured_models_only FROM `jar3d_query_info` WHERE query_id = ?;";
+        String loopSql = "SELECT loop_id, loop_sequence, loop_type FROM `jar3d_query_sequences` WHERE query_id = ? and loop_id = ?;";
         sqlForQueryInfo = connection.prepareStatement(querySql);
         sqlForLoops = connection.prepareStatement(loopSql);
     }
@@ -47,7 +47,7 @@ public class DBLoader implements QueryLoader {
     }
 
     private List<Loop> loadLoops(String queryId) throws SQLException {
-        String loopCountSql = "SELECT MAX(loop_id) AS max FROM query_sequences where query_id = ?;";
+        String loopCountSql = "SELECT MAX(loop_id) AS max FROM `jar3d_query_sequences` where query_id = ?;";
         PreparedStatement sqlForLoopCount = connection.prepareStatement(loopCountSql);
         sqlForLoopCount.setString(1, queryId);
         
@@ -84,7 +84,7 @@ public class DBLoader implements QueryLoader {
 	        boolean found = result.first();
 	        
 	        if (!found) {
-	        	throw new IndexOutOfBoundsException("Could not find query with id: " + queryId);
+	        	throw new QueryLoadingFailed("Could not find query with id: " + queryId);
 	        }
 	        
 	        modelType = result.getString("model_type");
@@ -103,8 +103,8 @@ public class DBLoader implements QueryLoader {
 	        
 	        loops = loadLoops(queryId);
 		} catch (SQLException e) {
-			System.out.println(e);
-			throw new QueryLoadingFailed("Could not load: " + queryId);
+			System.out.println(sqlForQueryInfo);
+			throw new QueryLoadingFailed("Could not load: " + queryId, e);
 		}
 		
         Query query = new ImmutableQuery(queryId, loops, onlyStructured, ilSet, hlSet, modelType);
