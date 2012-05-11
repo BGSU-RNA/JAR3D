@@ -27,9 +27,7 @@ public class JAR3Database {
 			q = db.load(QueryID);
 			List<List<LoopResult>> allResults = JAR3Database.MotifParse(base, q);
 			DBResultSaver rs = new DBResultSaver(usrName,pswd,dbConnection);
-			System.out.println(allResults);
 			for(List<LoopResult> results: allResults){
-//				System.out.println("Saving: " + results.get(0).loopId());
 				rs.save(results);
 			}
 
@@ -51,10 +49,8 @@ public class JAR3Database {
 				fasta.append("\n");
 			}
 			String fastaString = fasta.toString();
-			System.out.println("Running: " + query.getId() + " " + loop.getId());
 			List<LoopResult> results = MotifParse(loop.getId(), query, fastaString, folder, 
 					loop.getType(), "bp", query.onlyStructured());
-			System.out.println(" " + results);
 			allResults.add(results);
 		}
 		return allResults;
@@ -80,12 +76,9 @@ public class JAR3Database {
 	        
 	        HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, modelType);
 	        if (loopType.equalsIgnoreCase("IL")) {
-	        	System.out.println("This is sane");
 	            results = Alignment.doILdbQuery((int)loopID, query, sData, modelNames, groupData, numSequences, 20);
 	           	
 	        } else {
-	        	System.out.println("Why am I seeing this");
-	        	System.out.println(loopType);
 	        	results = new ArrayList<LoopResult>();
 	        }
 		    return results;
