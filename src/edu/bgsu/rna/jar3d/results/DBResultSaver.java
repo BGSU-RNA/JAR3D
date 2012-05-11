@@ -63,12 +63,14 @@ public class DBResultSaver implements ResultsSaver {
 			insertLoopResult.setString(10, results.signature());
 			insertLoopResult.setInt(11, rotationInt(results.isRotated()));
 			insertLoopResult.setString(12, results.correspondencies());
+			updateLoopQuery.setString(1, results.queryId());
 		} catch (SQLException e) {
 			throw new SaveFailed("Could not generate loop sql.", e);
 		}
 		
 		try {
 			int count = insertLoopResult.executeUpdate();
+			updateLoopQuery.executeUpdate();
 			
 			if (count == 0) {
 				throw new SaveFailed("Update count wrong");
@@ -99,6 +101,9 @@ public class DBResultSaver implements ResultsSaver {
 			insertSequenceResult.setInt(6, result.editDistance());
 			insertSequenceResult.setInt(7, rotated);
 			insertSequenceResult.setString(8, result.motifId());
+			updateSequenceQuery.setString(1, result.queryId());
+			updateSequenceQuery.setString(2, result.sequenceId());
+			updateSequenceQuery.setInt(3, result.loopId());
 		} catch (SQLException e) {
 			throw new SaveFailed("Could not generate save sequence sql.", e);
 		}
@@ -106,6 +111,7 @@ public class DBResultSaver implements ResultsSaver {
 		try {
 			System.out.println(insertSequenceResult);
 			int count = insertSequenceResult.executeUpdate();
+			updateSequenceQuery.executeUpdate();
 			
 			if (count == 0) {
 				throw new SaveFailed("Saving should have updated at least 1 row.");
