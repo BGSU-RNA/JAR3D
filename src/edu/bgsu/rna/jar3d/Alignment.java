@@ -2086,7 +2086,7 @@ public class Alignment {
 					seqR.setSequenceId(String.valueOf(m));
 					seqRes.add(seqR);
 				}
-				ImmutableLoopResult loopR = new ImmutableLoopResult(loopID,groupName,rev,sig,seqRes, " ");
+				ImmutableLoopResult loopR = new ImmutableLoopResult(loopID,groupName,rev,sig,seqRes, "NA");
 				loopR.setQuery(query);
 				loopRes.add(loopR);
 			}
