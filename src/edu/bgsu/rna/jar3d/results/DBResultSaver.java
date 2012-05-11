@@ -159,6 +159,5 @@ public class DBResultSaver implements ResultsSaver {
 	 */
 	public void markFailure(Loop loop) {
 		// TODO Auto-generated method stub
-		
 	}
 }
