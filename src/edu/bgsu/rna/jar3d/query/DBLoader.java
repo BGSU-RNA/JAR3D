@@ -46,7 +46,7 @@ public class DBLoader implements QueryLoader {
     	return new BasicLoop(id, sequences, type);
     }
 
-    private List<Loop> loadLoops(String queryId) throws SQLException {
+    private List<Loop> loadLoops(String queryId) throws SQLException, QueryLoadingFailed {
         String loopCountSql = "SELECT MAX(loop_id) AS max FROM `jar3d_query_sequences` where query_id = ?;";
         PreparedStatement sqlForLoopCount = connection.prepareStatement(loopCountSql);
         sqlForLoopCount.setString(1, queryId);
@@ -55,7 +55,7 @@ public class DBLoader implements QueryLoader {
         ResultSet result = sqlForLoopCount.executeQuery();
         boolean found = result.first();
         if (!found) {
-        	throw new IndexOutOfBoundsException("Could not find any loops for query: " + queryId);
+        	throw new QueryLoadingFailed("Could not find any loops for query: " + queryId);
         }
         
         int loopCount = result.getInt("max") + 1;
