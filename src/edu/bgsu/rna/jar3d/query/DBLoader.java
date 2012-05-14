@@ -51,7 +51,7 @@ public class DBLoader implements QueryLoader {
     }
 
     private List<Loop> loadLoops(String queryId) throws SQLException, QueryLoadingFailed {
-        String loopCountSql = "SELECT MAX(loop_id) AS max FROM `jar3d_query_sequences` where query_id = ?;";
+        String loopCountSql = "SELECT MAX(loop_id) AS max FROM `jar3d_query_sequences` where query_id = ? and status = 0;";
         PreparedStatement sqlForLoopCount = connection.prepareStatement(loopCountSql);
         sqlForLoopCount.setString(1, queryId);
         
