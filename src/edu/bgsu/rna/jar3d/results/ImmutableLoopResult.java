@@ -108,6 +108,10 @@ public final class ImmutableLoopResult implements LoopResult {
 	public List<SequenceResult> sequenceResults() {
 		return sequenceResults;
 	}
+	
+	public void setQuery(Query query) {
+		this.query = query;
+	}
 
 	public Query query() {
 		return query;

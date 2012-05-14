@@ -5,6 +5,7 @@ import java.util.*;
 
 import com.almworks.sqlite4java.*;
 
+import edu.bgsu.rna.jar3d.query.Query;
 import edu.bgsu.rna.jar3d.results.ImmutableLoopResult;
 import edu.bgsu.rna.jar3d.results.LoopResult;
 import edu.bgsu.rna.jar3d.results.MutableSequenceResults;
@@ -391,29 +392,15 @@ public class Alignment {
 			
 			((Sequence)sData.elementAt(i)).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 			
-			String correspondences = ((InitialNode)S.first).showCorrespondences(S.letters);
+			String correspondences = ((InitialNode)S.first).showCorrespondences(S.nucleotides);
 
 			correspondences = correspondences.replace("JAR3D_aligns_to", "aligns_to_JAR3D");
 			
-			String SF = ((Sequence)sData.elementAt(0)).organism;    // where the file name got put
-			SF = SF.replace(".fasta","");
-			int a = SF.lastIndexOf("\\");
-			if (a >= 0)
-				SF = SF.substring(a+1);
-			a = SF.lastIndexOf("/");
-			if (a >= 0)
-				SF = SF.substring(a+1);
-			SF = SF.substring(0,6);                  // temporary way to fix file names
-			correspondences = correspondences.replace("SSS",SF+"_Sequence_"+i);
+			String SF = "Sequence_"+i+"_"+S.organism;
+			SF = SF.replace(" ","_");
+			correspondences = correspondences.replace("SSS",SF);
 			
-			String NF = nodeFileName.replace(".txt","");
-			a = NF.lastIndexOf("\\");
-			if (a >= 0)
-				NF = NF.substring(a+1);
-			a = NF.lastIndexOf("/");
-			if (a >= 0)
-				NF = NF.substring(a+1);
-			NF = NF.substring(0,6);                  // temporary way to fix file names
+			String NF = "MMM";                           // model name goes here
 			correspondences = correspondences.replace("MMM", NF);
 			((Sequence)sData.elementAt(i)).correspondences = correspondences;
 		}
@@ -1975,7 +1962,7 @@ public class Alignment {
 	}
 	
 	//Takes a JAR3D query and submits results to MySQL database
-	public static List doILdbQuery(int loopID, Vector sData, Vector modNames, HashMap groupData, int numSequences, int range)
+	public static List doILdbQuery(int loopID, Query query, Vector sData, Vector modNames, HashMap groupData, int numSequences, int range)
 	{
 		Vector alignmentVect = new Vector();                   // alignment lines to output
 		Vector pData = new Vector();                           // parse data
@@ -2091,14 +2078,17 @@ public class Alignment {
 			}
 			if(Boolean.TRUE){   //put goodness of fit checks here later?
 				Vector seqRes = new Vector();
-				for(int m = 1; m < sData.size(); m++)
+				for(int m = 0; m < sData.size() - 1; m++)
 				{
-//					MutableSequenceResults seqR = new MutableSequenceResults(groupName, groupScores[m],quants[m],
-//							minDist[m],rev);
-//					seqRes.add(seqR);
+					MutableSequenceResults seqR = new MutableSequenceResults(groupName, groupScores[m],quants[m],
+							minDist[m],rev);
+					seqR.setQuery(query);
+					seqR.setSequenceId(String.valueOf(m));
+					seqRes.add(seqR);
 				}
-//				LoopResult loopR = new ImmutableLoopResult(loopID,groupName,rev,sig,seqRes);
-//				loopRes.add(loopR);
+				ImmutableLoopResult loopR = new ImmutableLoopResult(loopID,groupName,rev,sig,seqRes, "NA");
+				loopR.setQuery(query);
+				loopRes.add(loopR);
 			}
 		}
 		return loopRes;
@@ -2179,31 +2169,17 @@ public class Alignment {
 			
 			((Sequence)sData.elementAt(i)).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 			
-//			String correspondences = ((InitialNode)S.first).showCorrespondences(S.letters);
-//
-//			correspondences = correspondences.replace("JAR3D_aligns_to", "aligns_to_JAR3D");
-//			
-//			String SF = ((Sequence)sData.elementAt(0)).organism;    // where the file name got put
-//			SF = SF.replace(".fasta","");
-//			int a = SF.lastIndexOf("\\");
-//			if (a >= 0)
-//				SF = SF.substring(a+1);
-//			a = SF.lastIndexOf("/");
-//			if (a >= 0)
-//				SF = SF.substring(a+1);
-//			SF = SF.substring(0,6);                  // temporary way to fix file names
-//			correspondences = correspondences.replace("SSS",SF+"_Sequence_"+i);
-//			
-//			String NF = nodeFileName.replace(".txt","");
-//			a = NF.lastIndexOf("\\");
-//			if (a >= 0)
-//				NF = NF.substring(a+1);
-//			a = NF.lastIndexOf("/");
-//			if (a >= 0)
-//				NF = NF.substring(a+1);
-//			NF = NF.substring(0,6);                  // temporary way to fix file names
-//			correspondences = correspondences.replace("MMM", NF);
-//			((Sequence)sData.elementAt(i)).correspondences = correspondences;
+			String correspondences = ((InitialNode)S.first).showCorrespondences(S.nucleotides);
+
+			correspondences = correspondences.replace("JAR3D_aligns_to", "aligns_to_JAR3D");
+			
+			String SF = "Sequence_"+i+"_"+S.organism;
+			SF = SF.replace(" ","_");
+			correspondences = correspondences.replace("SSS",SF);
+			
+			String NF = "MMM";                           // model name goes here
+			correspondences = correspondences.replace("MMM", NF);
+			((Sequence)sData.elementAt(i)).correspondences = correspondences;
 		}
 		return sData;
 	}

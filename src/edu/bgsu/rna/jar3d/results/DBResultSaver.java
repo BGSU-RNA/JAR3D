@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 import edu.bgsu.rna.jar3d.query.Loop;
@@ -21,19 +24,23 @@ public class DBResultSaver implements ResultsSaver {
     private PreparedStatement updateLoopQuery;
     
     private PreparedStatement markLoopFailure;
+    
+    private Timestamp now;
 	
 	public DBResultSaver(String username, String password, String db) throws SQLException {
         connection = DriverManager.getConnection(db, username, password);
-        String loopResultSQL = "insert into jar3d_results_by_loop (query_id, loop_id, motif_id, meanscore, meanpercentile, meaneditdist, medianscore, medianpercentile, medianeditdist, signature, rotation, correspondences) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-        String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (id, seq_id, loop_id, score, percentile, editdist, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?);";
-        String updateLoopSQL = "UPDATE jar3d_query_info SET status=1 WHERE query_id = ?;";
-        String updateSequenceSQL = "UPDATE jar3d_query_sequences SET status=1 WHERE query_id = ? and seq_id = ? and loop_id = ?;";
-        String failureSQL = "UPDATE jar3d_query_sequences SET status=-1 WHERE query_id = ? and loop_id = ?;";
+        String loopResultSQL = "insert into jar3d_results_by_loop (query_id, loop_id, motif_id, meanscore, meanpercentile, meaneditdist, medianscore, medianpercentile, medianeditdist, signature, rotation, correspondences) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (query_id, seq_id, loop_id, score, percentile, editdist, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?);";
+        String updateLoopSQL = "UPDATE jar3d_query_info SET status=1, time_completed=? WHERE query_id = ?;";
+        String updateSequenceSQL = "UPDATE jar3d_query_sequences SET status=1, time_completed=? WHERE query_id = ? and seq_id = ? and loop_id = ?;";
+        String failureSQL = "UPDATE jar3d_query_sequences SET status=-1, time_completed = ? WHERE query_id = ? and loop_id = ?;";
         insertLoopResult = connection.prepareStatement(loopResultSQL);
         insertSequenceResult = connection.prepareStatement(sequenceResultSQL);
         updateLoopQuery = connection.prepareStatement(updateLoopSQL);
         updateSequenceQuery = connection.prepareStatement(updateSequenceSQL);
         markLoopFailure = connection.prepareStatement(failureSQL);
+//        now = new Time(new Date().getTime());
+      now = new Timestamp(System.currentTimeMillis());
 	}
 	
 	/**
@@ -50,6 +57,7 @@ public class DBResultSaver implements ResultsSaver {
 		}
 
 		try {
+
 			insertLoopResult.setString(1, results.queryId());
 			insertLoopResult.setInt(2, results.loopId());
 			insertLoopResult.setString(3, results.modelId());
@@ -61,13 +69,16 @@ public class DBResultSaver implements ResultsSaver {
 			insertLoopResult.setFloat(9, (float)results.meanEditDistance());
 			insertLoopResult.setString(10, results.signature());
 			insertLoopResult.setInt(11, rotationInt(results.isRotated()));
-			insertLoopResult.setString(12, results.correspondencies());
+			insertLoopResult.setString(12, "Intentially left empty.");
+			updateLoopQuery.setTimestamp(1, now);
+			updateLoopQuery.setString(2, results.queryId());
 		} catch (SQLException e) {
 			throw new SaveFailed("Could not generate loop sql.", e);
 		}
 		
 		try {
 			int count = insertLoopResult.executeUpdate();
+			updateLoopQuery.executeUpdate();
 			
 			if (count == 0) {
 				throw new SaveFailed("Update count wrong");
@@ -98,12 +109,17 @@ public class DBResultSaver implements ResultsSaver {
 			insertSequenceResult.setInt(6, result.editDistance());
 			insertSequenceResult.setInt(7, rotated);
 			insertSequenceResult.setString(8, result.motifId());
+			updateSequenceQuery.setTimestamp(1, now);
+			updateSequenceQuery.setString(2, result.queryId());
+			updateSequenceQuery.setString(3, result.sequenceId());
+			updateSequenceQuery.setInt(4, result.loopId());
 		} catch (SQLException e) {
 			throw new SaveFailed("Could not generate save sequence sql.", e);
 		}
 		
 		try {
 			int count = insertSequenceResult.executeUpdate();
+			updateSequenceQuery.executeUpdate();
 			
 			if (count == 0) {
 				throw new SaveFailed("Saving should have updated at least 1 row.");
@@ -151,6 +167,5 @@ public class DBResultSaver implements ResultsSaver {
 	 */
 	public void markFailure(Loop loop) {
 		// TODO Auto-generated method stub
-		
 	}
 }

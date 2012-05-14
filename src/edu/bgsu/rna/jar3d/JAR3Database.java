@@ -20,7 +20,8 @@ public class JAR3Database {
 		String QueryID = args[1];
 		String usrName = args[2];
 		String pswd = args[3];
-		String dbConnection = "jdbc:mysql://localhost:3306/jar3d";
+		String dbName = args[4];
+		String dbConnection = "jdbc:mysql://localhost:3306/" + dbName;
 		try{
 			DBLoader db = new DBLoader(usrName,pswd,dbConnection);
 			q = db.load(QueryID);
@@ -48,7 +49,7 @@ public class JAR3Database {
 				fasta.append("\n");
 			}
 			String fastaString = fasta.toString();
-			List<LoopResult> results = MotifParse(loop.getId(), fastaString, folder, 
+			List<LoopResult> results = MotifParse(loop.getId(), query, fastaString, folder, 
 					loop.getType(), "bp", query.onlyStructured());
 			allResults.add(results);
 		}
@@ -60,7 +61,7 @@ public class JAR3Database {
 		//folder should be the folder with the data for the models, including loopType and version
 		//modelType indicates which models to use, for example "bp".  Should be the prefix before the first "_" in model folder
 		//structured is a boolean which indicates whether to use only structured models or all models
-		public static List<LoopResult> MotifParse(long loopID, String QueryTxt, 
+		public static List<LoopResult> MotifParse(long loopID, Query query, String QueryTxt, 
 				String folder, String loopType, String modelType, 
 				boolean structured) {
 			int numSequences = 10000; // make sure this is larger than needed	
@@ -75,7 +76,7 @@ public class JAR3Database {
 	        
 	        HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, modelType);
 	        if (loopType.equalsIgnoreCase("IL")) {
-	            results = Alignment.doILdbQuery((int)loopID, sData, modelNames, groupData, numSequences, 20);
+	            results = Alignment.doILdbQuery((int)loopID, query, sData, modelNames, groupData, numSequences, 20);
 	           	
 	        } else {
 	        	results = new ArrayList<LoopResult>();

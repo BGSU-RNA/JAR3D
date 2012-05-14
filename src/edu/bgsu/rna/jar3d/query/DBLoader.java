@@ -18,13 +18,17 @@ public class DBLoader implements QueryLoader {
     private PreparedStatement sqlForQueryInfo;
 
     private PreparedStatement sqlForLoops;
-        
+    
+    private PreparedStatement updateQueryInfo;
+
     public DBLoader(String username, String password, String dbConnection) throws SQLException {
         connection = DriverManager.getConnection(dbConnection, username, password);
-        String querySql = "SELECT group_set, model_type, structured_models_only FROM query_info WHERE query_id = ?;";
-        String loopSql = "SELECT id, loop_sequence, loop_type FROM query_sequences WHERE query_id = ? and loop_id = ?;";
+        String querySql = "SELECT group_set, model_type, structured_models_only FROM `jar3d_query_info` WHERE query_id = ?;";
+        String loopSql = "SELECT loop_id, loop_sequence, loop_type FROM `jar3d_query_sequences` WHERE query_id = ? and loop_id = ?;";
+        String updateInfo = "UPDATE jar3d_query_info SET status=2 WHERE query_id = ?;";
         sqlForQueryInfo = connection.prepareStatement(querySql);
         sqlForLoops = connection.prepareStatement(loopSql);
+        updateQueryInfo = connection.prepareStatement(updateInfo);
     }
 
     private Loop loadLoop(String queryId, int index) throws SQLException {
@@ -38,7 +42,7 @@ public class DBLoader implements QueryLoader {
     	while (results.next()) {
     		String sequence = results.getString("loop_sequence");
     		type = results.getString("loop_type");
-    		id = results.getLong("id");
+    		id = results.getLong("loop_id");
     		sequences.add(sequence);
     	}
     	results.close();
@@ -46,8 +50,8 @@ public class DBLoader implements QueryLoader {
     	return new BasicLoop(id, sequences, type);
     }
 
-    private List<Loop> loadLoops(String queryId) throws SQLException {
-        String loopCountSql = "SELECT MAX(loop_id) AS max FROM query_sequences where query_id = ?;";
+    private List<Loop> loadLoops(String queryId) throws SQLException, QueryLoadingFailed {
+        String loopCountSql = "SELECT MAX(loop_id) AS max FROM `jar3d_query_sequences` where query_id = ?;";
         PreparedStatement sqlForLoopCount = connection.prepareStatement(loopCountSql);
         sqlForLoopCount.setString(1, queryId);
         
@@ -55,7 +59,7 @@ public class DBLoader implements QueryLoader {
         ResultSet result = sqlForLoopCount.executeQuery();
         boolean found = result.first();
         if (!found) {
-        	throw new IndexOutOfBoundsException("Could not find any loops for query: " + queryId);
+        	throw new QueryLoadingFailed("Could not find any loops for query: " + queryId);
         }
         
         int loopCount = result.getInt("max") + 1;
@@ -79,12 +83,14 @@ public class DBLoader implements QueryLoader {
         
 		try {
 	        sqlForQueryInfo.setString(1, queryId);
+	        updateQueryInfo.setString(1, queryId);
 	        
+	        updateQueryInfo.executeUpdate();
 	        ResultSet result = sqlForQueryInfo.executeQuery();
 	        boolean found = result.first();
 	        
 	        if (!found) {
-	        	throw new IndexOutOfBoundsException("Could not find query with id: " + queryId);
+	        	throw new QueryLoadingFailed("Could not find query with id: " + queryId);
 	        }
 	        
 	        modelType = result.getString("model_type");
@@ -103,8 +109,8 @@ public class DBLoader implements QueryLoader {
 	        
 	        loops = loadLoops(queryId);
 		} catch (SQLException e) {
-			System.out.println(e);
-			throw new QueryLoadingFailed("Could not load: " + queryId);
+			System.out.println(sqlForQueryInfo);
+			throw new QueryLoadingFailed("Could not load: " + queryId, e);
 		}
 		
         Query query = new ImmutableQuery(queryId, loops, onlyStructured, ilSet, hlSet, modelType);

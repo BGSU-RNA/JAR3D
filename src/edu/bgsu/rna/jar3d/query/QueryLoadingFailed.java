@@ -7,7 +7,17 @@ public class QueryLoadingFailed extends Exception {
 	 */
 	private static final long serialVersionUID = -4978273342511085294L;
 
+	
+	
 	public QueryLoadingFailed(String err) {
 		super(err);
+	}
+	
+	public QueryLoadingFailed(String err, Throwable t) {
+		super(err, t);
+	}
+	
+	public QueryLoadingFailed(Throwable t) {
+		super(t);
 	}
 }
