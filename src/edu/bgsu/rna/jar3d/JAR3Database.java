@@ -15,7 +15,6 @@ import edu.bgsu.rna.jar3d.results.LoopResult;
 public class JAR3Database {
 	
 	public static void main(String[] args) {
-		Query q;
 		String base = args[0];
 		String QueryID = args[1];
 		String usrName = args[2];
@@ -23,26 +22,64 @@ public class JAR3Database {
 		String dbName = args[4];
 		String dbConnection = "jdbc:mysql://localhost:3306/" + dbName;
 		DBResultSaver rs = null;
+		DBLoader db = null;
+		List<List<LoopResult>> allResults = new ArrayList<List<LoopResult>>();
 		
-		try{
-			DBLoader db = new DBLoader(usrName,pswd,dbConnection);
-			q = db.load(QueryID);
-			List<List<LoopResult>> allResults = JAR3Database.MotifParse(base, q);
+		try {
+			db = new DBLoader(usrName,pswd,dbConnection);
+		} catch(Exception e) {
+			e.printStackTrace();
+			System.err.println("Could not connect db for loading.");
+			markFailure(usrName, pswd, dbConnection, QueryID);
+		}
+		
+		Query query = null;
+		
+		try {
+			query = db.load(QueryID);
+		} catch(Exception e) {
+			e.printStackTrace();
+			System.err.println("Could not load query " + QueryID);
+			markFailure(usrName, pswd, dbConnection, QueryID);
+		} finally {
+			db.cleanUp();
+		}
+		
+		try {
+			allResults = JAR3Database.MotifParse(base, query);
+		} catch(Exception e){
+			e.printStackTrace();
+			System.err.println("Could not score query: " + QueryID);
+			markFailure(usrName, pswd, dbConnection, QueryID);
+		}
+		
+		try {
 			rs = new DBResultSaver(usrName,pswd,dbConnection);
-			for(List<LoopResult> results: allResults){
+			for(List<LoopResult> results: allResults) {
 				rs.save(results);
 			}
-
-		} catch(Exception e){
-			try {
-				rs.markFailure(QueryID);
-			} catch(Exception e1) {
-				e1.printStackTrace();
-				System.out.println("Marking failed");
-			}
+		} catch(Exception e) {
 			e.printStackTrace();
-			System.out.println("Failed to load query");
-		}		
+			System.err.println("Could not save: " + QueryID);
+			markFailure(usrName, pswd, dbConnection, QueryID);
+		} finally {
+			rs.cleanUp();
+		}
+		
+		System.exit(0);
+	}
+	
+	private static void markFailure(String user, String password, String db, String queryId) {
+		try {
+			DBResultSaver rs = new DBResultSaver(user, password, db);
+			rs.markFailure(queryId);
+			rs.cleanUp();
+		} catch(Exception e) {
+			e.printStackTrace();
+			System.err.println("Failed marking failure.");
+		} finally {
+			System.exit(-1);
+		}
 	}
 	
 	public static List<List<LoopResult>> MotifParse(String base, Query query) {
