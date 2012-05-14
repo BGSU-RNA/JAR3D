@@ -10,7 +10,7 @@ public interface ResultsSaver {
 
 	public void save(LoopResult results) throws SaveFailed;
 	
-	public void markFailure(Loop loop);
+	public void markFailure(String queryId) throws SaveFailed;
 
 	public void cleanUp();
 }

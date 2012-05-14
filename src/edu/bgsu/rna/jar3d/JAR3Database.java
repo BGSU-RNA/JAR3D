@@ -22,16 +22,24 @@ public class JAR3Database {
 		String pswd = args[3];
 		String dbName = args[4];
 		String dbConnection = "jdbc:mysql://localhost:3306/" + dbName;
+		DBResultSaver rs = null;
+		
 		try{
 			DBLoader db = new DBLoader(usrName,pswd,dbConnection);
 			q = db.load(QueryID);
 			List<List<LoopResult>> allResults = JAR3Database.MotifParse(base, q);
-			DBResultSaver rs = new DBResultSaver(usrName,pswd,dbConnection);
+			rs = new DBResultSaver(usrName,pswd,dbConnection);
 			for(List<LoopResult> results: allResults){
 				rs.save(results);
 			}
 
-		}catch(Exception e){
+		} catch(Exception e){
+			try {
+				rs.markFailure(QueryID);
+			} catch(Exception e1) {
+				e1.printStackTrace();
+				System.out.println("Marking failed");
+			}
 			e.printStackTrace();
 			System.out.println("Failed to load query");
 		}		

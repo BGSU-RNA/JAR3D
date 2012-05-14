@@ -33,7 +33,7 @@ public class DBResultSaver implements ResultsSaver {
         String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (query_id, seq_id, loop_id, score, percentile, editdist, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?);";
         String updateLoopSQL = "UPDATE jar3d_query_info SET status=1, time_completed=? WHERE query_id = ?;";
         String updateSequenceSQL = "UPDATE jar3d_query_sequences SET status=1, time_completed=? WHERE query_id = ? and seq_id = ? and loop_id = ?;";
-        String failureSQL = "UPDATE jar3d_query_sequences SET status=-1, time_completed = ? WHERE query_id = ? and loop_id = ?;";
+        String failureSQL = "UPDATE jar3d_query_info SET status=-1, time_completed = ? WHERE query_id = ?;";
         insertLoopResult = connection.prepareStatement(loopResultSQL);
         insertSequenceResult = connection.prepareStatement(sequenceResultSQL);
         updateLoopQuery = connection.prepareStatement(updateLoopSQL);
@@ -165,7 +165,13 @@ public class DBResultSaver implements ResultsSaver {
 	 * 
 	 * @param loop The loop to mark.
 	 */
-	public void markFailure(Loop loop) {
-		// TODO Auto-generated method stub
+	public void markFailure(String queryId) throws SaveFailed {
+		try {
+			markLoopFailure.setTimestamp(1, now);
+			markLoopFailure.setString(2, queryId);
+			markLoopFailure.executeUpdate();
+		} catch(Exception e) {
+			throw new SaveFailed("Could not mark failure of: " + queryId, e);
+		}
 	}
 }
