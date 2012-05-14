@@ -18,13 +18,17 @@ public class DBLoader implements QueryLoader {
     private PreparedStatement sqlForQueryInfo;
 
     private PreparedStatement sqlForLoops;
+    
+    private PreparedStatement updateQueryInfo;
 
     public DBLoader(String username, String password, String dbConnection) throws SQLException {
         connection = DriverManager.getConnection(dbConnection, username, password);
         String querySql = "SELECT group_set, model_type, structured_models_only FROM `jar3d_query_info` WHERE query_id = ?;";
         String loopSql = "SELECT loop_id, loop_sequence, loop_type FROM `jar3d_query_sequences` WHERE query_id = ? and loop_id = ?;";
+        String updateInfo = "UPDATE jar3d_query_info SET status=2 WHERE query_id = ?;";
         sqlForQueryInfo = connection.prepareStatement(querySql);
         sqlForLoops = connection.prepareStatement(loopSql);
+        updateQueryInfo = connection.prepareStatement(updateInfo);
     }
 
     private Loop loadLoop(String queryId, int index) throws SQLException {
@@ -79,7 +83,9 @@ public class DBLoader implements QueryLoader {
         
 		try {
 	        sqlForQueryInfo.setString(1, queryId);
+	        updateQueryInfo.setString(1, queryId);
 	        
+	        updateQueryInfo.executeUpdate();
 	        ResultSet result = sqlForQueryInfo.executeQuery();
 	        boolean found = result.first();
 	        
