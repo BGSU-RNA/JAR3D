@@ -79,16 +79,16 @@ public class SimpleAlign {
 	public static int editDist(String seq1, String seq2){
 		//calculates the Levenshtein distance between seq1 and seq2
 		
-		if(seq1.length()==0&seq2.length()==0) return 0;
-		else if(seq1.length()==0) return seq2.length();
-		else if(seq2.length()==0) return seq1.length();
-		
-		int n1 = seq1.length();
-		int n2 = seq2.length();
 		
 		seq1 = seq1.toUpperCase().replaceAll("-", "");
 		seq2 = seq2.toUpperCase().replaceAll("-", "");
 		
+		if(seq1.length()==0&seq2.length()==0) return 0;
+		if(seq1.length()==0) 				  return seq2.length();
+		if(seq2.length()==0) 				  return seq1.length();
+		
+		int n1 = seq1.length();
+		int n2 = seq2.length();
 		
 		int[][] Scores = new int[n1+1][n2+1];
 		for(int i = 0; i <= n1; i ++){
