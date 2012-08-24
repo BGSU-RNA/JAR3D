@@ -12,5 +12,5 @@ public interface ResultsSaver {
 	
 	public void markFailure(String queryId) throws SaveFailed;
 
-	public void cleanUp();
+	public void cleanUp() throws SaveFailed;
 }

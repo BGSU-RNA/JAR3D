@@ -13,5 +13,5 @@ public interface QueryLoader {
 	/**
 	 * Perform any clean up needed, such as closing connections etc.
 	 */
-	public void cleanUp();
+	public void cleanUp() throws QueryLoadingFailed;
 }
