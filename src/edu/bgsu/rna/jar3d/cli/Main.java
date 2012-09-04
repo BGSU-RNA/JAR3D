@@ -35,8 +35,6 @@ public class Main {
 		String input = args[0];
 		String models = args[1];
 		String output = args[2];
-		
-		System.out.println(input + " " + models + " " + output);
 
 		QueryLoader loader = null;
 		try {
