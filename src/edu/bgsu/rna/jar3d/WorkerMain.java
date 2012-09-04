@@ -10,6 +10,7 @@ import edu.bgsu.rna.jar3d.query.QueryLoadingFailed;
 import edu.bgsu.rna.jar3d.results.DBResultSaver;
 import edu.bgsu.rna.jar3d.results.LoopResult;
 import edu.bgsu.rna.jar3d.results.ResultsSaver;
+import edu.bgsu.rna.jar3d.results.SaveFailed;
 
 public class WorkerMain {
 
@@ -58,7 +59,14 @@ public class WorkerMain {
 ////			saver.save(result, success);
 //
 //		}
-		saver.cleanUp();
+		
+		try {
+			saver.cleanUp();
+		} catch (SaveFailed e) {
+			System.out.println("Could not clean up saving " + queryId);
+			e.printStackTrace();
+			System.exit(1);
+		}
 		System.exit(0); // Not needed but hey.
 	}
 }

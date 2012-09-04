@@ -1,81 +1,29 @@
-package edu.bgsu.rna.jar3d.cli;
+package edu.bgsu.rna.jar3d;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
-import edu.bgsu.rna.jar3d.Alignment;
-import edu.bgsu.rna.jar3d.MotifGroup;
-import edu.bgsu.rna.jar3d.Sequence;
-import edu.bgsu.rna.jar3d.webJAR3D;
-import edu.bgsu.rna.jar3d.query.FastaLoader;
 import edu.bgsu.rna.jar3d.query.Loop;
 import edu.bgsu.rna.jar3d.query.Query;
 import edu.bgsu.rna.jar3d.query.QueryLoader;
-import edu.bgsu.rna.jar3d.query.QueryLoadingFailed;
-import edu.bgsu.rna.jar3d.results.FastaSaver;
 import edu.bgsu.rna.jar3d.results.LoopResult;
 import edu.bgsu.rna.jar3d.results.ResultsSaver;
-import edu.bgsu.rna.jar3d.results.SaveFailed;
 
-public class Main {
+public class Application {
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-//		if (args.length != 2) {
-//			System.err.println("Must give 3 arguments: input.fasta models output.fasta");
-//			System.exit(1);
-//		}
-		
-		String input = args[0];
-		String models = args[1];
-		String output = args[2];
-		
-		System.out.println(input + " " + models + " " + output);
-
-		QueryLoader loader = null;
-		try {
-			loader = new FastaLoader(input);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.exit(1);
-		}
-		
-		Query query = null;
-		try {
-			query = loader.load("");
-			loader.cleanUp();
-		} catch (QueryLoadingFailed e1) {
-			e1.printStackTrace();
-			System.exit(1);
-		}
-		
-		List<LoopResult> results = runQuery(query, models);
-		ResultsSaver saver = null;
-		try {
-			saver = new FastaSaver(output);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		
-		try {
-			saver.save(results);
-			saver.cleanUp();
-		} catch (SaveFailed e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+	private QueryLoader loader;
+	private ResultsSaver saver;
+	
+	public Application(QueryLoader loader, ResultsSaver saver) {
+		this.loader = loader;
+		this.saver = saver;
 	}
 	
-	public static List<LoopResult> runQuery(Query query, String models) {
-		return MotifParse(models, query).get(0);
+	public List<List<LoopResult>> runQuery(String queryId, String base) {
+		return null;
 	}
 	
 	public static List<List<LoopResult>> MotifParse(String base, Query query) {
@@ -124,5 +72,19 @@ public class Main {
         }
 	    return results;
 	}
-
+	
+	public void saveResult(LoopResult result) {
+		
+	}
+	
+	public void saveResults(List<LoopResult> results) {
+		for(LoopResult result: results) {
+			this.saveResult(result);
+		}
+	}
+	
+	public void runAndSave(String queryId) {
+//		List<LoopResult> results = this.runQuery(queryId);
+//		this.saveResults(results);
+	}
 }
