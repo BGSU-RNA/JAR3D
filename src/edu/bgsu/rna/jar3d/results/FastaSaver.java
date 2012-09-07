@@ -36,6 +36,9 @@ public class FastaSaver extends AbstractResultsSaver {
 	private String join(String ... data) {
 		StringBuilder builder = new StringBuilder();
 		for(int i = 0; i < data.length; i++) {
+			if (data[i].equals("")) {
+				data[i] = "NA";
+			}
 			builder.append(data[i]);
 			if (i + 1 != data.length) {
 				builder.append(",");

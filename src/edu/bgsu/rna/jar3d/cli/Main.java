@@ -81,6 +81,8 @@ public class Main {
 		for(Loop loop: query) {
 			StringBuilder fasta = new StringBuilder();
 			String folder = base + File.separator + loop.getType() + File.separator + "0.6";
+			System.out.println(folder);
+			System.out.println(loop);
 			
 			for(String sequence: loop) {
 				fasta.append(">\n"); // TODO use generated FASTA header.

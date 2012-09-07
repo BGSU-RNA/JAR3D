@@ -34,6 +34,7 @@ public class FastaLoader implements QueryLoader {
 					sequence = line;
 				}
 			}
+			sequences.add(sequence);
 		} catch(IOException e) {
 			throw new QueryLoadingFailed(e);
 		}
