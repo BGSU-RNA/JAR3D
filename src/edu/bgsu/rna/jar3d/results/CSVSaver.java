@@ -20,7 +20,6 @@ public class CSVSaver extends AbstractResultsSaver {
 	}
 	
 	private void saveLoopResults(LoopResult results) throws SaveFailed {
-		String queryId = results.queryId();
 		String loopId = new Integer(results.loopId()).toString();
 		String motifId = results.modelId();
 		String meanScore = format(results.meanScore());
@@ -30,7 +29,7 @@ public class CSVSaver extends AbstractResultsSaver {
 		String meanEditDistance = format(results.meanEditDistance());
 		String medianEditDistance = format(results.medianEditDistance());
 		
-		String line = join(queryId, loopId, motifId, meanScore, medianScore, 
+		String line = join(loopId, motifId, meanScore, medianScore, 
 				meanPercentile, medianPercentile, meanEditDistance, medianEditDistance);
 		
 		try {
@@ -42,7 +41,6 @@ public class CSVSaver extends AbstractResultsSaver {
 	}
 	
 	private void saveSequenceResults(int loopId, SequenceResult result) throws SaveFailed {
-		String queryId = result.queryId();
 		String loopIdString = new Integer(loopId).toString();
 		String sequenceId = result.sequenceId();
 		String motifId = result.motifId();
@@ -50,7 +48,7 @@ public class CSVSaver extends AbstractResultsSaver {
 		String percentile = format(result.percentile());
 		String editDistance = new Integer(result.editDistance()).toString();
 		String rotated = new Boolean(result.isRotated()).toString();
-		String line = join(queryId, loopIdString, sequenceId, motifId, score, percentile, editDistance, rotated);
+		String line = join(loopIdString, sequenceId, motifId, score, percentile, editDistance, rotated);
 		try {
 			sequenceWriter.write(line);
 			sequenceWriter.newLine();
@@ -94,9 +92,9 @@ public class CSVSaver extends AbstractResultsSaver {
 	}
 
 	public void writeHeader() throws SaveFailed {
-		String sequenceLine = join("queryId", "loopId", "sequenceId", "motifId", 
+		String sequenceLine = join("loopId", "sequenceId", "motifId", 
 				"score", "percentile", "editDistance", "rotated");
-		String loopLine = join("queryId", "loopId", "motifId", "meanScore", "medianScore", 
+		String loopLine = join("loopId", "motifId", "meanScore", "medianScore", 
 				"meanPercentile", "medianPercentile", "meanEditDistance", "medianEditDistance");
 		
 		try {
