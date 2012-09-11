@@ -41,16 +41,16 @@ public class CSVSaver extends AbstractResultsSaver {
 		}
 	}
 	
-	private void saveSequenceResults(SequenceResult result) throws SaveFailed {
+	private void saveSequenceResults(int loopId, SequenceResult result) throws SaveFailed {
 		String queryId = result.queryId();
-		String loopId = new Integer(result.loopId()).toString();
+		String loopIdString = new Integer(loopId).toString();
 		String sequenceId = result.sequenceId();
 		String motifId = result.motifId();
 		String score = format(result.score());
 		String percentile = format(result.percentile());
 		String editDistance = new Integer(result.editDistance()).toString();
 		String rotated = new Boolean(result.isRotated()).toString();
-		String line = join(queryId, loopId, sequenceId, motifId, score, percentile, editDistance, rotated);
+		String line = join(queryId, loopIdString, sequenceId, motifId, score, percentile, editDistance, rotated);
 		try {
 			sequenceWriter.write(line);
 			sequenceWriter.newLine();
@@ -62,7 +62,7 @@ public class CSVSaver extends AbstractResultsSaver {
 	public void save(LoopResult results) throws SaveFailed {
 		saveLoopResults(results);
 		for(SequenceResult sequenceResult: results.sequenceResults()) {
-			saveSequenceResults(sequenceResult);
+			saveSequenceResults(results.loopId(), sequenceResult);
 		}		
 	}
 	
