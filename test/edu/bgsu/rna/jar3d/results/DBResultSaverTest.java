@@ -26,9 +26,9 @@ public class DBResultSaverTest {
 		String motifId = "ABob";
 //		Query query = new
 		int loopId = 0;
-		MutableSequenceResults r1 = new MutableSequenceResults(motifId, 0, 0, 0, false);
+		MutableSequenceResults r1 = new MutableSequenceResults(motifId, 0, 0, 0, false, 0);
 		r1.setLoopId(loopId);
-		MutableSequenceResults r2 = new MutableSequenceResults(motifId, 0, 0, 0, false);
+		MutableSequenceResults r2 = new MutableSequenceResults(motifId, 0, 0, 0, false, 0);
 		r2.setLoopId(loopId);
 		List<SequenceResult> seqs = new ArrayList<SequenceResult>();
 		seqs.add(r1);
