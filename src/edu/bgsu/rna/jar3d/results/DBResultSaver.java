@@ -4,12 +4,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
 
-import edu.bgsu.rna.jar3d.query.Loop;
 
 public class DBResultSaver implements ResultsSaver {
 
@@ -174,4 +171,7 @@ public class DBResultSaver implements ResultsSaver {
 			throw new SaveFailed("Could not mark failure of: " + queryId, e);
 		}
 	}
+
+	// No header to write.
+	public void writeHeader() throws SaveFailed { }
 }

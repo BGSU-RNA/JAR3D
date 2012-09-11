@@ -19,6 +19,7 @@ public class FastaLoader implements QueryLoader {
 	
 	public Query load(String queryId) throws QueryLoadingFailed {
     	List<String> sequences = new ArrayList<String>();
+    	String name;
 		try {
 			String line;
 			String header = null;
@@ -35,12 +36,13 @@ public class FastaLoader implements QueryLoader {
 				}
 			}
 			sequences.add(sequence);
+			name = header;
 		} catch(IOException e) {
 			throw new QueryLoadingFailed(e);
 		}
 		
 		List<Loop> loops = new ArrayList<Loop>();
-		loops.add(new BasicLoop(1, sequences, "IL"));
+		loops.add(new BasicLoop(name, 1, sequences, "IL"));
 		
         return new ImmutableQuery(queryId, loops, true, "IL0.8", "", "IL");
 	}

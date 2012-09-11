@@ -11,10 +11,17 @@ public class BasicLoop implements Loop {
 	
 	private final long id;
 	
-	public BasicLoop(long id, List<String> loops, String type) {
+	private final String name;
+	
+	public BasicLoop(String name, long id, List<String> loops, String type) {
 		this.loops = loops;
 		this.type = type;
 		this.id = id;
+		this.name = name;
+	}
+	
+	public BasicLoop(long id, List<String> loops, String type) {
+		this(null, id, loops, type);
 	}
 
 	public List<String> getSequences() {
@@ -31,5 +38,9 @@ public class BasicLoop implements Loop {
 
 	public long getId() {
 		return id;
+	}
+
+	public String getName() {
+		return name;
 	}
 }

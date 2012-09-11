@@ -16,7 +16,7 @@ import edu.bgsu.rna.jar3d.query.Loop;
 import edu.bgsu.rna.jar3d.query.Query;
 import edu.bgsu.rna.jar3d.query.QueryLoader;
 import edu.bgsu.rna.jar3d.query.QueryLoadingFailed;
-import edu.bgsu.rna.jar3d.results.FastaSaver;
+import edu.bgsu.rna.jar3d.results.CSVSaver;
 import edu.bgsu.rna.jar3d.results.LoopResult;
 import edu.bgsu.rna.jar3d.results.ResultsSaver;
 import edu.bgsu.rna.jar3d.results.SaveFailed;
@@ -27,14 +27,11 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-//		if (args.length != 2) {
-//			System.err.println("Must give 3 arguments: input.fasta models output.fasta");
-//			System.exit(1);
-//		}
 		
 		String input = args[0];
 		String models = args[1];
-		String output = args[2];
+		String loopOutput = args[2];
+		String sequenceOutput = args[3];
 
 		QueryLoader loader = null;
 		try {
@@ -57,7 +54,7 @@ public class Main {
 		List<LoopResult> results = runQuery(query, models);
 		ResultsSaver saver = null;
 		try {
-			saver = new FastaSaver(output);
+			saver = new CSVSaver(loopOutput, sequenceOutput);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -80,9 +77,7 @@ public class Main {
 		List<List<LoopResult>> allResults = new ArrayList<List<LoopResult>>();
 		for(Loop loop: query) {
 			StringBuilder fasta = new StringBuilder();
-			String folder = base + File.separator + loop.getType() + File.separator + "0.6";
-			System.out.println(folder);
-			System.out.println(loop);
+			String folder = base + File.separator + loop.getType() + File.separator + "0.6";;
 			
 			for(String sequence: loop) {
 				fasta.append(">\n"); // TODO use generated FASTA header.
