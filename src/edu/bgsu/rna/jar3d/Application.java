@@ -9,8 +9,10 @@ import java.util.Vector;
 import edu.bgsu.rna.jar3d.query.Loop;
 import edu.bgsu.rna.jar3d.query.Query;
 import edu.bgsu.rna.jar3d.query.QueryLoader;
+import edu.bgsu.rna.jar3d.query.QueryLoadingFailed;
 import edu.bgsu.rna.jar3d.results.LoopResult;
 import edu.bgsu.rna.jar3d.results.ResultsSaver;
+import edu.bgsu.rna.jar3d.results.SaveFailed;
 
 public class Application {
 
@@ -22,11 +24,12 @@ public class Application {
 		this.saver = saver;
 	}
 	
-	public List<List<LoopResult>> runQuery(String queryId, String base) {
-		return null;
+	public List<List<LoopResult>> runQuery(String queryId, String base) throws QueryLoadingFailed {
+		Query query = loader.load(queryId);
+		return this.motifParse(base, query);
 	}
 	
-	public static List<List<LoopResult>> MotifParse(String base, Query query) {
+	private List<List<LoopResult>> motifParse(String base, Query query) {
 		List<List<LoopResult>> allResults = new ArrayList<List<LoopResult>>();
 		for(Loop loop: query) {
 			StringBuilder fasta = new StringBuilder();
@@ -73,18 +76,15 @@ public class Application {
 	    return results;
 	}
 	
-	public void saveResult(LoopResult result) {
-		
-	}
-	
-	public void saveResults(List<LoopResult> results) {
-		for(LoopResult result: results) {
-			this.saveResult(result);
+	public void saveResults(List<List<LoopResult>> results) throws SaveFailed {
+		for(List<LoopResult> res: results) {
+			saver.save(res);
 		}
+		saver.cleanUp();
 	}
 	
-	public void runAndSave(String queryId) {
-//		List<LoopResult> results = this.runQuery(queryId);
-//		this.saveResults(results);
+	public void runAndSave(String queryId, String base) throws SaveFailed, QueryLoadingFailed {
+		List<List<LoopResult>> results = this.runQuery(queryId, base);
+		saveResults(results);
 	}
 }
