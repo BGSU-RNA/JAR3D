@@ -63,7 +63,7 @@ public class DBResultSaver implements ResultsSaver {
 			insertLoopResult.setFloat(6, (float)results.meanEditDistance());
 			insertLoopResult.setFloat(7, (float)results.medianScore());
 			insertLoopResult.setFloat(8, (float)results.medianPercentile());
-			insertLoopResult.setFloat(9, (float)results.meanEditDistance());
+			insertLoopResult.setFloat(9, (float)results.medianEditDistance());
 			insertLoopResult.setString(10, results.signature());
 			insertLoopResult.setInt(11, rotationInt(results.isRotated()));
 			insertLoopResult.setString(12, "Intentially left empty.");
