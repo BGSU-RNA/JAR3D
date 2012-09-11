@@ -32,13 +32,14 @@ public class MutableSequenceResults implements SequenceResult {
 	 * @param rotation True if the sequence was rotated relative to the model.
 	 */
 	public MutableSequenceResults(String motifId, double score, double percentile,
-			int editDistance, boolean rotation) {
+			int editDistance, boolean rotation, int loopID) {
 		
 		this.motifId = motifId;
 		this.score = score;
 		this.percentile = percentile;
 		this.editDistance = editDistance;
 		this.rotation = rotation;
+		this.loopId = loopID;
 	}
 	
 	/**

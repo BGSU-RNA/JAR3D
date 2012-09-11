@@ -2080,8 +2080,8 @@ public class Alignment {
 				Vector seqRes = new Vector();
 				for(int m = 0; m < sData.size() - 1; m++)
 				{
-					MutableSequenceResults seqR = new MutableSequenceResults(groupName, groupScores[m],quants[m],
-							minDist[m],rev);
+					MutableSequenceResults seqR = new MutableSequenceResults(groupName,groupScores[m],quants[m],
+							minDist[m],rev,loopID);
 					seqR.setQuery(query);
 					seqR.setSequenceId(String.valueOf(m));
 //					seqR.setLoopId();
