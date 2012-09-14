@@ -33,7 +33,7 @@ public class DBResultSaverTest {
 		List<SequenceResult> seqs = new ArrayList<SequenceResult>();
 		seqs.add(r1);
 		seqs.add(r2);
-		LoopResult result = new ImmutableLoopResult(loopId, motifId, false, "sign", seqs, "corr");
+		LoopResult result = new ImmutableLoopResult(loopId, motifId, false, "sign", seqs, "corr", "");
 		return result;
 	}
 	

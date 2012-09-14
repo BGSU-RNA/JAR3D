@@ -16,7 +16,7 @@ import java.io.*;
  *
  */
 public class Sequence {
-	long start, stop, elapsed;
+//	long start, stop, elapsed;
 	String organism;
 	String letters;            // as read from the fasta file
 	String nucleotides = "";   // with gaps stripped out
@@ -212,7 +212,7 @@ public class Sequence {
 	 */
 	void addNodeDataModelText(String modelText)
 	{
-		start = System.currentTimeMillis();
+//		start = System.currentTimeMillis();
 		Node current = new Node();
 		Stack branchingNodes = new Stack(); // keep track of current junction
 		int newchild = 0;
@@ -225,7 +225,7 @@ public class Sequence {
 		boolean flag = true;
 		boolean isHairpin = true;
 		double[] nData;
-		long start1 = System.currentTimeMillis();
+//		long start1 = System.currentTimeMillis();
 		int nodeNumber = 1;
 		int lineNum = 0;
 				
@@ -390,11 +390,11 @@ public class Sequence {
 				lineNum++;
 		}
 
-		stop = System.currentTimeMillis();
-		elapsed = stop - start1;
+//		stop = System.currentTimeMillis();
+//		elapsed = stop - start1;
 //		System.out.println("Reading model data file time: " + elapsed + " milliseconds");
 
-		start1 = System.currentTimeMillis();
+//		start1 = System.currentTimeMillis();
 
 
 		// Common to all models we might make
@@ -414,10 +414,10 @@ public class Sequence {
 			current = current.previous;		 // current equals the one before
 		}
 
-		stop = System.currentTimeMillis();
-		elapsed = stop - start1;
+//		stop = System.currentTimeMillis();
+//		elapsed = stop - start1;
 //		System.out.println("Connecting nodes 1 time: " + elapsed + " milliseconds");
-		start1 = System.currentTimeMillis();
+//		start1 = System.currentTimeMillis();
 
 
 		current = first; // set current equal to first for traversal and
@@ -446,10 +446,10 @@ public class Sequence {
 		}
 
 
-		stop = System.currentTimeMillis();
-		elapsed = stop - start1;
+//		stop = System.currentTimeMillis();
+//		elapsed = stop - start1;
 //		System.out.println("Connecting nodes 2 time: " + elapsed + " milliseconds");
-		start1 = System.currentTimeMillis();
+//		start1 = System.currentTimeMillis();
 
 
 
@@ -525,11 +525,11 @@ public class Sequence {
 		}
 		 */
 
-		stop = System.currentTimeMillis();
-		elapsed = stop - start1;
+//		stop = System.currentTimeMillis();
+//		elapsed = stop - start1;
 //		System.out.println("Connecting nodes 3 time: " + elapsed + " milliseconds");
 
-		elapsed = stop - start;
+//		elapsed = stop - start;
 //		System.out.println("Node data added time: " + elapsed + " milliseconds");
 	}// end method addNodedataModelText
 
@@ -611,7 +611,7 @@ public class Sequence {
 	 */
 	void addNodeDataOld(String modelFileName)
 	{
-		start = System.currentTimeMillis();
+//		start = System.currentTimeMillis();
 		Node current = new Node();
 		Stack branchingNodes = new Stack(); // keep track of current junction
 		int newchild = 0;
@@ -624,7 +624,7 @@ public class Sequence {
 		boolean flag = true;
 		boolean isHairpin = true;
 		double[] nData;
-		long start1 = System.currentTimeMillis();
+//		long start1 = System.currentTimeMillis();
 
 		BufferedReader rdr;
 		
@@ -819,11 +819,11 @@ public class Sequence {
 			System.out.println(e);
 		}
 
-		stop = System.currentTimeMillis();
-		elapsed = stop - start1;
+//		stop = System.currentTimeMillis();
+//		elapsed = stop - start1;
 //		System.out.println("Reading model data file time: " + elapsed + " milliseconds");
 
-		start1 = System.currentTimeMillis();
+//		start1 = System.currentTimeMillis();
 
 
 		// Common to all models we might make
@@ -843,10 +843,10 @@ public class Sequence {
 			current = current.previous;		 // current equals the one before
 		}
 
-		stop = System.currentTimeMillis();
-		elapsed = stop - start1;
+//		stop = System.currentTimeMillis();
+//		elapsed = stop - start1;
 //		System.out.println("Connecting nodes 1 time: " + elapsed + " milliseconds");
-		start1 = System.currentTimeMillis();
+//		start1 = System.currentTimeMillis();
 
 
 		current = first; // set current equal to first for traversal and
@@ -875,10 +875,10 @@ public class Sequence {
 		}
 
 
-		stop = System.currentTimeMillis();
-		elapsed = stop - start1;
+//		stop = System.currentTimeMillis();
+//		elapsed = stop - start1;
 //		System.out.println("Connecting nodes 2 time: " + elapsed + " milliseconds");
-		start1 = System.currentTimeMillis();
+//		start1 = System.currentTimeMillis();
 
 
 
@@ -959,11 +959,11 @@ public class Sequence {
 
 
 
-		stop = System.currentTimeMillis();
-		elapsed = stop - start1;
+//		stop = System.currentTimeMillis();
+//		elapsed = stop - start1;
 //		System.out.println("Connecting nodes 3 time: " + elapsed + " milliseconds");
 
-		elapsed = stop - start;
+//		elapsed = stop - start;
 //		System.out.println("Node data added time: " + elapsed + " milliseconds");
 	}// end method addNodedata
 
@@ -1036,7 +1036,7 @@ public class Sequence {
 	 */
 	void parseSequence(int range)
 	{
-		start = System.currentTimeMillis();
+//		start = System.currentTimeMillis();
 
 		Node current = last; 
 		while(current != null) // go until the end of the list
@@ -1051,7 +1051,7 @@ public class Sequence {
 		// CYK algorithm for determining maximum log probability parse
 		for (int p=1; p <= nucleotides.length(); p++)         // length of subsequence
 		{
-			long start2 = System.currentTimeMillis();
+//			long start2 = System.currentTimeMillis();
 			for(int i=0; i+p <= nucleotides.length(); i++)   // starting point of subsequence
 			{
 				int j = i+p-1;                          // right side of this subsequence
@@ -1062,21 +1062,21 @@ public class Sequence {
 					current = current.previous;
 				}// while
 			}// for		     	
-			stop = System.currentTimeMillis();
-			elapsed = stop - start2;
+//			stop = System.currentTimeMillis();
+//			elapsed = stop - start2;
 //			System.out.println("Subsequences of length "+p+" took "+elapsed+" milliseconds");
 
 		}// for	
-		stop = System.currentTimeMillis();
-		elapsed = stop - start;
+//		stop = System.currentTimeMillis();
+//		elapsed = stop - start;
 //		System.out.println("Time to compute max log prob: " + elapsed+ " milliseconds");
 
 
-		start = System.currentTimeMillis();
+//		start = System.currentTimeMillis();
 		
 		((InitialNode)first).traceback(0,nucleotides.length()-1);
-		stop = System.currentTimeMillis();
-		elapsed = stop - start;
+//		stop = System.currentTimeMillis();
+//		elapsed = stop - start;
 //		System.out.println("Time to traceback: " + elapsed+ " milliseconds");
 	}// end parseSequence()
 	

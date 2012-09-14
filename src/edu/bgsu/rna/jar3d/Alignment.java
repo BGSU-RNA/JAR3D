@@ -324,7 +324,7 @@ public class Alignment {
 	 */
 	public static Vector doParse(Vector sData, int numSequences, String nodeFileName, int range)
 	{
-		long start, stop, elapsed;
+//		long start, stop, elapsed;
 		Node current;
 		Vector mProbs = new Vector();
 
@@ -356,10 +356,10 @@ public class Alignment {
 			for (int j = 0; j < S.itcFirst.length; j++)
 				S.itcFirst[j] = firstS.itc[j];
 
-			start = System.currentTimeMillis();
+//			start = System.currentTimeMillis();
 			S.parseSequence(range);                             	      // parse this sequence
-			stop = System.currentTimeMillis();
-			elapsed = stop - start;
+//			stop = System.currentTimeMillis();
+//			elapsed = stop - start;
 
 //			System.out.println("Alignment.doParse parsing took "+elapsed/1000+" seconds");
 			// We also need to store the parse information somewhere!  All we have is a parse sequence.
@@ -1303,7 +1303,7 @@ public class Alignment {
 	
 	public static ParseData doParse2(Vector sData, int numSequences, String nodeFileName, int range)
 	{
-		long start, stop, elapsed;
+//		long start, stop, elapsed;
 		Node current;
 		Vector mProbs = new Vector();
 		Vector probsM = new Vector();
@@ -1336,10 +1336,10 @@ public class Alignment {
 			for (int j = 0; j < S.itcFirst.length; j++)
 				S.itcFirst[j] = firstS.itc[j];
 
-			start = System.currentTimeMillis();
+//			start = System.currentTimeMillis();
 			S.parseSequence(range);                             	      // parse this sequence
-			stop = System.currentTimeMillis();
-			elapsed = stop - start;
+//			stop = System.currentTimeMillis();
+//			elapsed = stop - start;
 
 //			System.out.println("Alignment.doParse parsing took "+elapsed/1000+" seconds");
 			// We also need to store the parse information somewhere!  All we have is a parse sequence.
@@ -1964,8 +1964,8 @@ public class Alignment {
 	//Takes a JAR3D query and submits results to MySQL database
 	public static List doILdbQuery(int loopID, Query query, Vector sData, Vector modNames, HashMap groupData, int numSequences, int range)
 	{
-		Vector alignmentVect = new Vector();                   // alignment lines to output
-		Vector pData = new Vector();                           // parse data
+//		Vector alignmentVect = new Vector();                   // alignment lines to output
+//		Vector pData = new Vector();                           // parse data
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
 		double[] modelScores = new double[modNames.size()];
@@ -2084,10 +2084,9 @@ public class Alignment {
 							minDist[m],rev,loopID);
 					seqR.setQuery(query);
 					seqR.setSequenceId(String.valueOf(m));
-//					seqR.setLoopId();
 					seqRes.add(seqR);
 				}
-				ImmutableLoopResult loopR = new ImmutableLoopResult(loopID,groupName,rev,sig,seqRes, "NA");
+				ImmutableLoopResult loopR = new ImmutableLoopResult(loopID, groupName, rev, sig, seqRes, "NA", "");
 				loopR.setQuery(query);
 				loopRes.add(loopR);
 			}
@@ -2098,7 +2097,7 @@ public class Alignment {
 	//Overloaded doParse that can take group data as a string instead of a file name
 	public static Vector doParse(Vector sData, int numSequences, String nodeInfo, int range, boolean fullModelText)
 	{
-		long start, stop, elapsed;
+//		long start, stop, elapsed;
 		Node current;
 		Vector mProbs = new Vector();
 
@@ -2134,10 +2133,10 @@ public class Alignment {
 			for (int j = 0; j < S.itcFirst.length; j++)
 				S.itcFirst[j] = firstS.itc[j];
 
-			start = System.currentTimeMillis();
+//			start = System.currentTimeMillis();
 			S.parseSequence(range);                             	      // parse this sequence
-			stop = System.currentTimeMillis();
-			elapsed = stop - start;
+//			stop = System.currentTimeMillis();
+//			elapsed = stop - start;
 
 //			System.out.println("Alignment.doParse parsing took "+elapsed/1000+" seconds");
 			// We also need to store the parse information somewhere!  All we have is a parse sequence.

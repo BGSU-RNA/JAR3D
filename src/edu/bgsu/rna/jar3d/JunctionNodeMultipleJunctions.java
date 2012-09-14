@@ -9,7 +9,7 @@ import java.util.*;
 public class JunctionNodeMultipleJunctions extends BranchingNode {
 
     int branches;
-    long start, stop, elapsed;
+//    long start, stop, elapsed;
     
 	/**
 	 * This is the JunctionNode constructor
@@ -86,7 +86,7 @@ public class JunctionNodeMultipleJunctions extends BranchingNode {
 	
 	void computeMaxLogProbMultiple(Sequence seq, int i, int j)
 	{
-		start = System.currentTimeMillis();
+//		start = System.currentTimeMillis();
 		if ((i >= super.iMin) && (i <= super.iMax) && (j >= super.jMin) && (j <= super.jMax)  && (i <= j)) 
 		{		
 			int[] splitPoints = new int[branches+1];
@@ -155,8 +155,8 @@ public class JunctionNodeMultipleJunctions extends BranchingNode {
   			maxLogProb[i-iMin][j-jMin] = p;
   			myGen[i-iMin][j-jMin] = new genData(optSplitPoints);
 		} // end if loop
-		stop = System.currentTimeMillis();
-		elapsed = stop - start;
+//		stop = System.currentTimeMillis();
+//		elapsed = stop - start;
 		//System.out.println("Junction node - Compute max log prob time: " + elapsed+ " milliseconds");
 	}
 	

@@ -11,6 +11,8 @@ public interface LoopResult {
 	public String queryId();
 		
 	public int loopId();
+	
+	public String name();
 
 	public String modelId();
 

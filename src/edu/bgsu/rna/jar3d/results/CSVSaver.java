@@ -43,6 +43,7 @@ public class CSVSaver extends AbstractResultsSaver {
 	private void saveSequenceResults(int loopId, SequenceResult result) throws SaveFailed {
 		String loopIdString = new Integer(loopId).toString();
 		String sequenceId = result.sequenceId();
+//		String sequenceName = result.g
 		String motifId = result.motifId();
 		String score = format(result.score());
 		String percentile = format(result.percentile());

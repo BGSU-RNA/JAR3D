@@ -16,6 +16,8 @@ public final class ImmutableLoopResult implements LoopResult {
 	
 	private final String signature;
 	
+	public final String name;
+	
 	private double meanEditDistance;
 	
 	private double meanScore;
@@ -36,13 +38,14 @@ public final class ImmutableLoopResult implements LoopResult {
 	
 	public ImmutableLoopResult(int loopId, String modelId, boolean rotation, 
 			String signature, List<SequenceResult> sequenceResults, 
-			String correspondecies) {
+			String correspondecies, String name) {
 		this.sequenceResults = sequenceResults;
 		this.modelId = modelId;
 		this.loopId = loopId;
 		this.rotation = rotation;
 		this.signature = signature;
 		this.correspondices = correspondecies;
+		this.name = name;
 		computeData();
 	}
 	
@@ -124,6 +127,10 @@ public final class ImmutableLoopResult implements LoopResult {
 	public String correspondencies() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public String name() {
+		return name;
 	}
 
 }
