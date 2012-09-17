@@ -8,13 +8,11 @@ import java.util.List;
 
 public class FastaLoader implements QueryLoader {
 
-	private String filename;
 	
 	private BufferedReader reader;
 	
 	public FastaLoader(String filename) throws IOException {
-		this.filename = filename;
-		this.reader = new BufferedReader(new FileReader(this.filename));
+		this.reader = new BufferedReader(new FileReader(filename));
 	}
 	
 	public Query load(String queryId) throws QueryLoadingFailed {
