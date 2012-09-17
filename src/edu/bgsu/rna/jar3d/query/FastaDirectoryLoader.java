@@ -1,8 +1,6 @@
 package edu.bgsu.rna.jar3d.query;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,17 +27,25 @@ public class FastaDirectoryLoader implements QueryLoader {
     }
 
     public Query load(String queryId) throws QueryLoadingFailed {
+
         List<Loop> loops = new ArrayList<Loop>();
         for (File file: files) {
             try {
                 FastaLoader loader = new FastaLoader(file.getAbsolutePath());
                 Query query = loader.load(null);
-                loops.addAll(query.getLoops());
+                List<Loop> queryLoops = query.getLoops();
+
+                for(Loop loop: queryLoops) {
+                    Loop newLoop = new BasicLoop((long)loops.size(), loop.getSequences(), loop.getType());
+                    loops.add(newLoop);
+                }
+
                 loader.cleanUp();
             } catch (IOException e) {
                 throw new QueryLoadingFailed(e);
             }
         }
+
         return new ImmutableQuery(queryId, loops, true, "IL", "HL", "bp_models");
     }
 
