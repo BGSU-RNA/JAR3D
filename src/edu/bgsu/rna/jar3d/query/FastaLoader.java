@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FastaLoader implements QueryLoader {
-
 	
 	private BufferedReader reader;
 	
