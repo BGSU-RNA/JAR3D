@@ -85,6 +85,7 @@ public class Application {
 	
 	public void runAndSave(String queryId, String base) throws SaveFailed, QueryLoadingFailed {
 		List<List<LoopResult>> results = this.runQuery(queryId, base);
+		saver.writeHeader();
 		saveResults(results);
 	}
 }

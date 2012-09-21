@@ -12,7 +12,6 @@ public abstract class AbstractResultsSaver implements ResultsSaver {
 	 * @throws SaveFailed if any problem occurs. 
 	 */
 	public void save(List<LoopResult> results) throws SaveFailed {
-		writeHeader();
 		for(LoopResult result: results) {
 			save(result);
 		}

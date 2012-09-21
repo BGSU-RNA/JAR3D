@@ -32,8 +32,9 @@ public class FastaDirectoryLoader implements QueryLoader {
 
         List<Loop> loops = new ArrayList<Loop>();
         for (File file: files) {
+            System.out.println(file);
             try {
-                FastaLoader loader = new FastaLoader(file.getAbsolutePath());
+                FastaFileLoader loader = new FastaFileLoader(file.getAbsolutePath());
                 Query query = loader.load(null);
                 List<Loop> queryLoops = query.getLoops();
 
