@@ -9,6 +9,8 @@ import java.util.List;
 
 public class FastaDirectoryLoader implements QueryLoader {
 
+    private boolean structuredOnly = true;
+
     private FilenameFilter fastaFilter = new FilenameFilter() {
         public boolean accept(File dir, String name) {
             String lowerName = name.toLowerCase();
@@ -46,7 +48,7 @@ public class FastaDirectoryLoader implements QueryLoader {
             }
         }
 
-        return new ImmutableQuery(queryId, loops, true, "IL", "HL", "bp_models");
+        return new ImmutableQuery(queryId, loops, structuredOnly, "IL0.8", "", "IL");
     }
 
     public void cleanUp() throws QueryLoadingFailed { }
