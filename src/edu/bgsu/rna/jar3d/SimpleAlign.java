@@ -1,10 +1,10 @@
 package edu.bgsu.rna.jar3d;
-import java.io.*;
+
 import java.util.*; 
 
 public class SimpleAlign {
 	
-	public static String[] getSeqStrings(Vector sData){
+	public static String[] getSeqStrings(Vector<Sequence> sData){
 		//pulls sequence strings from a vector of Sequence objects
 		
 		int n = sData.size();
@@ -115,11 +115,11 @@ public class SimpleAlign {
 		return Scores[n1][n2];
 	}
 	
-	public static int[][] calcILEditDistances(Vector sD1,Vector sD2,boolean reverse){
+	public static int[][] calcILEditDistances(Vector<Sequence> sD1,Vector<Sequence> sD2,boolean reverse){
 		return calcILEditDistances(sD1,sD2,reverse,false);
 	}
 	
-	public static int[][] calcILEditDistances(Vector sD1,Vector sD2,boolean reverse,boolean Verbose){
+	public static int[][] calcILEditDistances(Vector<Sequence> sD1,Vector<Sequence> sD2,boolean reverse,boolean Verbose){
 		//calculates the edit distance between every sequence in fasta file seqFile1
 		//and every sequence in faste file seqFile2.  the first dim of the returned
 		//2d array corresponds to the files in seqFile1, the second to seqFile2
@@ -184,11 +184,11 @@ public class SimpleAlign {
 		return EdDists;
 	}
 	
-	public static int[][] calcHLEditDistances(Vector sD1,Vector sD2){
+	public static int[][] calcHLEditDistances(Vector<Sequence> sD1,Vector<Sequence> sD2){
 		return calcHLEditDistances(sD1,sD2,false);
 	}
 	
-	public static int[][] calcHLEditDistances(Vector sD1,Vector sD2,boolean Verbose){
+	public static int[][] calcHLEditDistances(Vector<Sequence> sD1,Vector<Sequence> sD2,boolean Verbose){
 		//calculates the edit distance between every sequence in fasta file seqFile1
 		//and every sequence in faste file seqFile2.  the first dim of the returned
 		//2d array corresponds to the files in seqFile1, the second to seqFile2
