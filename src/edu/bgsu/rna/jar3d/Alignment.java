@@ -236,8 +236,8 @@ public class Alignment {
 		
 		for (int i=1; i < Math.min(sequenceData.size(),numSequences+1); i++)
 		{
-			temp = ((Sequence)sequenceData.elementAt(i)).letters;
-			organism = ((Sequence)sequenceData.elementAt(i)).organism;
+			temp = sequenceData.elementAt(i).letters;
+			organism = sequenceData.elementAt(i).organism;
 			
 			StringTokenizer st = new StringTokenizer(temp,"*");
 			second  = st.nextToken();
@@ -272,16 +272,16 @@ public class Alignment {
 		Sequence S = new Sequence("","");                        // blank sequence to use repeatedly 
 		S.addNodeData(nodeFileName);	                         // only add node data once
 
-		((Sequence)sData.elementAt(0)).parseData = ((InitialNode)S.first).header(); // add a header line
+		sData.elementAt(0).parseData = ((InitialNode)S.first).header(); // add a header line
 
-		Sequence firstS = (Sequence)sData.elementAt(1);          // first sequence, which matches the model
+		Sequence firstS = sData.elementAt(1);          // first sequence, which matches the model
 		firstS.setNucleotides();
 		firstS.setArrays();
 		
 		for (int i = 1; i < Math.min(sData.size(),numSequences+1); i++) 
 		{
-			S.organism = ((Sequence)sData.elementAt(i)).organism;             // focus on one sequence
-			S.letters  = ((Sequence)sData.elementAt(i)).letters;
+			S.organism = sData.elementAt(i).organism;             // focus on one sequence
+			S.letters  = sData.elementAt(i).letters;
 						
 			S.setNucleotides();                                    // strip dashes from sequence
 			S.setArrays();                                         // define cti, itc, convert letters to numbers
@@ -317,7 +317,7 @@ public class Alignment {
 				}
 			}
 			
-			((Sequence)sData.elementAt(i)).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
+			sData.elementAt(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 			
 			String correspondences = ((InitialNode)S.first).showCorrespondences(S.nucleotides);
 
@@ -329,7 +329,7 @@ public class Alignment {
 			
 			String NF = "MMM";                           // model name goes here
 			correspondences = correspondences.replace("MMM", NF);
-			((Sequence)sData.elementAt(i)).correspondences = correspondences;
+			sData.elementAt(i).correspondences = correspondences;
 		}
 		return sData;
 	}
@@ -377,7 +377,7 @@ public class Alignment {
 	public static int[] stripDash(Vector<String> pData)
 	{
 		boolean found = false;
-		int[] mask = new int[((String)pData.get(0)).length()];
+		int[] mask = new int[pData.get(0).length()];
 		for(int i = 0; i<mask.length; i++)
 			mask[i] = 0;
 		for(int j = 0; j < mask.length; j++)                       // look at each column
@@ -478,17 +478,17 @@ public class Alignment {
 			for(int i = 0; i < mask.length; i++)
 			{
 				if(mask[i] == 0)
-					System.out.print(((String)pData.get(j)).charAt(i));
+					System.out.print(pData.get(j).charAt(i));
 			}		
 			if(j == 0)
 			{
-				System.out.println(" "+((Sequence)sData.elementAt(j)).organism);
+				System.out.println(" " + sData.elementAt(j).organism);
 			}
 			else
 			{
-			System.out.print(" "+((Sequence)sData.elementAt(j)).organism + " ");
-			for(int x = 0; x < ((Sequence)sData.elementAt(j)).maxLogProbs.size(); x++)
-				System.out.print(((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(x)).get(0)+" ");
+			System.out.print(" " + sData.elementAt(j).organism + " ");
+			for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
+				System.out.print(((Vector)sData.elementAt(j).maxLogProbs.get(x)).get(0)+" ");
 			System.out.println();
 			}
 		}
@@ -521,8 +521,8 @@ public class Alignment {
 			}
 			else
 			{
-				System.out.print(">"+((Sequence)sData.elementAt(j)).organism + " ");
-				for(int x = 0; x < ((Sequence)sData.elementAt(j)).maxLogProbs.size(); x++)
+				System.out.print(">" + sData.elementAt(j).organism + " ");
+				for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
 					System.out.print(((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(x)).get(0));
 				System.out.println();
 			}
@@ -565,8 +565,8 @@ public class Alignment {
 			}
 			else
 			{
-				System.out.print(">"+((Sequence)sData.elementAt(j)).organism + " ");
-				for(int x = 0; x < ((Sequence)sData.elementAt(j)).maxLogProbs.size(); x++)
+				System.out.print(">" + sData.elementAt(j).organism + " ");
+				for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
 					System.out.print(((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(x)).get(0));
 				System.out.println();
 			}
@@ -597,9 +597,9 @@ public class Alignment {
 		for(int j = 1; j < sData.size(); j++)
 		{
 			System.out.print(Motif+" "+R+" ");
-			for(int x = 0; x < ((Sequence)sData.elementAt(j)).maxLogProbs.size(); x++)
+			for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
 				System.out.print(((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(x)).get(0)+" ");
-			System.out.print(((Sequence)sData.elementAt(j)).organism + " ");
+			System.out.print(sData.elementAt(j).organism + " ");
 			System.out.println();
 		}
 
@@ -617,7 +617,7 @@ public class Alignment {
 		
 		for (int i = 0; i < Math.min(sData.size(),numSequences+1); i++)
 		{
-			pData.add(((Sequence)sData.get(i)).parseData);
+			pData.add(sData.get(i).parseData);
 		}
 		
 		int[] mask = stripDash(pData);
@@ -628,7 +628,7 @@ public class Alignment {
 		for(int i = 0; i < mask.length; i++)
 		{
 			if(mask[i] == 0)
-				alnm += ((String)pData.get(0)).charAt(i);
+				alnm += pData.get(0).charAt(i);
 		}		
 		alignmentVect.add(alnm);                          // paste in header line
 		
@@ -638,10 +638,10 @@ public class Alignment {
 			for(int i = 0; i < mask.length; i++)
 			{
 				if(mask[i] == 0)
-					alnm += ((String)pData.get(j)).charAt(i);
+					alnm += pData.get(j).charAt(i);
 			}		
 			alignmentVect.add(alnm);
-			alignmentVect.add(">"+((Sequence)sData.elementAt(j)).organism);
+			alignmentVect.add(">" + sData.elementAt(j).organism);
 			alignmentVect.add("Score = "+((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(0)).get(0));
 		}
 		return alignmentVect;	
@@ -676,11 +676,11 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < ((Sequence)sData.elementAt(m)).maxLogProbs.size(); x++)
+			for(int x = 0; x < sData.elementAt(m).maxLogProbs.size(); x++)
 			{
 				sum = modelSums[x]; // get current sum for this model (x)
 				
-				sum = sum + Double.parseDouble((String)((Vector)((Sequence)sData.elementAt(m)).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+				sum = sum + Double.parseDouble((String)((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
 				modelSums[x] = sum;
 			}
 		}
@@ -747,10 +747,10 @@ public class Alignment {
 				if(mask[i] == 0)
 					alnm += ((String)pData.get(j)).charAt(i);
 			}		
-			alnm += " "+((Sequence)sData.elementAt(j)).organism+" ";
+			alnm += " " + sData.elementAt(j).organism + " ";
 			
-			for(int x = 0; x < ((Sequence)sData.elementAt(j)).maxLogProbs.size(); x++)
-				alnm += modNames.get(indices[x]) + " score: " + ((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(indices[x])).get(0) + " ";
+			for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
+				alnm += modNames.get(indices[x]) + " score: " + ((Vector)sData.elementAt(j).maxLogProbs.get(indices[x])).get(0) + " ";
 			alignmentVect.add(alnm);
 		}
 		return alignmentVect;
@@ -781,21 +781,21 @@ public class Alignment {
 
 		for (int k=0; k< modNames.size(); k++)
 		{
-			tinyModNames.add(((String)modNames.get(k)).substring(0,8));
+			tinyModNames.add(modNames.get(k).substring(0,8));
 		}
 		
 		// parse all sequences against models
 		for(int k = 0; k < modNames.size(); k++)
 		{
-			sData  = Alignment.doParse(sData,numSequences,(String)modNames.get(k),range);
+			sData  = Alignment.doParse(sData, numSequences, modNames.get(k), range);
 		}
 
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < ((Sequence)sData.elementAt(m)).maxLogProbs.size(); x++)
+			for(int x = 0; x < sData.elementAt(m).maxLogProbs.size(); x++)
 			{
-				String temp = String.valueOf(((Vector)((Sequence)sData.elementAt(m)).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+				String temp = String.valueOf(((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
 				double tempo = Double.parseDouble(temp);
 				modelSums[x] += tempo;
 			}
@@ -851,7 +851,7 @@ public class Alignment {
 		}
 		
 		for (int i = 0; i < sData.size(); i++)
-			pData.add(((Sequence)sData.get(i)).parseData);
+			pData.add(sData.get(i).parseData);
 
 		int[] mask = stripDash(pData);
 		String alnm = "";
@@ -863,14 +863,14 @@ public class Alignment {
 			for(int i = 0; i < mask.length; i++)
 			{
 				if(mask[i] == 0)
-					alnm += ((String)pData.get(j)).charAt(i);
+					alnm += pData.get(j).charAt(i);
 			}		
-			alnm += " "+((Sequence)sData.elementAt(j)).organism+" ";
+			alnm += " " + sData.elementAt(j).organism + " ";
 			
-			for(int x = 0; x < ((Sequence)sData.elementAt(j)).maxLogProbs.size(); x++)
+			for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
 			{
 				fmt = new Formatter();
-				fmt.format("%10.6f", ((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(indices[x])).get(0));
+				fmt.format("%10.6f", ((Vector)sData.elementAt(j).maxLogProbs.get(indices[x])).get(0));
 				alnm += tinyModNames.get(indices[x]) + " score: " + fmt + " ";
 			}
 			alignmentVect.add(alnm);
@@ -898,7 +898,7 @@ public class Alignment {
 		// remove http:// from model names
 			for(int k = 0; k < modNames.size(); k++)
 			{
-				shortModNames.add(((String)modNames.get(k)).substring(33,((String)modNames.get(k)).length()-4));
+				shortModNames.add(modNames.get(k).substring(33, modNames.get(k).length()-4));
 			}
 		}
 		else
@@ -908,29 +908,29 @@ public class Alignment {
 
 		for (int k=0; k< modNames.size(); k++)
 		{
-			tinyModNames.add(((String)modNames.get(k)).substring(0,6));
+			tinyModNames.add(modNames.get(k).substring(0,6));
 		}
 		
 		// parse sequence data in sData against models
 		for(int k = 0; k < modNames.size(); k++)
 		{
-			sData  = Alignment.doParse(sData,numSequences,(String)modNames.get(k),range);
-			rsData = Alignment.doParse(rsData,numSequences,(String)modNames.get(k),range);
+			sData  = Alignment.doParse(sData, numSequences, modNames.get(k), range);
+			rsData = Alignment.doParse(rsData, numSequences, modNames.get(k), range);
 		}
 
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < ((Sequence)sData.elementAt(m)).maxLogProbs.size(); x++)
+			for(int x = 0; x < sData.elementAt(m).maxLogProbs.size(); x++)
 			{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-				String temp = String.valueOf(((Vector)((Sequence)sData.elementAt(m)).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+				String temp = String.valueOf(((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
 				double tempo = Double.parseDouble(temp);   
 		//		System.out.print(tempo+"  ");
 				modelSums[x] += tempo;
 
-				temp = String.valueOf(((Vector)((Sequence)rsData.elementAt(m)).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+				temp = String.valueOf(((Vector)rsData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
 				tempo = Double.parseDouble(temp);
 				rmodelSums[x] += tempo;
 			}
@@ -1002,16 +1002,16 @@ public class Alignment {
 		
 		//		 align again to get max prob alignment
         if (reversed[indices[0]]==0) {
-        	sData  = Alignment.doParse(sData,numSequences,(String)modNames.get(indices[0]),range);
-        	System.out.println("parsing forward again "+(String)modNames.get(indices[0])+" "+indices[0]);
+        	sData  = Alignment.doParse(sData, numSequences, modNames.get(indices[0]), range);
+        	System.out.println("parsing forward again " + modNames.get(indices[0]) + " " + indices[0]);
     		for (int i = 0; i < sData.size(); i++)
-    			pData.add(((Sequence)sData.get(i)).parseData);  
+    			pData.add(sData.get(i).parseData);  
         }
         else {
-        	rsData = Alignment.doParse(rsData,numSequences,(String)modNames.get(indices[0]),range);
-        	System.out.println("parsing reversed again "+(String)modNames.get(indices[0])+" "+indices[0]);
+        	rsData = Alignment.doParse(rsData, numSequences, modNames.get(indices[0]),range);
+        	System.out.println("parsing reversed again " + modNames.get(indices[0]) + " " + indices[0]);
     		for (int i = 0; i < sData.size(); i++)
-    			pData.add(((Sequence)rsData.get(i)).parseData); 
+    			pData.add(rsData.get(i).parseData); 
         }
 		
 		
@@ -1026,7 +1026,7 @@ public class Alignment {
 			for(int i = 0; i < mask.length; i++)
 			{
 				if(mask[i] == 0)
-					alnm += ((String)pData.get(j)).charAt(i);
+					alnm += pData.get(j).charAt(i);
 			}		
 			
 			if (j > 0) {
@@ -1035,9 +1035,9 @@ public class Alignment {
 			{
 				fmt = new Formatter();
 				if (reversed[indices[x]] == 0)
-					fmt.format("%12.6f", ((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(indices[x])).get(0));
+					fmt.format("%12.6f", ((Vector)sData.elementAt(j).maxLogProbs.get(indices[x])).get(0));
 				else
-					fmt.format("%12.6f", ((Vector)((Sequence)rsData.elementAt(j)).maxLogProbs.get(indices[x])).get(0));
+					fmt.format("%12.6f", ((Vector)rsData.elementAt(j).maxLogProbs.get(indices[x])).get(0));
 				alnm += tinyModNames.get(indices[x]) + " score: " + fmt + " ";
 			}
 			}
@@ -1053,12 +1053,12 @@ public class Alignment {
 		{
 			for(int j = 0; j < aData.size(); j++)
 			{
-				if((f+1)*numChars > ((String)aData.get(j)).length())
+				if((f+1)*numChars > aData.get(j).length())
 				{
-					System.out.println(((String)aData.get(j)).substring(f*numChars, ((String)aData.get(j)).length()));
+					System.out.println(aData.get(j).substring(f*numChars, aData.get(j).length()));
 				}
 				else
-					System.out.println(((String)aData.get(j)).substring(f*numChars, (f+1)*numChars));
+					System.out.println(aData.get(j).substring(f*numChars, (f+1)*numChars));
 			}
 			System.out.println();
 		}
@@ -1086,9 +1086,9 @@ public class Alignment {
 			}
 			else
 			{
-				temp += ">"+((Sequence)sData.elementAt(j)).organism + " ";
-				for(int x = 0; x < ((Sequence)sData.elementAt(j)).maxLogProbs.size(); x++)
-					temp += ((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(x)).get(0);
+				temp += ">" + sData.elementAt(j).organism + " ";
+				for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
+					temp += ((Vector)sData.elementAt(j).maxLogProbs.get(x)).get(0);
 				temp += "\n";
 			}
 			for(int i = 0; i < mask.length; i++)
@@ -1116,16 +1116,16 @@ public class Alignment {
 		Sequence S = new Sequence("","");                        // blank sequence to use repeatedly 
 		S.addNodeData(nodeFileName);	                         // only add node data once
 
-		((Sequence)sData.elementAt(0)).parseData = ((InitialNode)S.first).header();
+		sData.elementAt(0).parseData = ((InitialNode)S.first).header();
 
-		Sequence firstS = (Sequence)sData.elementAt(1);          // first sequence, which matches the model
+		Sequence firstS = sData.elementAt(1);          // first sequence, which matches the model
 		firstS.setNucleotides();
 		firstS.setArrays();
 		
 		for (int i = 1; i < Math.min(sData.size(),numSequences+1); i++) 
 		{
-			S.organism = ((Sequence)sData.elementAt(i)).organism;             // focus on one sequence
-			S.letters  = ((Sequence)sData.elementAt(i)).letters;
+			S.organism = sData.elementAt(i).organism;             // focus on one sequence
+			S.letters  = sData.elementAt(i).letters;
 			
 			// System.out.println("Alignment.doParse: " + S.letters);
 			
@@ -1166,7 +1166,7 @@ public class Alignment {
 				}
 			}
 			probsM.add(mProbs);
-			((Sequence)sData.elementAt(i)).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
+			sData.elementAt(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 			
 		}
 		Double[][] probsArray = Alignment.vec2array(probsM);
@@ -1200,17 +1200,17 @@ public class Alignment {
 		// parse sequence data in sData against models
 		for(int k = 0; k < modNames.size(); k++)
 		{
-			sData  = Alignment.doParse(sData,numSequences,(String)modNames.get(k),range);
+			sData  = Alignment.doParse(sData, numSequences, modNames.get(k), range);
 		}
 
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < ((Sequence)sData.elementAt(m)).maxLogProbs.size(); x++)
+			for(int x = 0; x < sData.elementAt(m).maxLogProbs.size(); x++)
 			{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-				String temp = String.valueOf(((Vector)((Sequence)sData.elementAt(m)).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+				String temp = String.valueOf(((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
 				double tempo = Double.parseDouble(temp);   
 				scores[m][x] = tempo;
 			}
@@ -1226,7 +1226,7 @@ public class Alignment {
 		{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-				String temp = String.valueOf(((Vector)((Sequence)sData.elementAt(m+1)).maxLogProbs.get(0)).get(0)); // get score for this sequence(m)
+				String temp = String.valueOf(((Vector)sData.elementAt(m+1).maxLogProbs.get(0)).get(0)); // get score for this sequence(m)
 				double tempo = Double.parseDouble(temp);   
 				scores[m] = tempo;
 		}
@@ -1255,7 +1255,7 @@ public class Alignment {
 	    MotifGroup group;
 	    for(int k = 0; k < modNames.size(); k++)
 		{
-	    	group = (MotifGroup)groupData.get((String)modNames.get(k));
+	    	group = groupData.get(modNames.get(k));
 			sData  = Alignment.doParse(sData,numSequences,group.Model,range,Boolean.TRUE);
 			rsData = Alignment.doParse(rsData,numSequences,group.Model,range,Boolean.TRUE);
 		}
@@ -1263,16 +1263,16 @@ public class Alignment {
 //Add up model scores for each sequence, find mean score, compare regular and reversed scores
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < ((Sequence)sData.elementAt(m)).maxLogProbs.size(); x++)
+			for(int x = 0; x < sData.elementAt(m).maxLogProbs.size(); x++)
 			{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-				String temp = String.valueOf(((Vector)((Sequence)sData.elementAt(m)).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+				String temp = String.valueOf(((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
 				double tempo = Double.parseDouble(temp);   
 				modelSums[x] += tempo;
 				modelScoreMat[x][m] = tempo;
 
-				temp = String.valueOf(((Vector)((Sequence)rsData.elementAt(m)).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+				temp = String.valueOf(((Vector)rsData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
 				tempo = Double.parseDouble(temp);
 				rmodelSums[x] += tempo;
 				rmodelScoreMat[x][m] = tempo;
@@ -1313,11 +1313,11 @@ public class Alignment {
 		for(int g = 0; g < modNames.size(); g++)
 		{
 			int index = indices[g];
-			String groupName = (String)tinyModNames.get(index);
+			String groupName = tinyModNames.get(index);
 			String sig;
 			boolean rev;
 			double[] groupScores = new double[sData.size()];
-			group = (MotifGroup)groupData.get(groupName);
+			group = groupData.get(groupName);
 			if (reversed[index] == 0){  //not reversed
 				rev = Boolean.FALSE;
 				sig = group.Signature[0]; 
@@ -1374,16 +1374,16 @@ public class Alignment {
 			S.addNodeData(nodeInfo);	                     // add model data from file
 		}
 
-		((Sequence)sData.elementAt(0)).parseData = ((InitialNode)S.first).header(); // add a header line
+		sData.elementAt(0).parseData = ((InitialNode)S.first).header(); // add a header line
 
-		Sequence firstS = (Sequence)sData.elementAt(1);          // first sequence, which matches the model
+		Sequence firstS = sData.elementAt(1);          // first sequence, which matches the model
 		firstS.setNucleotides();
 		firstS.setArrays();
 		
 		for (int i = 1; i < Math.min(sData.size(),numSequences+1); i++) 
 		{
-			S.organism = ((Sequence)sData.elementAt(i)).organism;             // focus on one sequence
-			S.letters  = ((Sequence)sData.elementAt(i)).letters;			
+			S.organism = sData.elementAt(i).organism;             // focus on one sequence
+			S.letters  = sData.elementAt(i).letters;			
 			S.setNucleotides();                                    // strip dashes from sequence
 			S.setArrays();                                         // define cti, itc, convert letters to numbers
 
@@ -1421,7 +1421,7 @@ public class Alignment {
 				}
 			}
 			
-			((Sequence)sData.elementAt(i)).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
+			sData.elementAt(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 			
 			String correspondences = ((InitialNode)S.first).showCorrespondences(S.nucleotides);
 
@@ -1433,7 +1433,7 @@ public class Alignment {
 			
 			String NF = "MMM";                           // model name goes here
 			correspondences = correspondences.replace("MMM", NF);
-			((Sequence)sData.elementAt(i)).correspondences = correspondences;
+			sData.elementAt(i).correspondences = correspondences;
 		}
 		return sData;
 	}
