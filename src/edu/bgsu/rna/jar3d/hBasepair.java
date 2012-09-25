@@ -156,7 +156,6 @@ public class hBasepair extends BasicNode {
    			setOptimalAndRelease(i,j);
 
    			// if setOptimalAndReleased was already done, don't go on to the child!
-//			alreadyDone = setOptimalAndRelease(i,j);
    			
    			if(optimalGen1.deleted)
   			{

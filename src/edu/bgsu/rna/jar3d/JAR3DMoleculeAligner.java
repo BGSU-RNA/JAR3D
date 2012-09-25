@@ -17,7 +17,6 @@ public class JAR3DMoleculeAligner {
 		if (args.length>0)
 		{
 			System.setProperty("user.dir",args[0]);
-			// System.out.println(System.getProperty("user.dir"));
 			DNA = (int)(Double.parseDouble(args[4]));
 			Vector<Sequence> sequenceData = Alignment.loadFastaColumnsDNA(args[1],0,0,DNA); 
 			numSequences = (int)(Double.parseDouble(args[3]));

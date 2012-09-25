@@ -27,7 +27,6 @@ public class HairpinNode extends BasicNode {
 		if (numfix > 0)
 		{			
 			numFixed    = numfix;
-//			System.out.println("HairpinNode "+numfix);
 			insertions  = new Vector<InsertionDistribution>(numFixed);
 			for (int i = 0; i<numFixed; i++)
 			{

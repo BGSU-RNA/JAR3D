@@ -54,7 +54,6 @@ public class BasepairNode extends BasicNode {
         
         lInsDist = new InsertionDistribution(lLenDist, lLetDist);
         rInsDist = new InsertionDistribution(rLenDist, rLetDist);
-//        System.out.println("BasepairNode: rLetDist length "+rLetDist.length);
  	}
 
 	
@@ -100,9 +99,6 @@ public class BasepairNode extends BasicNode {
 			// consider the possibility of generating a pair and various numbers of insertions
 			
 			// for loop that sets maxLogProb[i-super.iMin][j-super.jMin]
-
-			/*pc[0] = seq.code[i];
-			pc[1] = seq.code[j];*/
 			
 			pli = 0;					// 0 left insertions so far
 			
@@ -127,8 +123,6 @@ public class BasepairNode extends BasicNode {
   					prl = rInsDist.logLengthDist[b];
   					pri = priarray[b];
 					pnew = super.child.getMaxLogProb(i+a+1,j-b-1);
-					//System.out.println("Basepair " + seq.code[i]+" "+seq.code[j]);
-					//System.out.println("Basepair " + pairLogProb[seq.code[i]][seq.code[j]]);
 					pnew = pnew + pairLogProb[seq.code[i]][seq.code[j]];
 					pnew = pnew + pll + pli + prl + pri;
   	  				if (pnew > p) {

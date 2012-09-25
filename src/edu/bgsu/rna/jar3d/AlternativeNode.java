@@ -50,7 +50,6 @@ public class AlternativeNode extends BranchingNode {
 			int branch = 0;
 			for(int l = 0; l < probDist.length; l++)
 			{
-			//  System.out.println("Alternative node: i="+i+" j="+j+" l="+l);
 				pnew = logProbDist[l] + ((Node)super.children.get(l)).getMaxLogProb(i,j); 
 				if(pnew > p)
 				{
@@ -73,10 +72,6 @@ public class AlternativeNode extends BranchingNode {
 
   			for (int k = 0; k < branches; k++)
   	   			((Node)super.children.get(k)).traceback(i,j);
-  				
-  			
-//   			int branch = optimalGen.branch;
-//   			((Node)super.children.get(branch)).traceback(i,j);
   		}
   		else
   			System.out.println("Alternative node out of range");
@@ -96,7 +91,6 @@ public class AlternativeNode extends BranchingNode {
   				String newChild = ((Node)children.get(i)).showParse(n);
   				if (i != optimalGen1.branch)
   				{
-//  				newChild = newChild.replace("-","+");
   					newChild = newChild.replace("A","+");  // replace letters with + symbol to indicate this branch was not used
   					newChild = newChild.replace("C","+");
   					newChild = newChild.replace("G","+");

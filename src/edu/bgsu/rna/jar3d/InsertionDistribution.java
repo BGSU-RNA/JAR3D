@@ -35,7 +35,6 @@ public class InsertionDistribution {
 	public String generate()
 	{
 		char letters[] = new char[]{'A','C','G','U'};
-//		char letters[] = new char[]{'a','c','g','u'};
 
 		int length = rnaMath.rando(lengthDist);
 		String insert = "";
@@ -57,12 +56,8 @@ public class InsertionDistribution {
 	{
 		double p;
 		p = logLengthDist[codes.length];       // probability of this length of insertion
-//System.out.println("InsertionDistribution.computeLogProb: codes length is "+codes.length);
-//System.out.println("InsertionDistribution.computeLogProb: logLetterDist length is "+logLetterDist.length);
-//System.out.println(letterDist[0]+" "+letterDist[1]+" "+letterDist[2]+" "+letterDist[3]);
-for (int i = 0; i < codes.length; i++)
+		for (int i = 0; i < codes.length; i++)
 		{
-//System.out.println("InsertionDistribution.computeLogProb: codes[i] = "+codes[i]);
 			p += logLetterDist[codes[i]];
 		}
 			return p;

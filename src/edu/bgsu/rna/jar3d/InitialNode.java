@@ -27,7 +27,6 @@ public class InitialNode extends BasicNode {
 		//	normalize is a function that makes sure all the array's elements add up to 1
         lInsDist = new InsertionDistribution(lLenDist, lLetDist);
         rInsDist = new InsertionDistribution(rLenDist, rLetDist);
-//      System.out.println("InitialNode: rLetDist length "+rLetDist.length);
 
 	}
 
@@ -65,7 +64,6 @@ public class InitialNode extends BasicNode {
   			{
 				priarray[b] = priarray[b-1];
 				int c = seq.code[j-b+1];
-//				System.out.println(i+" "+j+" "+b+" "+seq.code[0]+" "+c);
 				priarray[b] += rInsDist.logLetterDist[c];
   			} // end for loop
 
@@ -91,12 +89,6 @@ public class InitialNode extends BasicNode {
   	  		} // end for loop
   			maxLogProb[i-iMin][j-jMin] = p;
   			myGen[i-iMin][j-jMin] = new genData(aa,bb);
-  			/*
-  			if ((p < -99999999))
-			{
-				System.out.println("Initial node with -Inf prob.  "+i+" "+j+" "+leftIndex+" "+rightIndex);
-			}
-			*/
 		} // end if loop
 	}// end method computMaxLogProb
 
