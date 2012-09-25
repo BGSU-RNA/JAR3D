@@ -1230,7 +1230,7 @@ public class Alignment {
 	}
 	
 	//Takes a JAR3D query and submits results to MySQL database
-	public static List doILdbQuery(int loopID, Query query, Vector<Sequence> sData, Vector<String> modNames, HashMap<String, MotifGroup> groupData, int numSequences, int range)
+	public static List<LoopResult> doILdbQuery(int loopID, Query query, Vector<Sequence> sData, Vector<String> modNames, HashMap<String, MotifGroup> groupData, int numSequences, int range)
 	{
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed

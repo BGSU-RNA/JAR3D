@@ -884,9 +884,9 @@ public class Sequence {
 	}
 	
 	//Overloaded getModelNames for the new file system
-	public static Vector getModelNames(String folder, String modelType, boolean Structured)
+	public static Vector<String> getModelNames(String folder, String modelType, boolean Structured)
 	{
-		Vector modelNames = new Vector();
+		Vector<String> modelNames = new Vector<String>();
 		char fsep = File.separatorChar;
 		String listName;
 		if(Structured){
