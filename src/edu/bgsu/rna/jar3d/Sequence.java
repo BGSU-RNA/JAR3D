@@ -1,8 +1,7 @@
 package edu.bgsu.rna.jar3d;
+
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
@@ -177,8 +176,6 @@ public class Sequence {
 		int charCnt = 0;
 		String nodeLine = "";
 		String dataString = "";
-		String comment = "";
-		int numFix = 0;
 		StringTokenizer element;
 		boolean flag = true;
 		boolean isHairpin = true;
@@ -197,10 +194,8 @@ public class Sequence {
 			if (!nodeLine.equals("//") && (!nodeLine.equals("")))
 			{
 				Vector numDatas = new Vector(); // to hold arrays of doubles
-				Vector stringData = new Vector();
 				if(nodeLine.indexOf("//") != -1)
 				{
-					comment = nodeLine.substring(nodeLine.indexOf("//"),nodeLine.length());
 					nodeLine = nodeLine.substring(0,nodeLine.indexOf("//"));
 				}
 				StringTokenizer st = new StringTokenizer(nodeLine,"|");
@@ -495,8 +490,6 @@ public class Sequence {
 		int charCnt = 0;
 		String nodeLine = "";
 		String dataString = "";
-		String comment = "";
-		int numFix = 0;
 		StringTokenizer element;
 		boolean flag = true;
 		boolean isHairpin = true;
@@ -509,7 +502,6 @@ public class Sequence {
 			{
 				String curDir = System.getProperty("user.dir");
 		        curDir = curDir.replace(File.separator + "bin","");
-				int z = 0;
 	
 				try
 				{
@@ -549,10 +541,8 @@ public class Sequence {
 				if (!nodeLine.equals("//") && (!nodeLine.equals("")))
 				{
 					Vector numDatas = new Vector(); // to hold arrays of doubles
-					Vector stringData = new Vector();
 					if(nodeLine.indexOf("//") != -1)
 					{
-						comment = nodeLine.substring(nodeLine.indexOf("//"),nodeLine.length());
 						nodeLine = nodeLine.substring(0,nodeLine.indexOf("//"));
 					}
 					StringTokenizer st = new StringTokenizer(nodeLine,"|");
@@ -838,9 +828,9 @@ public class Sequence {
 	 * but if it can't look there, it looks online at rna.bgsu.edu/JAR3D.
 	 */
 	
-	public static Vector getModelNames(String loopType)
+	public static Vector<String> getModelNames(String loopType)
 	{
-		Vector modelNames = new Vector();
+		Vector<String> modelNames = new Vector<String>();
 		String listName = loopType + "_Models.txt";
 
 	try {
@@ -943,9 +933,9 @@ public class Sequence {
 	 * 
 	 */
 	
-	public static Vector readTextFile(String fileName)
+	public static Vector<String> readTextFile(String fileName)
 	{
-		Vector lineValues = new Vector();
+		Vector<String> lineValues = new Vector<String>();
 
 	try {
 		String curDir = System.getProperty("user.dir");
