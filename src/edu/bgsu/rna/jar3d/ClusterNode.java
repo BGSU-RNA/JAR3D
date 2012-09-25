@@ -9,7 +9,7 @@ import java.util.*;
 public class ClusterNode extends BasicNode {
 
 	LinkedList interactions = new LinkedList();
-	Vector insertions;
+	Vector<InsertionDistribution> insertions;
 	int numLeftInt, numRightInt;
 	double normalizationZ;
 	int[] maxLengths;
@@ -36,7 +36,7 @@ public class ClusterNode extends BasicNode {
 		
 		// System.out.println("ClusterNode.constructor normalization constant " + normalizationZ);
 		
-		insertions = new Vector(numLeftInt+numRightInt);
+		insertions = new Vector<InsertionDistribution>(numLeftInt+numRightInt);
 		for (int i = 0; i<numLeftInt+numRightInt; i++)
 		{
             // This dummy setting is below changed when an insertion is added
@@ -201,13 +201,13 @@ public class ClusterNode extends BasicNode {
 	 * This method generates insertions for the ClusterNode
 	 * @return
 	 */
-	public Vector generateInsertions()
+	public Vector<String> generateInsertions()
 	{
-		Vector ins = new Vector(numLeftInt+numRightInt);
+		Vector<String> ins = new Vector<String>(numLeftInt+numRightInt);
 		String temp = "";
 		for(int i = 0; i < ins.capacity(); i++)
 		{
-			 temp = ((InsertionDistribution)insertions.get(i)).generate();
+			 temp = insertions.get(i).generate();
 			 ins.add(temp);
 		}
 		return ins;
@@ -217,7 +217,7 @@ public class ClusterNode extends BasicNode {
 	{
 		String[] bases = generateInteractingBases();
 		
-		Vector subseq = generateInsertions();
+		Vector<String> subseq = generateInsertions();
 		
 		String left = "";
 		String right = "";
