@@ -158,7 +158,7 @@ public class JAR3DMatlab {
 			for(int i = 0; i < mask.length; i++)
 			{
 				if(mask[i] == 0)
-					alnm += ((String)pData.get(j)).charAt(i);
+					alnm += pData.get(j).charAt(i);
 			}		
 			alnm += " "+((Sequence)sData.elementAt(j)).organism+" ";
 			for(int x = 0; x < ((Sequence)sData.elementAt(j)).maxLogProbs.size(); x++)
@@ -216,7 +216,7 @@ public class JAR3DMatlab {
 		}
 		for(int i=0; i<modelNames.size(); i++)
 		{
-			String nodeFileName = (String)modelNames.get(i);
+			String nodeFileName = modelNames.get(i);
 			Sequence S = new Sequence("","");                        // blank sequence
 			S.addNodeData(nodeFileName);	                         // only add node data once
 		}
