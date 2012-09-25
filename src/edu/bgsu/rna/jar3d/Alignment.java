@@ -44,9 +44,7 @@ public class Alignment {
 
 	public static Vector<Sequence> loadFasta(String fileName)
 	{
-		Vector<Sequence> sData = new Vector<Sequence>();
-		sData = loadFastaColumns(fileName,0,0);
-		return sData;
+		return loadFastaColumns(fileName,0,0);
 	}
 
 	/**
@@ -60,9 +58,7 @@ public class Alignment {
 
 	public static Vector<Sequence> loadFastaColumns(String fileName, int StartCol, int EndCol)
 	{
-		Vector<Sequence> sData = new Vector<Sequence>();
-		sData = loadFastaColumnsDNA(fileName,StartCol,EndCol,0);
-		return sData;
+		return loadFastaColumnsDNA(fileName,StartCol,EndCol,0);
 	}
 
 	/**
