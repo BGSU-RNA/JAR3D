@@ -1,8 +1,7 @@
 package edu.bgsu.rna.jar3d;
+
 import java.io.*;
 import java.util.*; 
-
-import edu.bgsu.rna.jar3d.results.LoopResult;
 
 /**
  * This is the Alignment class, it has methods that are used to facilitate aligning sequences
@@ -22,7 +21,7 @@ public class JAR3DMatlab {
 	
 	public static String ModelCorrespondences(String fastaFileName, String modelFileName, int numSequences)
 	{
-		Vector sequenceData = Alignment.loadFasta(fastaFileName);
+		Vector<Sequence> sequenceData = Alignment.loadFasta(fastaFileName);
 		sequenceData = Alignment.doParse(sequenceData,numSequences,modelFileName,15);
 
 		Alignment.displayAlignmentFASTA(sequenceData, numSequences);
@@ -62,12 +61,11 @@ public class JAR3DMatlab {
 	{
 		int numSequences = 1000;                            // make sure this is larger than needed	
 		String FASTAName = "";
-		Vector sData;
-		Vector scores = new Vector();
+		Vector<Sequence> sData;
         
 		System.setProperty("user.dir",UserDir);
 
-		Vector modelNames = Sequence.getModelNames(loopType);  // read file listing model names
+		Vector<String> modelNames = Sequence.getModelNames(loopType);  // read file listing model names
 
 		System.out.println("Read " + modelNames.size() + " model names");
 		
@@ -79,7 +77,6 @@ public class JAR3DMatlab {
 	    {
 	        FASTAName = ((String)modelNames.get(m)).replace(".txt",".fasta");
 	        System.out.println("Aligning sequences from "+FASTAName);
-	//        System.out.println("JAR3DMatlab.MotifTest: sequences\\"+FASTAName);
 	        sData = Alignment.loadFasta(FASTAName); 
 	        double[] newscores = new double[2*modelNames.size()];
             if (loopType.equals("IL"))
@@ -88,8 +85,6 @@ public class JAR3DMatlab {
             	for (int g=0; g < 2*modelNames.size(); g++)
             		S[m][g] = newscores[g];
             }
-//            else if (loopType.equals("HL"))
-//            	newscores = Alignment.getSortedHLAlignment(sData,modelNames,numSequences,100);
       	    }	    
 	    return S;
 	}
@@ -108,14 +103,13 @@ public class JAR3DMatlab {
 	{
 		int numSequences = 10000;                     // make sure this is larger than needed	
 		String FASTAName = "";
-		Vector sData;
-		Vector scores = new Vector();
+		Vector<Sequence> sData;
         
 		System.setProperty("user.dir",UserDir);
 		
-		Vector modelNames = Sequence.readTextFile("Models" + File.separator + modelNameFile);  // read file listing model names
+		Vector<String> modelNames = Sequence.readTextFile("Models" + File.separator + modelNameFile);  // read file listing model names
 		System.out.println("Read " + modelNames.size() + " model names");
-		Vector sequenceNames = Sequence.readTextFile("Sequences" + File.separator + sequenceNameFile);  // read file listing model names
+		Vector<String> sequenceNames = Sequence.readTextFile("Sequences" + File.separator + sequenceNameFile);  // read file listing model names
 		System.out.println("Read " + sequenceNames.size() + " sequence names");
 		
 		double[][] S;
@@ -130,7 +124,6 @@ public class JAR3DMatlab {
 	    {
 	        FASTAName = ((String)sequenceNames.get(m));
 	        System.out.println("Aligning sequences from "+FASTAName);
-	//        System.out.println("JAR3DMatlab.MotifTest: sequences\\"+FASTAName);
 	        sData = Alignment.loadFasta(FASTAName); 
 	        double[] newscores = new double[2*modelNames.size()];
             if (loopType.equals("IL"))
@@ -149,7 +142,7 @@ public class JAR3DMatlab {
 	
 	public static Vector Display(Vector sData)
     {
-		Vector pData = new Vector();
+		Vector<String> pData = new Vector<String>();
 		
 		for (int i = 0; i < sData.size(); i++)
 		{
@@ -165,9 +158,6 @@ public class JAR3DMatlab {
 		for(int j = 0; j < pData.size(); j++)
 		{
 			alnm = "";
-//			for(int x = 0; x < ((Sequence)sData.elementAt(j)).maxLogProbs.size(); x++)
-//				alnm += ((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(x)).get(0);
-//			alnm += "   ";
 			for(int i = 0; i < mask.length; i++)
 			{
 				if(mask[i] == 0)
@@ -185,13 +175,11 @@ public class JAR3DMatlab {
 	public static double[][] MotifParseAll(String UserDir, String SeqFile, String loopType) 
 	{
 		int numSequences = 10000;                            // make sure this is larger than needed	
-		String FASTAName = "";
-		Vector sData;
-		Vector scores = new Vector();
+		Vector<Sequence> sData;
 		
 		System.setProperty("user.dir",UserDir);
 		
-		Vector modelNames = Sequence.getModelNames(loopType);
+		Vector<String> modelNames = Sequence.getModelNames(loopType);
 		
 
 	    sData = Alignment.loadFasta(SeqFile);
@@ -200,16 +188,12 @@ public class JAR3DMatlab {
         {
           	S = Alignment.getILScores(sData,modelNames,numSequences,100);
         }
-//            else if (loopType.equals("HL"))
-//            	newscores = Alignment.getSortedHLAlignment(sData,modelNames,numSequences,100);
 	    return S;
 	}
 	public static double[] MotifParseSingle(String UserDir, String SeqFile, String ModFile) 
 	{
 		int numSequences = 100010;                            // make sure this is larger than needed	
-		String FASTAName = "";
-		Vector sData;
-		Vector scores = new Vector();
+		Vector<Sequence> sData;
 		
 		System.setProperty("user.dir",UserDir);
 		
@@ -226,13 +210,12 @@ public class JAR3DMatlab {
 
 	public static void WriteModelDists(String UserDir, String loopType,int distSize)
 	{
-		Vector sData;
-		Vector tinyModNames = new Vector();
+		Vector<String> tinyModNames = new Vector<String>();
 		
-		Vector modelNames = Sequence.getModelNames(loopType);
+		Vector<String> modelNames = Sequence.getModelNames(loopType);
 		for (int k=0; k< modelNames.size(); k++)
 		{
-			tinyModNames.add(((String)modelNames.get(k)).substring(0,5));
+			tinyModNames.add(modelNames.get(k).substring(0,5));
 		}
 		for(int i=0; i<modelNames.size(); i++)
 		{
@@ -244,8 +227,8 @@ public class JAR3DMatlab {
 	public static int[][] DisplayEditDists(String UserDir, String seqFile1, String seqFile2, String loopType){
 		System.setProperty("user.dir",UserDir);
 		
-		Vector seqData1 = Alignment.loadFasta(seqFile1);
-		Vector seqData2 = Alignment.loadFasta(seqFile1);
+		Vector<Sequence> seqData1 = Alignment.loadFasta(seqFile1);
+		Vector<Sequence> seqData2 = Alignment.loadFasta(seqFile1);
 		int[][] EditDistances;
 		if(loopType.equals("IL")){
 			boolean rev = false;
