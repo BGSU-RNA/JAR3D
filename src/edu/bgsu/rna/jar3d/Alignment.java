@@ -20,11 +20,11 @@ import java.sql.*;
  */
 public class Alignment {
 
-	public static Vector JAR3D(String UserDir, String FastaFile, String ModelFile, int numSequences, int DNA, int range) 
+	public static Vector<Sequence> JAR3D(String UserDir, String FastaFile, String ModelFile, int numSequences, int DNA, int range) 
 	{
 		System.setProperty("user.dir",UserDir);
 //		 System.out.println(System.getProperty("user.dir"));
-		Vector sequenceData = Alignment.loadFastaColumnsDNA(FastaFile,0,0,DNA); 
+		Vector<Sequence> sequenceData = Alignment.loadFastaColumnsDNA(FastaFile,0,0,DNA); 
 		sequenceData = Alignment.doParse(sequenceData,numSequences,ModelFile,range);
 		Alignment.displayAlignmentFASTA(sequenceData,numSequences);	
 		return sequenceData;
@@ -39,9 +39,9 @@ public class Alignment {
 	 * @return
 	 */
 
-	public static Vector loadFasta(String fileName)
+	public static Vector<Sequence> loadFasta(String fileName)
 	{
-		Vector sData = new Vector();
+		Vector<Sequence> sData = new Vector<Sequence>();
 		sData = loadFastaColumns(fileName,0,0);
 		return sData;
 	}
@@ -55,9 +55,9 @@ public class Alignment {
 	 * @return
 	 */
 
-	public static Vector loadFastaColumns(String fileName, int StartCol, int EndCol)
+	public static Vector<Sequence> loadFastaColumns(String fileName, int StartCol, int EndCol)
 	{
-		Vector sData = new Vector();
+		Vector<Sequence> sData = new Vector<Sequence>();
 		sData = loadFastaColumnsDNA(fileName,StartCol,EndCol,0);
 		return sData;
 	}
@@ -73,9 +73,9 @@ public class Alignment {
 	 * @return
 	 */
 	
-	public static Vector loadFastaColumnsDNA(String fileName, int StartCol, int EndCol, int DNA)
+	public static Vector<Sequence> loadFastaColumnsDNA(String fileName, int StartCol, int EndCol, int DNA)
 		{
-		Vector sData = new Vector();
+		Vector<Sequence> sData = new Vector<Sequence>();
 		String temp="";
 		String organism="";
 		String letters="";
@@ -185,9 +185,9 @@ public class Alignment {
 	 * @param EndCol
 	 * @return
 	 */
-	public static Vector parseFastaText(String fastaText, int StartCol, int EndCol)
+	public static Vector<Sequence> parseFastaText(String fastaText, int StartCol, int EndCol)
 	{
-		Vector sData = new Vector();
+		Vector<Sequence> sData = new Vector<Sequence>();
 		String temp="";
 		String organism="";
 		String letters="";
@@ -237,9 +237,9 @@ public class Alignment {
 	 * @param sequenceData
 	 * @return
 	 */
-	public static Vector reverse(int numSequences, Vector sequenceData)
+	public static Vector<Sequence> reverse(int numSequences, Vector<Sequence> sequenceData)
 	{
-		Vector reverseSData = new Vector();
+		Vector<Sequence> reverseSData = new Vector<Sequence>();
 
 		String temp="";
 		String organism="";
@@ -322,11 +322,11 @@ public class Alignment {
 	 * @param range
 	 * @return
 	 */
-	public static Vector doParse(Vector sData, int numSequences, String nodeFileName, int range)
+	public static Vector<Sequence> doParse(Vector<Sequence> sData, int numSequences, String nodeFileName, int range)
 	{
 //		long start, stop, elapsed;
 		Node current;
-		Vector mProbs = new Vector();
+		Vector<Double> mProbs = new Vector<Double>();
 
 		Sequence S = new Sequence("","");                        // blank sequence to use repeatedly 
 		S.addNodeData(nodeFileName);	                         // only add node data once
@@ -366,7 +366,7 @@ public class Alignment {
 			// We need to store the max log probabilities too
 			//	pData.add(((InitialNode)S.first).showParse(S.nucleotides) + " " + ((Vector)(((Sequence)sData.elementAt(i)).maxLogProbs.get(0))).get(0));
 
-			mProbs = new Vector();
+			mProbs = new Vector<Double>();
 			current = S.first;
 //System.out.println(((InitialNode)S.first).showParse(S.nucleotides)+" ");
 			while(current != null)
@@ -375,7 +375,7 @@ public class Alignment {
 //System.out.println(current.mytype+" "+current.optimalMaxLogProb);
 				current =  current.next;
 			}
-			((Sequence)sData.elementAt(i)).maxLogProbs.add(mProbs);
+			sData.elementAt(i).maxLogProbs.add(mProbs);
 			if (S.first.optimalMaxLogProb < -99999999)
 			{
 //				System.out.println("Alignment.doParse: No good parse found, score "+S.first.optimalMaxLogProb);
@@ -413,12 +413,12 @@ public class Alignment {
 	 * @param modelNum is the number corresponding to which model to use (will probably be a text file soon)
 	 * @return
 	 */
-	public static Vector generateSyntheticData(int numSequences,int range)
+	public static Vector<Sequence> generateSyntheticData(int numSequences,int range)
 	{
 		Sequence S = new Sequence("Synthetic organism","AAAA");
 		S.addNodeData("");
 
-		Vector sData = new Vector();
+		Vector<Sequence> sData = new Vector<Sequence>();
 
 		sData.add(new Sequence("",""));
 
@@ -448,7 +448,7 @@ public class Alignment {
 	 * @param pData this is a vector of plain string sequences
 	 * @return
 	 */
-	public static int[] stripDash(Vector pData)
+	public static int[] stripDash(Vector<String> pData)
 	{
 		boolean found = false;
 		int[] mask = new int[((String)pData.get(0)).length()];
@@ -465,7 +465,7 @@ public class Alignment {
 			for(int i = 0; i < pData.size() && found != true; i++)
 			{
 				//System.out.println(" "+i + " " + (String)pData.get(i));
-				if(((String)pData.get(i)).charAt(j) != '-')
+				if(pData.get(i).charAt(j) != '-')
 					found = true;                                  // a non-dash has been found
 			}
 			//System.out.println();
@@ -479,7 +479,7 @@ public class Alignment {
 			found = false;
 			for(int i = 0; i < pData.size() && found != true; i++)
 			{
-				if(((String)pData.get(i)).charAt(j) != '(')
+				if(pData.get(i).charAt(j) != '(')
 					found = true;
 			}
 
@@ -493,7 +493,7 @@ public class Alignment {
 			found = false;
 			for(int i = 0; i < pData.size() && found != true; i++)
 			{
-				if(((String)pData.get(i)).charAt(j) != ')')
+				if(pData.get(i).charAt(j) != ')')
 					found = true;
 			}
 
@@ -507,7 +507,7 @@ public class Alignment {
 			found = false;
 			for(int i = 0; i < pData.size() && found != true; i++)
 			{
-				if(((String)pData.get(i)).charAt(j) != '[')
+				if(pData.get(i).charAt(j) != '[')
 					found = true;
 			}
 
@@ -521,7 +521,7 @@ public class Alignment {
 			found = false;
 			for(int i = 0; i < pData.size() && found != true; i++)
 			{
-				if(((String)pData.get(i)).charAt(j) != ']')
+				if(pData.get(i).charAt(j) != ']')
 					found = true;
 			}
 
@@ -538,16 +538,16 @@ public class Alignment {
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
 	 */
-	public static void displayAlignment(Vector sData, int numSequences)
+	public static void displayAlignment(Vector<Sequence> sData, int numSequences)
 	{
 		
-		Vector pData = new Vector();
+		Vector<String> pData = new Vector<String>();
 		
 //		System.out.println("Alignment.displayAlignment "+sData.size());
 
 		for (int i = 0; i < Math.min(numSequences+1,sData.size()); i++)
 		{
-			pData.add(((Sequence)sData.get(i)).parseData);
+			pData.add(sData.get(i).parseData);
 //System.out.println(pData.elementAt(i));
 		}
 		System.out.println("Displaying alignment ----------------"+pData.size());
@@ -587,14 +587,14 @@ public class Alignment {
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
 	 */
-	public static void displayAlignmentFASTA(Vector sData, int numSequences)
+	public static void displayAlignmentFASTA(Vector<Sequence> sData, int numSequences)
 	{
 		
-		Vector pData = new Vector();
+		Vector<String> pData = new Vector<String>();
 		
 		for (int i = 0; i < Math.min(numSequences+1,sData.size()); i++)
 		{
-			pData.add(((Sequence)sData.get(i)).parseData);
+			pData.add(sData.get(i).parseData);
 //System.out.println(pData.elementAt(i));
 		}
 		System.out.println("Displaying alignment ----------------"+pData.size());
@@ -640,14 +640,14 @@ public class Alignment {
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
 	 */
-	public static void listAlignmentAsCorrespondences(Vector sData, int numSequences, String SeqName, String ModelName)
+	public static void listAlignmentAsCorrespondences(Vector<Sequence> sData, int numSequences, String SeqName, String ModelName)
 	{
 		
-		Vector pData = new Vector();
+		Vector<String> pData = new Vector<String>();
 		
 		for (int i = 0; i < Math.min(numSequences+1,sData.size()); i++)
 		{
-			pData.add(((Sequence)sData.get(i)).parseData);
+			pData.add(sData.get(i).parseData);
 		}
 
 		int[] mask = stripDash(pData);
@@ -685,7 +685,7 @@ public class Alignment {
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
 	 */
-	public static void displayMaxLogProbs(Vector sData, int numSequences, int Motif, int R)
+	public static void displayMaxLogProbs(Vector<Sequence> sData, int numSequences, int Motif, int R)
 	{
 		
 /*		Vector pData = new Vector();
@@ -717,9 +717,9 @@ public class Alignment {
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
 	 */
-	public static Vector getAlignment(Vector sData, int numSequences)
+	public static Vector<String> getAlignment(Vector<Sequence> sData, int numSequences)
 	{
-		Vector pData = new Vector();
+		Vector<String> pData = new Vector<String>();
 		
 		for (int i = 0; i < Math.min(sData.size(),numSequences+1); i++)
 		{
@@ -729,7 +729,7 @@ public class Alignment {
 		
 		int[] mask = stripDash(pData);
 		String alnm = "";
-		Vector alignmentVect = new Vector();
+		Vector<String> alignmentVect = new Vector<String>();
 
 		alnm = "";
 		for(int i = 0; i < mask.length; i++)
@@ -762,11 +762,11 @@ public class Alignment {
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
 	 */
-	public static Vector getSortedAlignment(Vector seqNames, Vector modNames, int numSequences, int range)
+	public static Vector<String> getSortedAlignment(Vector<String> seqNames, Vector<String> modNames, int numSequences, int range)
 	{
-		Vector alignmentVect = new Vector();
-		Vector sData = new Vector();
-		Vector pData = new Vector();
+		Vector<String> alignmentVect = new Vector<String>();
+		Vector<Sequence> sData = new Vector<Sequence>();
+		Vector<String> pData = new Vector<String>();
 		double[] modelSums = new double[modNames.size()];
 		double[] modelScores = new double[modNames.size()];
 		double sum = 0;
@@ -866,27 +866,27 @@ public class Alignment {
 		return alignmentVect;
 	}
 	
-	public static double[] getSortedHLAlignment(Vector sData, Vector modNames, int numSequences, int range)
+	public static double[] getSortedHLAlignment(Vector<Sequence> sData, Vector<String> modNames, int numSequences, int range)
 	{
-		Vector alignmentVect = new Vector();
-		Vector pData = new Vector();
+		Vector<String> alignmentVect = new Vector<String>();
+		Vector<String> pData = new Vector<String>();
 		double[] modelSums = new double[modNames.size()];
 		double[] modelScores = new double[modNames.size()];
-		Vector shortModNames = new Vector();
-		Vector tinyModNames = new Vector();
+		Vector<String> shortModNames = new Vector<String>();
+		Vector<String> tinyModNames = new Vector<String>();
         double[] scores = new double[2*modNames.size()];;
 
-		if(((String)modNames.get(0)).contains("http"))
+		if(modNames.get(0).contains("http"))
 		{
 		// remove http:// from model names
 			for(int k = 0; k < modNames.size(); k++)
 			{
-				shortModNames.add(((String)modNames.get(k)).substring(33,((String)modNames.get(k)).length()-4));
+				shortModNames.add(modNames.get(k).substring(33, modNames.get(k).length() - 4));
 			}
 		}
 		else
 		{
-			shortModNames = new Vector(modNames);
+			shortModNames = new Vector<String>(modNames);
 		}
 
 		for (int k=0; k< modNames.size(); k++)
@@ -989,21 +989,20 @@ public class Alignment {
 		return scores;
 	}	
 
-	public static double[] getSortedILAlignment(Vector sData, Vector modNames, int numSequences, int range)
+	public static double[] getSortedILAlignment(Vector<Sequence> sData, Vector<String> modNames, int numSequences, int range)
 	{
-		Vector alignmentVect = new Vector();                   // alignment lines to output
-		Vector pData = new Vector();                           // parse data
+		Vector<String> pData = new Vector<String>();                           // parse data
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
 		double[] modelScores = new double[modNames.size()];
 		double[] rmodelScores = new double[modNames.size()];
-		Vector shortModNames = new Vector();                   // for easier display
-		Vector tinyModNames = new Vector();                    // for even easier display
+		Vector<String> shortModNames = new Vector<String>();                   // for easier display
+		Vector<String> tinyModNames = new Vector<String>();                    // for even easier display
 		int[] reversed = new int[modNames.size()];             // is best model reversed?
  //       String scores = "";
         double[] scores = new double[2*modNames.size()];       // all scores computed
 
-        Vector rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
+        Vector<Sequence> rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
 		
 		if(((String)modNames.get(0)).contains("http"))         // look online for models
 		{
@@ -1015,7 +1014,7 @@ public class Alignment {
 		}
 		else
 		{
-			shortModNames = new Vector(modNames);
+			shortModNames = new Vector<String>(modNames);
 		}
 
 		for (int k=0; k< modNames.size(); k++)
@@ -1168,9 +1167,9 @@ public class Alignment {
 		return scores;
 	}	
 	
-	public static void makeHTMLAlignment(Vector sData, int numSequences)
+	public static void makeHTMLAlignment(Vector<Sequence> sData, int numSequences)
 	{
-		Vector pData = new Vector();
+		Vector<String> pData = new Vector<String>();
 		String html = "";
 		
 		html+= "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n";
@@ -1193,7 +1192,6 @@ public class Alignment {
 	
 		int[] mask = stripDash(pData);
 		String alnm = "";
-		Vector alignmentVect = new Vector();
 	
 		for(int j = 0; j < Math.min(pData.size(),numSequences+1); j++)
 		{
@@ -1234,9 +1232,9 @@ public class Alignment {
 	    }
 	}
 
-	public static void printAlignment(Vector aData, int numChars)
+	public static void printAlignment(Vector<String> aData, int numChars)
 	{
-		for(int f = 0; f < ((String)aData.get(1)).length()/numChars+1; f++)
+		for(int f = 0; f < aData.get(1).length()/numChars+1; f++)
 		{
 			for(int j = 0; j < aData.size(); j++)
 			{
@@ -1251,14 +1249,14 @@ public class Alignment {
 		}
 	}
 
-	public static String tempdisplayAlignmentFASTA(Vector sData, int numSequences)
+	public static String tempdisplayAlignmentFASTA(Vector<Sequence> sData, int numSequences)
 	{
 		String temp = "";
-		Vector pData = new Vector();
+		Vector<String> pData = new Vector<String>();
 		
 		for (int i = 0; i < Math.min(numSequences+1,sData.size()); i++)
 		{
-			pData.add(((Sequence)sData.get(i)).parseData);
+			pData.add(sData.get(i).parseData);
 //System.out.println(pData.elementAt(i));
 		}
 		temp += "Displaying alignment ----------------"+pData.size()+"\n";
@@ -1301,11 +1299,11 @@ public class Alignment {
 		return temp;
 	}
 	
-	public static ParseData doParse2(Vector sData, int numSequences, String nodeFileName, int range)
+	public static ParseData doParse2(Vector<Sequence> sData, int numSequences, String nodeFileName, int range)
 	{
 //		long start, stop, elapsed;
 		Node current;
-		Vector mProbs = new Vector();
+		Vector<Double> mProbs = new Vector<Double>();
 		Vector probsM = new Vector();
 		
 		Sequence S = new Sequence("","");                        // blank sequence to use repeatedly 
@@ -1346,7 +1344,7 @@ public class Alignment {
 			// We need to store the max log probabilities too
 			//	pData.add(((InitialNode)S.first).showParse(S.nucleotides) + " " + ((Vector)(((Sequence)sData.elementAt(i)).maxLogProbs.get(0))).get(0));
 
-			mProbs = new Vector();
+			mProbs = new Vector<Double>();
 			current = S.first;
 //System.out.println(((InitialNode)S.first).showParse(S.nucleotides)+" ");
 			while(current != null)
@@ -1355,7 +1353,7 @@ public class Alignment {
 //System.out.println(current.mytype+" "+current.optimalMaxLogProb);
 				current =  current.next;
 			}
-			((Sequence)sData.elementAt(i)).maxLogProbs.add(mProbs);
+			sData.elementAt(i).maxLogProbs.add(mProbs);
 			if (S.first.optimalMaxLogProb < -99999999)
 			{
 //				System.out.println("Alignment.doParse: No good parse found, score "+S.first.optimalMaxLogProb);
@@ -1397,22 +1395,20 @@ public class Alignment {
 		return probsArray;
 	}
 
-	public static double[] makeSortedILAlignmentHTML(Vector sData, Vector modNames, int numSequences, int range, String Fname, int toDisp)
+	public static double[] makeSortedILAlignmentHTML(Vector<Sequence> sData, Vector<String> modNames, int numSequences, int range, String Fname, int toDisp)
 	{
-		Vector alignmentVect = new Vector();                   // alignment lines to output
-		Vector pData = new Vector();                           // parse data
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
 		double[] modelScores = new double[modNames.size()];
 		double[] rmodelScores = new double[modNames.size()];
 		double[][] modelScoreMat = new double[modNames.size()][sData.size()];
 		double[][] rmodelScoreMat = new double[modNames.size()][sData.size()];
-		Vector shortModNames = new Vector();                   // for easier display
-		Vector tinyModNames = new Vector();                    // for even easier display
+		Vector<String> shortModNames = new Vector<String>();                   // for easier display
+		Vector<String> tinyModNames = new Vector<String>();                    // for even easier display
 		int[] reversed = new int[modNames.size()];             // is best model reversed?
 	    double[] scores = new double[2*modNames.size()];       // all scores computed
 
-	    Vector rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
+	    Vector<Sequence> rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
 	    
 	    //variables for MySQL DB connection
 	    java.sql.Connection myConnection;
@@ -1429,7 +1425,7 @@ public class Alignment {
 		}
 		else
 		{
-			shortModNames = new Vector(modNames);
+			shortModNames = new Vector<String>(modNames);
 		}
 
 		for (int k=0; k< modNames.size(); k++)
@@ -1625,7 +1621,7 @@ public class Alignment {
 			//Calculate edit distances
 			String modSeqsFile = (String)modNames.elementAt(gnum).toString();
 			modSeqsFile = modSeqsFile.substring(0, modSeqsFile.indexOf(".")) + ".fasta";
-			Vector modsData = Alignment.loadFasta(modSeqsFile);
+			Vector<Sequence> modsData = Alignment.loadFasta(modSeqsFile);
 			int[][] EditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rev);
 			int[] minDist = new int[EditDistances.length];
 			for(int i =0; i < EditDistances.length; i ++){
@@ -1686,15 +1682,13 @@ public class Alignment {
 	    return scores;
 	}
 
-	public static double[] makeSortedHLAlignmentHTML(Vector sData, Vector modNames, int numSequences, int range, String Fname, int toDisp)
+	public static double[] makeSortedHLAlignmentHTML(Vector<Sequence> sData, Vector<String> modNames, int numSequences, int range, String Fname, int toDisp)
 	{
-		Vector alignmentVect = new Vector();                   // alignment lines to output
-		Vector pData = new Vector();                           // parse data
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] modelScores = new double[modNames.size()];
 		double[][] modelScoreMat = new double[modNames.size()][sData.size()];
-		Vector shortModNames = new Vector();                   // for easier display
-		Vector tinyModNames = new Vector();                    // for even easier display
+		Vector<String> shortModNames = new Vector<String>();                   // for easier display
+		Vector<String> tinyModNames = new Vector<String>();                    // for even easier display
 	    double[] scores = new double[modNames.size()];       // all scores computed
 	
 		if(((String)modNames.get(0)).contains("http"))         // look online for models
@@ -1702,17 +1696,17 @@ public class Alignment {
 		// remove http:// from model names
 			for(int k = 0; k < modNames.size(); k++)
 			{
-				shortModNames.add(((String)modNames.get(k)).substring(33,((String)modNames.get(k)).length()-4));
+				shortModNames.add(modNames.get(k).substring(33, modNames.get(k).length()-4));
 			}
 		}
 		else
 		{
-			shortModNames = new Vector(modNames);
+			shortModNames = new Vector<String>(modNames);
 		}
 
 		for (int k=0; k< modNames.size(); k++)
 		{
-			tinyModNames.add(((String)modNames.get(k)).substring(0,6));
+			tinyModNames.add(modNames.get(k).substring(0,6));
 		}
 		
 		// parse sequence data in sData against models
@@ -1909,17 +1903,8 @@ public class Alignment {
 	    return scores;
 	}
 
-	public static double[][] getILScores(Vector sData, Vector modNames, int numSequences, int range)
+	public static double[][] getILScores(Vector<Sequence> sData, Vector<String> modNames, int numSequences, int range)
 	{
-		Vector alignmentVect = new Vector();                   // alignment lines to output
-		Vector pData = new Vector();                           // parse data
-		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
-		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
-		double[] modelScores = new double[modNames.size()];
-		double[] rmodelScores = new double[modNames.size()];
-		Vector shortModNames = new Vector();                   // for easier display
-		Vector tinyModNames = new Vector();                    // for even easier display
-		int[] reversed = new int[modNames.size()];             // is best model reversed?
         double[][] scores = new double[sData.size()][modNames.size()];       // all scores computed
 		
 		// parse sequence data in sData against models
@@ -1945,7 +1930,7 @@ public class Alignment {
 		}
 		return scores;
 	}
-	public static double[] getILScoresSingle(Vector sData, String modName, int numSequences, int range)
+	public static double[] getILScoresSingle(Vector<Sequence> sData, String modName, int numSequences, int range)
 	{
 		double[] scores = new double[sData.size()-1];       // all scores computed
 		sData  = Alignment.doParse(sData,numSequences,modName,range);
@@ -1962,25 +1947,23 @@ public class Alignment {
 	}
 	
 	//Takes a JAR3D query and submits results to MySQL database
-	public static List doILdbQuery(int loopID, Query query, Vector sData, Vector modNames, HashMap groupData, int numSequences, int range)
+	public static List doILdbQuery(int loopID, Query query, Vector<Sequence> sData, Vector<String> modNames, HashMap<String, MotifGroup> groupData, int numSequences, int range)
 	{
-//		Vector alignmentVect = new Vector();                   // alignment lines to output
-//		Vector pData = new Vector();                           // parse data
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
 		double[] modelScores = new double[modNames.size()];
 		double[] rmodelScores = new double[modNames.size()];
 		double[][] modelScoreMat = new double[modNames.size()][sData.size()];
 		double[][] rmodelScoreMat = new double[modNames.size()][sData.size()];
-		Vector shortModNames = new Vector();                   // for easier display
+		Vector<String> shortModNames = new Vector<String>();                   // for easier display
 		int[] reversed = new int[modNames.size()];             // is best model reversed?
 		double[] scores = new double[2*modNames.size()];
-		Vector loopRes = new Vector();
+		Vector<LoopResult> loopRes = new Vector<LoopResult>();
 		
-		Vector rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
+		Vector<Sequence> rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
 	    
-	    shortModNames = new Vector(modNames);
-	    Vector tinyModNames = new Vector(shortModNames);
+	    shortModNames = new Vector<String>(modNames);
+	    Vector<String> tinyModNames = new Vector<String>(shortModNames);
 //Parse all sequences against all groups	    
 	    MotifGroup group;
 	    for(int k = 0; k < modNames.size(); k++)
@@ -2070,14 +2053,14 @@ public class Alignment {
 			//Calculate quantiles
 			double[] quants = webJAR3D.getQuantilesA(groupScores, group);
 			//Calculate edit distances
-			Vector modsData = Alignment.parseFastaText(group.Sequences,0,0);
+			Vector<Sequence> modsData = Alignment.parseFastaText(group.Sequences,0,0);
 			int[][] EditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rev);
 			int[] minDist = new int[EditDistances.length];
 			for(int i =0; i < EditDistances.length; i ++){
 				minDist[i] = ArrayMath.min(EditDistances[i]);
 			}
 			if(Boolean.TRUE){   //put goodness of fit checks here later?
-				Vector seqRes = new Vector();
+				Vector<SequenceResult> seqRes = new Vector<SequenceResult>();
 				for(int m = 0; m < sData.size() - 1; m++)
 				{
 					MutableSequenceResults seqR = new MutableSequenceResults(groupName,groupScores[m],quants[m],
@@ -2095,11 +2078,11 @@ public class Alignment {
 	}
 	
 	//Overloaded doParse that can take group data as a string instead of a file name
-	public static Vector doParse(Vector sData, int numSequences, String nodeInfo, int range, boolean fullModelText)
+	public static Vector<Sequence> doParse(Vector<Sequence> sData, int numSequences, String nodeInfo, int range, boolean fullModelText)
 	{
 //		long start, stop, elapsed;
 		Node current;
-		Vector mProbs = new Vector();
+		Vector<Double> mProbs = new Vector<Double>();
 
 		Sequence S = new Sequence("","");                    // blank sequence to use repeatedly
 		if(fullModelText){
@@ -2143,7 +2126,7 @@ public class Alignment {
 			// We need to store the max log probabilities too
 			//	pData.add(((InitialNode)S.first).showParse(S.nucleotides) + " " + ((Vector)(((Sequence)sData.elementAt(i)).maxLogProbs.get(0))).get(0));
 
-			mProbs = new Vector();
+			mProbs = new Vector<Double>();
 			current = S.first;
 //System.out.println(((InitialNode)S.first).showParse(S.nucleotides)+" ");
 			while(current != null)
@@ -2152,7 +2135,7 @@ public class Alignment {
 //System.out.println(current.mytype+" "+current.optimalMaxLogProb);
 				current =  current.next;
 			}
-			((Sequence)sData.elementAt(i)).maxLogProbs.add(mProbs);
+			sData.elementAt(i).maxLogProbs.add(mProbs);
 			if (S.first.optimalMaxLogProb < -99999999)
 			{
 //				System.out.println("Alignment.doParse: No good parse found, score "+S.first.optimalMaxLogProb);
