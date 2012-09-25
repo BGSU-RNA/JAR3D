@@ -1107,7 +1107,7 @@ public class Alignment {
 	{
 		Node current;
 		Vector<Double> mProbs = new Vector<Double>();
-		Vector probsM = new Vector();
+		Vector<Vector<Double>> probsM = new Vector<Vector<Double>>();
 		
 		Sequence S = new Sequence("","");                        // blank sequence to use repeatedly 
 		S.addNodeData(nodeFileName);	                         // only add node data once
@@ -1172,18 +1172,18 @@ public class Alignment {
 		return PD;
 	}
 	
-	public static Double[][] vec2array(Vector probsM)
+	public static Double[][] vec2array(Vector<Vector<Double>> probsM)
 	{
 		int n = probsM.size();
-		Vector dummy = (Vector)probsM.get(0);
+		Vector<Double> dummy = probsM.get(0);
 		int m = dummy.size();
 		Double[][] probsArray = new Double[n][m];
 		for(int i=0; i<n; i++)
 		{
-			Vector vec = (Vector)probsM.get(i);
+			Vector<Double> vec = probsM.get(i);
 			for(int j=0; j<m; j++)
 			{	
-				probsArray[i][j] = (Double) vec.get(j);
+				probsArray[i][j] = vec.get(j);
 			}
 		}
 		return probsArray;
