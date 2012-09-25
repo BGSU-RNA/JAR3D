@@ -146,46 +146,6 @@ public class JAR3DMatlab {
       	    }	    
 	    return S;
 	}
-
-	public static double[] MotifParse(String UserDir, String SeqFile) 
-	{
-		int numSequences = 10000;                            // make sure this is larger than needed	
-		String FASTAName = "";
-		Vector sData;
-		Vector scores = new Vector();
-        String loopType;
-        double[] S;
-        double[] newscores;
-        
-		System.setProperty("user.dir",UserDir);
-
-		sData = Alignment.loadFasta(SeqFile);
-        Sequence first = (Sequence)sData.elementAt(1);
-        String firstLetters = first.letters;
-        if (firstLetters.contains("*")){
-        	loopType = "IL";
-        }
-        else{
-        	loopType = "HL";
-        }
-        Vector modelNames = Sequence.getModelNames(loopType);
-		
-        if (loopType.equals("IL"))
-        {
-        	S = new double[2*modelNames.size()];
-    	    newscores = new double[2*modelNames.size()];
-        	newscores = Alignment.makeSortedILAlignmentHTML(sData,modelNames,numSequences,100,SeqFile,20);
-           	for (int g=0; g < 2*modelNames.size(); g++)
-       		S[g] = newscores[g];
-        }else {  // if not IL assume HL
-        	S = new double[modelNames.size()];
-	    	newscores = new double[modelNames.size()];
-           	newscores = Alignment.makeSortedHLAlignmentHTML(sData,modelNames,numSequences,100,SeqFile,20);
-       		for (int g=0; g < modelNames.size(); g++)
-       			S[g] = newscores[g];
-        }
-	    return S;
-	}
 	
 	public static Vector Display(Vector sData)
     {
