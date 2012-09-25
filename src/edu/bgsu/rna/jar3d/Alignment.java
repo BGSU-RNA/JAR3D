@@ -523,7 +523,7 @@ public class Alignment {
 			{
 				System.out.print(">" + sData.elementAt(j).organism + " ");
 				for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
-					System.out.print(((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(x)).get(0));
+					System.out.print(((Vector)sData.elementAt(j).maxLogProbs.get(x)).get(0));
 				System.out.println();
 			}
 			for(int i = 0; i < mask.length; i++)
@@ -567,7 +567,7 @@ public class Alignment {
 			{
 				System.out.print(">" + sData.elementAt(j).organism + " ");
 				for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
-					System.out.print(((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(x)).get(0));
+					System.out.print(((Vector)sData.elementAt(j).maxLogProbs.get(x)).get(0));
 				System.out.println();
 			}
 			for(int i = 0; i < mask.length; i++)
@@ -598,7 +598,7 @@ public class Alignment {
 		{
 			System.out.print(Motif+" "+R+" ");
 			for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
-				System.out.print(((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(x)).get(0)+" ");
+				System.out.print(((Vector)sData.elementAt(j).maxLogProbs.get(x)).get(0)+" ");
 			System.out.print(sData.elementAt(j).organism + " ");
 			System.out.println();
 		}
@@ -642,7 +642,7 @@ public class Alignment {
 			}		
 			alignmentVect.add(alnm);
 			alignmentVect.add(">" + sData.elementAt(j).organism);
-			alignmentVect.add("Score = "+((Vector)((Sequence)sData.elementAt(j)).maxLogProbs.get(0)).get(0));
+			alignmentVect.add("Score = "+((Vector)sData.elementAt(j).maxLogProbs.get(0)).get(0));
 		}
 		return alignmentVect;	
 	}	
@@ -664,13 +664,13 @@ public class Alignment {
 		// put all sequences in the same Vector
 		for(int l = 0; l < seqNames.size(); l++)
 		{
-			sData.addAll(Alignment.loadFasta((String)seqNames.get(l)));
+			sData.addAll(Alignment.loadFasta(seqNames.get(l)));
 		}
 		
 		// parse all sequences against models
 		for(int k = 0; k < modNames.size(); k++)
 		{
-			sData = Alignment.doParse(sData,numSequences,(String)modNames.get(k),30);
+			sData = Alignment.doParse(sData, numSequences, modNames.get(k), 30);
 		}
 
 		// add up model scores for each sequence
@@ -733,7 +733,7 @@ public class Alignment {
 		}
 		
 		for (int i = 0; i < sData.size(); i++)
-			pData.add(((Sequence)sData.get(i)).parseData);
+			pData.add(sData.get(i).parseData);
 
 		int[] mask = stripDash(pData);
 		String alnm = "";
@@ -745,7 +745,7 @@ public class Alignment {
 			for(int i = 0; i < mask.length; i++)
 			{
 				if(mask[i] == 0)
-					alnm += ((String)pData.get(j)).charAt(i);
+					alnm += pData.get(j).charAt(i);
 			}		
 			alnm += " " + sData.elementAt(j).organism + " ";
 			
