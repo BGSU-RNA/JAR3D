@@ -6,6 +6,6 @@ import java.util.*;
  *
  */
 public class ParseData {
-	public Vector sdata;
+	public List<Sequence> sdata;
 	public Double[][] probsM;
 }

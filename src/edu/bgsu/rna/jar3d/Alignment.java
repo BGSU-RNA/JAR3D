@@ -24,10 +24,10 @@ import edu.bgsu.rna.jar3d.results.SequenceResult;
  */
 public class Alignment {
 
-	public static Vector<Sequence> JAR3D(String UserDir, String FastaFile, String ModelFile, int numSequences, int DNA, int range) 
+	public static List<Sequence> JAR3D(String UserDir, String FastaFile, String ModelFile, int numSequences, int DNA, int range) 
 	{
 		System.setProperty("user.dir",UserDir);
-		Vector<Sequence> sequenceData = Alignment.loadFastaColumnsDNA(FastaFile,0,0,DNA); 
+		List<Sequence> sequenceData = Alignment.loadFastaColumnsDNA(FastaFile,0,0,DNA); 
 		sequenceData = Alignment.doParse(sequenceData,numSequences,ModelFile,range);
 		Alignment.displayAlignmentFASTA(sequenceData,numSequences);	
 		return sequenceData;
@@ -222,9 +222,9 @@ public class Alignment {
 	 * @param sequenceData
 	 * @return
 	 */
-	public static Vector<Sequence> reverse(int numSequences, Vector<Sequence> sequenceData)
+	public static List<Sequence> reverse(int numSequences, List<Sequence> sequenceData)
 	{
-		Vector<Sequence> reverseSData = new Vector<Sequence>();
+		List<Sequence> reverseSData = new Vector<Sequence>();
 
 		String temp="";
 		String organism="";
@@ -236,8 +236,8 @@ public class Alignment {
 		
 		for (int i=1; i < Math.min(sequenceData.size(),numSequences+1); i++)
 		{
-			temp = sequenceData.elementAt(i).letters;
-			organism = sequenceData.elementAt(i).organism;
+			temp = sequenceData.get(i).letters;
+			organism = sequenceData.get(i).organism;
 			
 			StringTokenizer st = new StringTokenizer(temp,"*");
 			second  = st.nextToken();
@@ -264,7 +264,7 @@ public class Alignment {
 	 * @param range
 	 * @return
 	 */
-	public static Vector<Sequence> doParse(Vector<Sequence> sData, int numSequences, String nodeFileName, int range)
+	public static List<Sequence> doParse(List<Sequence> sData, int numSequences, String nodeFileName, int range)
 	{
 		Node current;
 		Vector<Double> mProbs = new Vector<Double>();
@@ -272,16 +272,16 @@ public class Alignment {
 		Sequence S = new Sequence("","");                        // blank sequence to use repeatedly 
 		S.addNodeData(nodeFileName);	                         // only add node data once
 
-		sData.elementAt(0).parseData = ((InitialNode)S.first).header(); // add a header line
+		sData.get(0).parseData = ((InitialNode)S.first).header(); // add a header line
 
-		Sequence firstS = sData.elementAt(1);          // first sequence, which matches the model
+		Sequence firstS = sData.get(1);          // first sequence, which matches the model
 		firstS.setNucleotides();
 		firstS.setArrays();
 		
 		for (int i = 1; i < Math.min(sData.size(),numSequences+1); i++) 
 		{
-			S.organism = sData.elementAt(i).organism;             // focus on one sequence
-			S.letters  = sData.elementAt(i).letters;
+			S.organism = sData.get(i).organism;             // focus on one sequence
+			S.letters  = sData.get(i).letters;
 						
 			S.setNucleotides();                                    // strip dashes from sequence
 			S.setArrays();                                         // define cti, itc, convert letters to numbers
@@ -304,7 +304,7 @@ public class Alignment {
 				mProbs.add(new Double(current.optimalMaxLogProb));
 				current =  current.next;
 			}
-			sData.elementAt(i).appendProbabilities(mProbs);
+			sData.get(i).appendProbabilities(mProbs);
 			if (S.first.optimalMaxLogProb < -99999999)
 			{
 				current = S.first.next;
@@ -317,7 +317,7 @@ public class Alignment {
 				}
 			}
 			
-			sData.elementAt(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
+			sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 			
 			String correspondences = ((InitialNode)S.first).showCorrespondences(S.nucleotides);
 
@@ -329,7 +329,7 @@ public class Alignment {
 			
 			String NF = "MMM";                           // model name goes here
 			correspondences = correspondences.replace("MMM", NF);
-			sData.elementAt(i).correspondences = correspondences;
+			sData.get(i).correspondences = correspondences;
 		}
 		return sData;
 	}
@@ -374,7 +374,7 @@ public class Alignment {
 	 * @param pData this is a vector of plain string sequences
 	 * @return
 	 */
-	public static int[] stripDash(Vector<String> pData)
+	public static int[] stripDash(List<String> pData)
 	{
 		boolean found = false;
 		int[] mask = new int[pData.get(0).length()];
@@ -458,10 +458,10 @@ public class Alignment {
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
 	 */
-	public static void displayAlignment(Vector<Sequence> sData, int numSequences)
+	public static void displayAlignment(List<Sequence> sData, int numSequences)
 	{
 		
-		Vector<String> pData = new Vector<String>();
+		List<String> pData = new Vector<String>();
 
 		for (int i = 0; i < Math.min(numSequences+1,sData.size()); i++)
 		{
@@ -482,11 +482,11 @@ public class Alignment {
 			}		
 			if(j == 0)
 			{
-				System.out.println(" " + sData.elementAt(j).organism);
+				System.out.println(" " + sData.get(j).organism);
 			}
 			else
 			{
-			System.out.print(" " + sData.elementAt(j).organism + " ");
+			System.out.print(" " + sData.get(j).organism + " ");
 			for(int x = 0; x < sData.get(j).probablityCount(); x++)
 				System.out.print(sData.get(j).getMaxProbability(x) + " ");
 			System.out.println();
@@ -499,10 +499,10 @@ public class Alignment {
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
 	 */
-	public static void displayAlignmentFASTA(Vector<Sequence> sData, int numSequences)
+	public static void displayAlignmentFASTA(List<Sequence> sData, int numSequences)
 	{
 		
-		Vector<String> pData = new Vector<String>();
+		List<String> pData = new Vector<String>();
 		
 		for (int i = 0; i < Math.min(numSequences+1,sData.size()); i++)
 		{
@@ -521,7 +521,7 @@ public class Alignment {
 			}
 			else
 			{
-				System.out.print(">" + sData.elementAt(j).organism + " ");
+				System.out.print(">" + sData.get(j).organism + " ");
 				for(int x = 0; x < sData.get(j).probablityCount(); x++)
 					System.out.print(sData.get(j).getMaxProbability(x));
 				System.out.println();
@@ -545,10 +545,10 @@ public class Alignment {
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
 	 */
-	public static void listAlignmentAsCorrespondences(Vector<Sequence> sData, int numSequences, String SeqName, String ModelName)
+	public static void listAlignmentAsCorrespondences(List<Sequence> sData, int numSequences, String SeqName, String ModelName)
 	{
 		
-		Vector<String> pData = new Vector<String>();
+		List<String> pData = new Vector<String>();
 		
 		for (int i = 0; i < Math.min(numSequences+1,sData.size()); i++)
 		{
@@ -589,7 +589,7 @@ public class Alignment {
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
 	 */
-	public static void displayMaxLogProbs(Vector<Sequence> sData, int numSequences, int Motif, int R)
+	public static void displayMaxLogProbs(List<Sequence> sData, int numSequences, int Motif, int R)
 	{		
 		System.out.println("Displaying alignment ---------------- "+sData.size());
 
@@ -599,7 +599,7 @@ public class Alignment {
 			System.out.print(Motif+" "+R+" ");
 			for(int x = 0; x < sData.get(j).probablityCount(); x++)
 				System.out.print(sData.get(j).getMaxProbability(x) + " ");
-			System.out.print(sData.elementAt(j).organism + " ");
+			System.out.print(sData.get(j).organism + " ");
 			System.out.println();
 		}
 
@@ -611,9 +611,9 @@ public class Alignment {
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
 	 */
-	public static Vector<String> getAlignment(Vector<Sequence> sData, int numSequences)
+	public static List<String> getAlignment(List<Sequence> sData, int numSequences)
 	{
-		Vector<String> pData = new Vector<String>();
+		List<String> pData = new Vector<String>();
 		
 		for (int i = 0; i < Math.min(sData.size(),numSequences+1); i++)
 		{
@@ -652,11 +652,11 @@ public class Alignment {
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
 	 */
-	public static Vector<String> getSortedAlignment(Vector<String> seqNames, Vector<String> modNames, int numSequences, int range)
+	public static List<String> getSortedAlignment(List<String> seqNames, List<String> modNames, int numSequences, int range)
 	{
-		Vector<String> alignmentVect = new Vector<String>();
-		Vector<Sequence> sData = new Vector<Sequence>();
-		Vector<String> pData = new Vector<String>();
+		List<String> alignmentVect = new Vector<String>();
+		List<Sequence> sData = new Vector<Sequence>();
+		List<String> pData = new Vector<String>();
 		double[] modelSums = new double[modNames.size()];
 		double[] modelScores = new double[modNames.size()];
 		double sum = 0;
@@ -676,7 +676,7 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.elementAt(m).probablityCount(); x++)
+			for(int x = 0; x < sData.get(m).probablityCount(); x++)
 			{
 				sum = modelSums[x]; // get current sum for this model (x)				
 				sum += sData.get(m).getMaxProbability(x);
@@ -746,19 +746,19 @@ public class Alignment {
 				if(mask[i] == 0)
 					alnm += pData.get(j).charAt(i);
 			}		
-			alnm += " " + sData.elementAt(j).organism + " ";
+			alnm += " " + sData.get(j).organism + " ";
 			
-			for(int x = 0; x < sData.elementAt(j).probablityCount(); x++)
+			for(int x = 0; x < sData.get(j).probablityCount(); x++)
 				alnm += modNames.get(indices[x]) + " score: " + sData.get(j).getMaxProbability(indices[x]) + " ";
 			alignmentVect.add(alnm);
 		}
 		return alignmentVect;
 	}
 
-	public static double[] getSortedHLAlignment(Vector<Sequence> sData, Vector<String> modNames, int numSequences, int range)
+	public static double[] getSortedHLAlignment(List<Sequence> sData, List<String> modNames, int numSequences, int range)
 	{
-		Vector<String> alignmentVect = new Vector<String>();
-		Vector<String> pData = new Vector<String>();
+		List<String> alignmentVect = new Vector<String>();
+		List<String> pData = new Vector<String>();
 		double[] modelSums = new double[modNames.size()];
 		double[] modelScores = new double[modNames.size()];
 		Vector<String> shortModNames = new Vector<String>();
@@ -792,7 +792,7 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.elementAt(m).probablityCount(); x++)
+			for(int x = 0; x < sData.get(m).probablityCount(); x++)
 			{
 				double tempo = sData.get(0).getMaxProbability(x);
 				modelSums[x] += tempo;
@@ -863,12 +863,12 @@ public class Alignment {
 				if(mask[i] == 0)
 					alnm += pData.get(j).charAt(i);
 			}		
-			alnm += " " + sData.elementAt(j).organism + " ";
+			alnm += " " + sData.get(j).organism + " ";
 			
-			for(int x = 0; x < sData.elementAt(j).probablityCount(); x++)
+			for(int x = 0; x < sData.get(j).probablityCount(); x++)
 			{
 				fmt = new Formatter();
-				fmt.format("%10.6f", sData.elementAt(j).getMaxProbability(indices[x]));
+				fmt.format("%10.6f", sData.get(j).getMaxProbability(indices[x]));
 				alnm += tinyModNames.get(indices[x]) + " score: " + fmt + " ";
 			}
 			alignmentVect.add(alnm);
@@ -876,20 +876,20 @@ public class Alignment {
 		return scores;
 	}	
 
-	public static double[] getSortedILAlignment(Vector<Sequence> sData, Vector<String> modNames, int numSequences, int range)
+	public static double[] getSortedILAlignment(List<Sequence> sData, List<String> modNames, int numSequences, int range)
 	{
 		Vector<String> pData = new Vector<String>();                           // parse data
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
 		double[] modelScores = new double[modNames.size()];
 		double[] rmodelScores = new double[modNames.size()];
-		Vector<String> shortModNames = new Vector<String>();                   // for easier display
-		Vector<String> tinyModNames = new Vector<String>();                    // for even easier display
+		List<String> shortModNames = new Vector<String>();                   // for easier display
+		List<String> tinyModNames = new Vector<String>();                    // for even easier display
 		int[] reversed = new int[modNames.size()];             // is best model reversed?
  //       String scores = "";
         double[] scores = new double[2*modNames.size()];       // all scores computed
 
-        Vector<Sequence> rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
+        List<Sequence> rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
 		
 		if(((String)modNames.get(0)).contains("http"))         // look online for models
 		{
@@ -1025,7 +1025,7 @@ public class Alignment {
 			}		
 			
 			if (j > 0) {
-			alnm += " "+((Sequence)sData.elementAt(j)).organism+" ";
+			alnm += " "+((Sequence)sData.get(j)).organism+" ";
 			for(int x = 0; x < modNames.size(); x++)
 			{
 				fmt = new Formatter();
@@ -1042,7 +1042,7 @@ public class Alignment {
 		return scores;
 	}	
 
-	public static void printAlignment(Vector<String> aData, int numChars)
+	public static void printAlignment(List<String> aData, int numChars)
 	{
 		for(int f = 0; f < aData.get(1).length()/numChars+1; f++)
 		{
@@ -1059,7 +1059,7 @@ public class Alignment {
 		}
 	}
 
-	public static String tempdisplayAlignmentFASTA(Vector<Sequence> sData, int numSequences)
+	public static String tempdisplayAlignmentFASTA(List<Sequence> sData, int numSequences)
 	{
 		String temp = "";
 		Vector<String> pData = new Vector<String>();
@@ -1081,9 +1081,9 @@ public class Alignment {
 			}
 			else
 			{
-				temp += ">" + sData.elementAt(j).organism + " ";
-				for(int x = 0; x < sData.elementAt(j).probablityCount(); x++)
-					temp += sData.elementAt(j).getMaxProbability(x);
+				temp += ">" + sData.get(j).organism + " ";
+				for(int x = 0; x < sData.get(j).probablityCount(); x++)
+					temp += sData.get(j).getMaxProbability(x);
 				temp += "\n";
 			}
 			for(int i = 0; i < mask.length; i++)
@@ -1102,25 +1102,25 @@ public class Alignment {
 		return temp;
 	}
 	
-	public static ParseData doParse2(Vector<Sequence> sData, int numSequences, String nodeFileName, int range)
+	public static ParseData doParse2(List<Sequence> sData, int numSequences, String nodeFileName, int range)
 	{
 		Node current;
-		Vector<Double> mProbs = new Vector<Double>();
-		Vector<Vector<Double>> probsM = new Vector<Vector<Double>>();
+		List<Double> mProbs = new Vector<Double>();
+		List<List<Double>> probsM = new Vector<List<Double>>();
 		
 		Sequence S = new Sequence("","");                        // blank sequence to use repeatedly 
 		S.addNodeData(nodeFileName);	                         // only add node data once
 
-		sData.elementAt(0).parseData = ((InitialNode)S.first).header();
+		sData.get(0).parseData = ((InitialNode)S.first).header();
 
-		Sequence firstS = sData.elementAt(1);          // first sequence, which matches the model
+		Sequence firstS = sData.get(1);          // first sequence, which matches the model
 		firstS.setNucleotides();
 		firstS.setArrays();
 		
 		for (int i = 1; i < Math.min(sData.size(),numSequences+1); i++) 
 		{
-			S.organism = sData.elementAt(i).organism;             // focus on one sequence
-			S.letters  = sData.elementAt(i).letters;
+			S.organism = sData.get(i).organism;             // focus on one sequence
+			S.letters  = sData.get(i).letters;
 			
 			// System.out.println("Alignment.doParse: " + S.letters);
 			
@@ -1148,7 +1148,7 @@ public class Alignment {
 				mProbs.add(new Double(current.optimalMaxLogProb));
 				current =  current.next;
 			}
-			sData.elementAt(i).appendProbabilities(mProbs);
+			sData.get(i).appendProbabilities(mProbs);
 			if (S.first.optimalMaxLogProb < -99999999)
 			{
 				current = S.first.next;
@@ -1158,10 +1158,10 @@ public class Alignment {
 					{
 					}
 					current = current.next;				
-				}
+				} // TODO REMOVE
 			}
 			probsM.add(mProbs);
-			sData.elementAt(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
+			sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 			
 		}
 		Double[][] probsArray = Alignment.vec2array(probsM);
@@ -1171,15 +1171,15 @@ public class Alignment {
 		return PD;
 	}
 
-	public static Double[][] vec2array(Vector<Vector<Double>> probsM)
+	public static Double[][] vec2array(List<List<Double>> probsM)
 	{
 		int n = probsM.size();
-		Vector<Double> dummy = probsM.get(0);
+		List<Double> dummy = probsM.get(0);
 		int m = dummy.size();
 		Double[][] probsArray = new Double[n][m];
 		for(int i=0; i<n; i++)
 		{
-			Vector<Double> vec = probsM.get(i);
+			List<Double> vec = probsM.get(i);
 			for(int j=0; j<m; j++)
 			{	
 				probsArray[i][j] = vec.get(j);
@@ -1188,7 +1188,7 @@ public class Alignment {
 		return probsArray;
 	}
 
-	public static double[][] getILScores(Vector<Sequence> sData, Vector<String> modNames, int numSequences, int range)
+	public static double[][] getILScores(List<Sequence> sData, List<String> modNames, int numSequences, int range)
 	{
         double[][] scores = new double[sData.size()][modNames.size()];       // all scores computed
 		
@@ -1201,7 +1201,7 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.elementAt(m).probablityCount(); x++)
+			for(int x = 0; x < sData.get(m).probablityCount(); x++)
 			{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
@@ -1212,7 +1212,7 @@ public class Alignment {
 		}
 		return scores;
 	}
-	public static double[] getILScoresSingle(Vector<Sequence> sData, String modName, int numSequences, int range)
+	public static double[] getILScoresSingle(List<Sequence> sData, String modName, int numSequences, int range)
 	{
 		double[] scores = new double[sData.size()-1];       // all scores computed
 		sData  = Alignment.doParse(sData,numSequences,modName,range);
@@ -1226,7 +1226,7 @@ public class Alignment {
 	}
 	
 	//Takes a JAR3D query and submits results to MySQL database
-	public static List<LoopResult> doILdbQuery(int loopID, Query query, Vector<Sequence> sData, Vector<String> modNames, HashMap<String, MotifGroup> groupData, int numSequences, int range)
+	public static List<LoopResult> doILdbQuery(int loopID, Query query, List<Sequence> sData, List<String> modNames, HashMap<String, MotifGroup> groupData, int numSequences, int range)
 	{
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
@@ -1234,12 +1234,12 @@ public class Alignment {
 		double[] rmodelScores = new double[modNames.size()];
 		double[][] modelScoreMat = new double[modNames.size()][sData.size()];
 		double[][] rmodelScoreMat = new double[modNames.size()][sData.size()];
-		Vector<String> shortModNames = new Vector<String>();                   // for easier display
+		List<String> shortModNames = new Vector<String>();                   // for easier display
 		int[] reversed = new int[modNames.size()];             // is best model reversed?
 		double[] scores = new double[2*modNames.size()];
-		Vector<LoopResult> loopRes = new Vector<LoopResult>();
+		List<LoopResult> loopRes = new Vector<LoopResult>();
 		
-		Vector<Sequence> rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
+		List<Sequence> rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
 	    
 	    shortModNames = new Vector<String>(modNames);
 	    Vector<String> tinyModNames = new Vector<String>(shortModNames);
@@ -1255,9 +1255,9 @@ public class Alignment {
 //Add up model scores for each sequence, find mean score, compare regular and reversed scores
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.elementAt(m).probablityCount(); x++)
+			for(int x = 0; x < sData.get(m).probablityCount(); x++)
 			{
-				double tempo = sData.elementAt(m).getMaxLogProbability(x, 0);   
+				double tempo = sData.get(m).getMaxLogProbability(x, 0);   
 				modelSums[x] += tempo;
 				modelScoreMat[x][m] = tempo;
 
@@ -1350,10 +1350,10 @@ public class Alignment {
 	}
 	
 	//Overloaded doParse that can take group data as a string instead of a file name
-	public static Vector<Sequence> doParse(Vector<Sequence> sData, int numSequences, String nodeInfo, int range, boolean fullModelText)
+	public static List<Sequence> doParse(List<Sequence> sData, int numSequences, String nodeInfo, int range, boolean fullModelText)
 	{
 		Node current;
-		Vector<Double> mProbs = new Vector<Double>();
+		List<Double> mProbs = new Vector<Double>();
 
 		Sequence S = new Sequence("","");                    // blank sequence to use repeatedly
 		if(fullModelText){
@@ -1362,16 +1362,16 @@ public class Alignment {
 			S.addNodeData(nodeInfo);	                     // add model data from file
 		}
 
-		sData.elementAt(0).parseData = ((InitialNode)S.first).header(); // add a header line
+		sData.get(0).parseData = ((InitialNode)S.first).header(); // add a header line
 
-		Sequence firstS = sData.elementAt(1);          // first sequence, which matches the model
+		Sequence firstS = sData.get(1);          // first sequence, which matches the model
 		firstS.setNucleotides();
 		firstS.setArrays();
 		
 		for (int i = 1; i < Math.min(sData.size(),numSequences+1); i++) 
 		{
-			S.organism = sData.elementAt(i).organism;             // focus on one sequence
-			S.letters  = sData.elementAt(i).letters;			
+			S.organism = sData.get(i).organism;             // focus on one sequence
+			S.letters  = sData.get(i).letters;			
 			S.setNucleotides();                                    // strip dashes from sequence
 			S.setArrays();                                         // define cti, itc, convert letters to numbers
 
@@ -1396,7 +1396,7 @@ public class Alignment {
 				mProbs.add(new Double(current.optimalMaxLogProb));
 				current =  current.next;
 			}
-			sData.elementAt(i).appendProbabilities(mProbs);
+			sData.get(i).appendProbabilities(mProbs);
 			if (S.first.optimalMaxLogProb < -99999999)
 			{
 				current = S.first.next;
@@ -1409,7 +1409,7 @@ public class Alignment {
 				}
 			}
 			
-			sData.elementAt(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
+			sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 			
 			String correspondences = ((InitialNode)S.first).showCorrespondences(S.nucleotides);
 
@@ -1421,7 +1421,7 @@ public class Alignment {
 			
 			String NF = "MMM";                           // model name goes here
 			correspondences = correspondences.replace("MMM", NF);
-			sData.elementAt(i).correspondences = correspondences;
+			sData.get(i).correspondences = correspondences;
 		}
 		return sData;
 	}

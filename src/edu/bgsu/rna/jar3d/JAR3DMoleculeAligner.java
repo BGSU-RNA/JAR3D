@@ -18,7 +18,7 @@ public class JAR3DMoleculeAligner {
 		{
 			System.setProperty("user.dir",args[0]);
 			DNA = (int)(Double.parseDouble(args[4]));
-			Vector<Sequence> sequenceData = Alignment.loadFastaColumnsDNA(args[1],0,0,DNA); 
+			List<Sequence> sequenceData = Alignment.loadFastaColumnsDNA(args[1],0,0,DNA); 
 			numSequences = (int)(Double.parseDouble(args[3]));
 			range        = (int)(Double.parseDouble(args[5]));
 			sequenceData = Alignment.doParse(sequenceData,numSequences,args[2],range);
@@ -30,7 +30,7 @@ public class JAR3DMoleculeAligner {
 		// for index restrictions to work, the first sequence needs to be at least as long as
 		// the sequence in the 3D structure from which the model was derived, and preferably
 		// not much longer
-		Vector<Sequence> sequenceData = Alignment.loadFasta("C:/cygwin/home/zirbel/JAR3D/sequences/IL_018_13_cWW-tSH-tHH-cSH-tWH-tHS-cWW.fasta");
+		List<Sequence> sequenceData = Alignment.loadFasta("C:/cygwin/home/zirbel/JAR3D/sequences/IL_018_13_cWW-tSH-tHH-cSH-tWH-tHS-cWW.fasta");
 		sequenceData = Alignment.doParse(sequenceData,numSequences,"C:/cygwin/home/zirbel/JAR3D/models/IL_018_13_cWW-tSH-tHH-cSH-tWH-tHS-cWW.txt",15);
 		numSequences = 10;
 

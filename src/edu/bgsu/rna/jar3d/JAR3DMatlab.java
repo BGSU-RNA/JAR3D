@@ -21,7 +21,7 @@ public class JAR3DMatlab {
 	
 	public static String ModelCorrespondences(String fastaFileName, String modelFileName, int numSequences)
 	{
-		Vector<Sequence> sequenceData = Alignment.loadFasta(fastaFileName);
+		List<Sequence> sequenceData = Alignment.loadFasta(fastaFileName);
 		sequenceData = Alignment.doParse(sequenceData,numSequences,modelFileName,15);
 
 		Alignment.displayAlignmentFASTA(sequenceData, numSequences);
@@ -36,10 +36,10 @@ public class JAR3DMatlab {
 		return correspondences;
 	}
 
-	public static Vector Align(String UserDir, String FastaFile, String ModelFile, int numSequences, int DNA, int range) 
+	public static List Align(String UserDir, String FastaFile, String ModelFile, int numSequences, int DNA, int range) 
 	{
 		System.setProperty("user.dir",UserDir);
-		Vector sequenceData = Alignment.loadFastaColumnsDNA(FastaFile,0,0,DNA); 
+		List sequenceData = Alignment.loadFastaColumnsDNA(FastaFile,0,0,DNA); 
 
 		sequenceData = Alignment.doParse(sequenceData,numSequences,ModelFile,range);
 		return sequenceData;
