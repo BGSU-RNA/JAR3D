@@ -213,7 +213,7 @@ public class Sequence {
 			
 			if (!nodeLine.equals("//") && (!nodeLine.equals("")))
 			{
-				Vector numDatas = new Vector(); // to hold arrays of doubles
+				List numDatas = new Vector(); // to hold arrays of doubles
 				if(nodeLine.indexOf("//") != -1)
 				{
 					nodeLine = nodeLine.substring(0,nodeLine.indexOf("//"));
