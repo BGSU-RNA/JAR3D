@@ -26,7 +26,7 @@ public class Sequence {
 	Node first, last;          // first and last nodes of parsing model
 
 	int code[];                // code for letters A, C, G, U
-	Vector maxLogProbs;
+	private List<List<Double>> maxLogProbs;
     String parseData;
     String correspondences;
     
@@ -39,7 +39,7 @@ public class Sequence {
 	public Sequence(String org, String let) {
 		organism = org;
 		letters = let;
-		maxLogProbs = new Vector();
+		maxLogProbs = new Vector<List<Double>>();
 	}
 
 	/**
@@ -53,7 +53,7 @@ public class Sequence {
 		letters = let;
 		setNucleotides();
 		setArrays();
-		maxLogProbs = new Vector();
+		maxLogProbs = new Vector<List<Double>>();
 
 		ctiFirst = new int[firstSeq.cti.length];
 		itcFirst = new int[firstSeq.itc.length];
@@ -75,7 +75,27 @@ public class Sequence {
 		setNucleotides();
 		setArrays();
 	}
-
+	
+	public int probablityCount() {
+	    return maxLogProbs.size();
+	}
+	
+	public List<Double> getMaxLogProbabilities(int index) {
+	    return maxLogProbs.get(index);
+	}
+	
+	public Double getMaxLogProbability(int i, int j) {
+	    return getMaxLogProbabilities(i).get(j);
+	}
+	
+	public Double getMaxProbability(int i) {
+	    return getMaxLogProbability(i, 0);
+	}
+	
+	public void appendProbabilities(List<Double> probs) {
+	    maxLogProbs.add(probs);
+	}
+	
 	/**
 	 * This method is used to strip dashes from the fasta file for
 	 * a plain nucleotide string

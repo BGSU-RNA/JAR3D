@@ -304,7 +304,7 @@ public class Alignment {
 				mProbs.add(new Double(current.optimalMaxLogProb));
 				current =  current.next;
 			}
-			sData.elementAt(i).maxLogProbs.add(mProbs);
+			sData.elementAt(i).appendProbabilities(mProbs);
 			if (S.first.optimalMaxLogProb < -99999999)
 			{
 				current = S.first.next;
@@ -487,8 +487,8 @@ public class Alignment {
 			else
 			{
 			System.out.print(" " + sData.elementAt(j).organism + " ");
-			for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
-				System.out.print(((Vector)sData.elementAt(j).maxLogProbs.get(x)).get(0)+" ");
+			for(int x = 0; x < sData.get(j).probablityCount(); x++)
+				System.out.print(sData.get(j).getMaxProbability(x) + " ");
 			System.out.println();
 			}
 		}
@@ -522,8 +522,8 @@ public class Alignment {
 			else
 			{
 				System.out.print(">" + sData.elementAt(j).organism + " ");
-				for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
-					System.out.print(((Vector)sData.elementAt(j).maxLogProbs.get(x)).get(0));
+				for(int x = 0; x < sData.get(j).probablityCount(); x++)
+					System.out.print(sData.get(j).getMaxProbability(x));
 				System.out.println();
 			}
 			for(int i = 0; i < mask.length; i++)
@@ -565,9 +565,9 @@ public class Alignment {
 			}
 			else
 			{
-				System.out.print(">" + sData.elementAt(j).organism + " ");
-				for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
-					System.out.print(((Vector)sData.elementAt(j).maxLogProbs.get(x)).get(0));
+				System.out.print(">" + sData.get(j).organism + " ");
+				for(int x = 0; x < sData.get(j).probablityCount(); x++)
+					System.out.print(sData.get(j).getMaxProbability(x));
 				System.out.println();
 			}
 			for(int i = 0; i < mask.length; i++)
@@ -597,8 +597,8 @@ public class Alignment {
 		for(int j = 1; j < sData.size(); j++)
 		{
 			System.out.print(Motif+" "+R+" ");
-			for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
-				System.out.print(((Vector)sData.elementAt(j).maxLogProbs.get(x)).get(0)+" ");
+			for(int x = 0; x < sData.get(j).probablityCount(); x++)
+				System.out.print(sData.get(j).getMaxProbability(x) + " ");
 			System.out.print(sData.elementAt(j).organism + " ");
 			System.out.println();
 		}
@@ -641,8 +641,8 @@ public class Alignment {
 					alnm += pData.get(j).charAt(i);
 			}		
 			alignmentVect.add(alnm);
-			alignmentVect.add(">" + sData.elementAt(j).organism);
-			alignmentVect.add("Score = "+((Vector)sData.elementAt(j).maxLogProbs.get(0)).get(0));
+			alignmentVect.add(">" + sData.get(j).organism);
+			alignmentVect.add("Score = " + sData.get(j).getMaxProbability(0));
 		}
 		return alignmentVect;	
 	}	
@@ -676,11 +676,12 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.elementAt(m).maxLogProbs.size(); x++)
+			for(int x = 0; x < sData.elementAt(m).probablityCount(); x++)
 			{
 				sum = modelSums[x]; // get current sum for this model (x)
 				
-				sum = sum + Double.parseDouble((String)((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+//				sum = sum + Double.parseDouble((String)((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+				sum = sData.get(m).getMaxProbability(x);
 				modelSums[x] = sum;
 			}
 		}
@@ -749,8 +750,8 @@ public class Alignment {
 			}		
 			alnm += " " + sData.elementAt(j).organism + " ";
 			
-			for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
-				alnm += modNames.get(indices[x]) + " score: " + ((Vector)sData.elementAt(j).maxLogProbs.get(indices[x])).get(0) + " ";
+			for(int x = 0; x < sData.elementAt(j).probablityCount(); x++)
+				alnm += modNames.get(indices[x]) + " score: " + sData.get(j).getMaxProbability(indices[x]) + " ";
 			alignmentVect.add(alnm);
 		}
 		return alignmentVect;
@@ -793,10 +794,10 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.elementAt(m).maxLogProbs.size(); x++)
+			for(int x = 0; x < sData.elementAt(m).probablityCount(); x++)
 			{
-				String temp = String.valueOf(((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
-				double tempo = Double.parseDouble(temp);
+//				String temp = String.valueOf(((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+				double tempo = sData.get(0).getMaxProbability(x);
 				modelSums[x] += tempo;
 			}
 		}
@@ -867,10 +868,10 @@ public class Alignment {
 			}		
 			alnm += " " + sData.elementAt(j).organism + " ";
 			
-			for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
+			for(int x = 0; x < sData.elementAt(j).probablityCount(); x++)
 			{
 				fmt = new Formatter();
-				fmt.format("%10.6f", ((Vector)sData.elementAt(j).maxLogProbs.get(indices[x])).get(0));
+				fmt.format("%10.6f", sData.elementAt(j).getMaxProbability(indices[x]));
 				alnm += tinyModNames.get(indices[x]) + " score: " + fmt + " ";
 			}
 			alignmentVect.add(alnm);
@@ -921,17 +922,18 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.elementAt(m).maxLogProbs.size(); x++)
+			for(int x = 0; x < sData.get(m).probablityCount(); x++)
 			{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-				String temp = String.valueOf(((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
-				double tempo = Double.parseDouble(temp);   
+//				String temp = String.valueOf(((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+//				double temp = Double.parseDouble(temp);
+			    double tempo = sData.get(m).getMaxProbability(x);   
 		//		System.out.print(tempo+"  ");
 				modelSums[x] += tempo;
 
-				temp = String.valueOf(((Vector)rsData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
-				tempo = Double.parseDouble(temp);
+//				temp = String.valueOf(((Vector)rsData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+				tempo = rsData.get(m).getMaxProbability(x);
 				rmodelSums[x] += tempo;
 			}
 		}
@@ -1035,9 +1037,9 @@ public class Alignment {
 			{
 				fmt = new Formatter();
 				if (reversed[indices[x]] == 0)
-					fmt.format("%12.6f", ((Vector)sData.elementAt(j).maxLogProbs.get(indices[x])).get(0));
+					fmt.format("%12.6f", sData.get(j).getMaxProbability(indices[x]));
 				else
-					fmt.format("%12.6f", ((Vector)rsData.elementAt(j).maxLogProbs.get(indices[x])).get(0));
+					fmt.format("%12.6f", rsData.get(j).getMaxProbability(indices[x]));
 				alnm += tinyModNames.get(indices[x]) + " score: " + fmt + " ";
 			}
 			}
@@ -1087,8 +1089,8 @@ public class Alignment {
 			else
 			{
 				temp += ">" + sData.elementAt(j).organism + " ";
-				for(int x = 0; x < sData.elementAt(j).maxLogProbs.size(); x++)
-					temp += ((Vector)sData.elementAt(j).maxLogProbs.get(x)).get(0);
+				for(int x = 0; x < sData.elementAt(j).probablityCount(); x++)
+					temp += sData.elementAt(j).getMaxProbability(x);
 				temp += "\n";
 			}
 			for(int i = 0; i < mask.length; i++)
@@ -1153,7 +1155,7 @@ public class Alignment {
 				mProbs.add(new Double(current.optimalMaxLogProb));
 				current =  current.next;
 			}
-			sData.elementAt(i).maxLogProbs.add(mProbs);
+			sData.elementAt(i).appendProbabilities(mProbs);
 			if (S.first.optimalMaxLogProb < -99999999)
 			{
 				current = S.first.next;
@@ -1206,12 +1208,12 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.elementAt(m).maxLogProbs.size(); x++)
+			for(int x = 0; x < sData.elementAt(m).probablityCount(); x++)
 			{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-				String temp = String.valueOf(((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
-				double tempo = Double.parseDouble(temp);   
+//				String temp = String.valueOf(((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+				double tempo = sData.get(m).getMaxLogProbability(x, 0);   
 				scores[m][x] = tempo;
 			}
 		}
@@ -1226,8 +1228,8 @@ public class Alignment {
 		{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-				String temp = String.valueOf(((Vector)sData.elementAt(m+1).maxLogProbs.get(0)).get(0)); // get score for this sequence(m)
-				double tempo = Double.parseDouble(temp);   
+//				String temp = String.valueOf(((Vector)sData.elementAt(m+1).maxLogProbs.get(0)).get(0)); // get score for this sequence(m)
+				double tempo = sData.get(m+1).getMaxLogProbability(0, 0);   
 				scores[m] = tempo;
 		}
 		return scores;
@@ -1263,17 +1265,17 @@ public class Alignment {
 //Add up model scores for each sequence, find mean score, compare regular and reversed scores
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.elementAt(m).maxLogProbs.size(); x++)
+			for(int x = 0; x < sData.elementAt(m).probablityCount(); x++)
 			{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-				String temp = String.valueOf(((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
-				double tempo = Double.parseDouble(temp);   
+//				String temp = String.valueOf(((Vector); // get score for this sequence(m)
+				double tempo = sData.elementAt(m).getMaxLogProbability(x, 0);   
 				modelSums[x] += tempo;
 				modelScoreMat[x][m] = tempo;
 
-				temp = String.valueOf(((Vector)rsData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
-				tempo = Double.parseDouble(temp);
+//				temp = String.valueOf(((Vector)rsData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
+				tempo = sData.get(m).getMaxLogProbability(x, 0);
 				rmodelSums[x] += tempo;
 				rmodelScoreMat[x][m] = tempo;
 			}
@@ -1408,7 +1410,7 @@ public class Alignment {
 				mProbs.add(new Double(current.optimalMaxLogProb));
 				current =  current.next;
 			}
-			sData.elementAt(i).maxLogProbs.add(mProbs);
+			sData.elementAt(i).appendProbabilities(mProbs);
 			if (S.first.optimalMaxLogProb < -99999999)
 			{
 				current = S.first.next;
