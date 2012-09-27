@@ -645,7 +645,7 @@ public class Alignment {
 			alignmentVect.add("Score = " + sData.get(j).getMaxProbability(0));
 		}
 		return alignmentVect;	
-	}	
+	}
 	
 	/**
 	 * This method displays the alignment
@@ -678,10 +678,8 @@ public class Alignment {
 		{
 			for(int x = 0; x < sData.elementAt(m).probablityCount(); x++)
 			{
-				sum = modelSums[x]; // get current sum for this model (x)
-				
-//				sum = sum + Double.parseDouble((String)((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
-				sum = sData.get(m).getMaxProbability(x);
+				sum = modelSums[x]; // get current sum for this model (x)				
+				sum += sData.get(m).getMaxProbability(x);
 				modelSums[x] = sum;
 			}
 		}
@@ -756,7 +754,7 @@ public class Alignment {
 		}
 		return alignmentVect;
 	}
-	
+
 	public static double[] getSortedHLAlignment(Vector<Sequence> sData, Vector<String> modNames, int numSequences, int range)
 	{
 		Vector<String> alignmentVect = new Vector<String>();
@@ -796,7 +794,6 @@ public class Alignment {
 		{
 			for(int x = 0; x < sData.elementAt(m).probablityCount(); x++)
 			{
-//				String temp = String.valueOf(((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
 				double tempo = sData.get(0).getMaxProbability(x);
 				modelSums[x] += tempo;
 			}
@@ -926,13 +923,9 @@ public class Alignment {
 			{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-//				String temp = String.valueOf(((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
-//				double temp = Double.parseDouble(temp);
 			    double tempo = sData.get(m).getMaxProbability(x);   
-		//		System.out.print(tempo+"  ");
 				modelSums[x] += tempo;
 
-//				temp = String.valueOf(((Vector)rsData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
 				tempo = rsData.get(m).getMaxProbability(x);
 				rmodelSums[x] += tempo;
 			}
@@ -1177,7 +1170,7 @@ public class Alignment {
 		PD.probsM = probsArray;
 		return PD;
 	}
-	
+
 	public static Double[][] vec2array(Vector<Vector<Double>> probsM)
 	{
 		int n = probsM.size();
@@ -1226,9 +1219,6 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size()-1; m++)
 		{
-				// there is no good reason for having to do these crazy manipulations
-				// in order to get the value of a double variable, but at least this works
-//				String temp = String.valueOf(((Vector)sData.elementAt(m+1).maxLogProbs.get(0)).get(0)); // get score for this sequence(m)
 				double tempo = sData.get(m+1).getMaxLogProbability(0, 0);   
 				scores[m] = tempo;
 		}
@@ -1267,14 +1257,10 @@ public class Alignment {
 		{
 			for(int x = 0; x < sData.elementAt(m).probablityCount(); x++)
 			{
-				// there is no good reason for having to do these crazy manipulations
-				// in order to get the value of a double variable, but at least this works
-//				String temp = String.valueOf(((Vector); // get score for this sequence(m)
 				double tempo = sData.elementAt(m).getMaxLogProbability(x, 0);   
 				modelSums[x] += tempo;
 				modelScoreMat[x][m] = tempo;
 
-//				temp = String.valueOf(((Vector)rsData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
 				tempo = sData.get(m).getMaxLogProbability(x, 0);
 				rmodelSums[x] += tempo;
 				rmodelScoreMat[x][m] = tempo;
