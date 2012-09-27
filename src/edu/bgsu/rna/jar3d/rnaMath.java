@@ -97,7 +97,6 @@ public class rnaMath {
 			for(int j = 0; j < dist.length; j++)
 			{
 				newdist[i][j] = dist[i][j]/sum;
-//				System.out.println(i+" "+j+" "+newdist[i][j]+" ");
 			}
 		}
 		return newdist;

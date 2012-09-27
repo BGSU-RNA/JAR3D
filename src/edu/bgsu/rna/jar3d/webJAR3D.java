@@ -3,9 +3,6 @@ import java.io.*;
 import java.util.*; 
 
 public class webJAR3D {
-	public static void main(String[] args) {
-		JAR3DMatlab.MotifParse(args[0], args[1]);
-	}
 	
 	public static String double2String(double number, int decimals){
 		String S = Double.toString(number);

@@ -51,12 +51,6 @@ public class JunctionNode extends BranchingNode {
 					{		   // branch one, from i to k        branch two, from k+1 to j
 							   // i-------------k--------------j
 						pnew = ((Node)super.children.get(0)).getMaxLogProb(i,k) + ((Node)super.children.get(1)).getMaxLogProb(k+1,j);
-/*						
-if (i==k)
-	System.out.println("JunctionNode.computeMaxLogProb i=k=" + i);
-if (k+1==j)
-	System.out.println("JunctionNode.computeMaxLogProb k+1=j=" + k+1);
-*/
 						if (pnew > p)
 						{
 							p = pnew;
@@ -65,13 +59,6 @@ if (k+1==j)
 					}				
 					maxLogProb[i-iMin][j-jMin] = p;
 					myGen[i-iMin][j-jMin] = new genData(new int[]{kk});
-					/*
-					if ((p < -99999999))
-					{
-						System.out.println("Junction node with -Inf prob.  "+i+" "+j+" "+leftIndex+" "+rightIndex);
-					}
-					*/
-				break;
 			case 3:
 				for(int k = i; k < j; k++)
 				{
@@ -121,36 +108,6 @@ if (k+1==j)
   		else
   			System.out.println("Junction out of range");
   	}
-
-/*	
-	public String showParse(String n, int i, int j)
-  	{
-   		if ((i >= super.iMin) && (i <= super.iMax) && (j >= super.jMin) && (j <= super.jMax)  && (i <= j))
-  		{
-   			String parse = "";
-   			setOptimalAndRelease(i,j);
-   			int kk = optimalGen.splitpoints[0];
-			switch(branches)
-			{
-				case 2:
-					parse = ((Node)children.get(0)).showParse(n,i,kk);
-					parse += ((Node)children.get(1)).showParse(n,kk+1,j);
-					break;
-				case 3:
-					int mm = optimalGen.splitpoints[1];
-					parse = ((Node)children.get(0)).showParse(n,i,kk);
-					parse += ((Node)children.get(1)).showParse(n,kk+1,mm);
-					parse += ((Node)children.get(2)).showParse(n,mm+1,j);
-					break;
-			}
-			return parse;
-  		}
-   		else
-   			return "Out of range";
-   		
-  	}
-*/	
-   	
   	
 	public String showParse(String n)
   	{
