@@ -24,15 +24,6 @@ import edu.bgsu.rna.jar3d.results.SequenceResult;
  */
 public class Alignment {
 
-	public static List<Sequence> JAR3D(String UserDir, String FastaFile, String ModelFile, int numSequences, int DNA, int range) 
-	{
-		System.setProperty("user.dir",UserDir);
-		List<Sequence> sequenceData = Alignment.loadFastaColumnsDNA(FastaFile,0,0,DNA); 
-		sequenceData = Alignment.doParse(sequenceData,numSequences,ModelFile,range);
-		Alignment.displayAlignmentFASTA(sequenceData,numSequences);	
-		return sequenceData;
-	}
-
 	/**
 	 * This method loads sequences from a FASTA file into a vector of Sequence objects called sData
 	 * It reads all columns of the FASTA file
@@ -304,19 +295,7 @@ public class Alignment {
 				mProbs.add(new Double(current.optimalMaxLogProb));
 				current =  current.next;
 			}
-			sData.get(i).appendProbabilities(mProbs);
-			if (S.first.optimalMaxLogProb < -99999999)
-			{
-				current = S.first.next;
-				while (current != null)
-				{
-					if (current.previous.currentMaxLogProb < -99999999 && current.currentMaxLogProb > -999999999)
-					{
-					}
-					current = current.next;				
-				}
-			}
-			
+			sData.get(i).appendProbabilities(mProbs);	
 			sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 			
 			String correspondences = ((InitialNode)S.first).showCorrespondences(S.nucleotides);
@@ -331,40 +310,6 @@ public class Alignment {
 			correspondences = correspondences.replace("MMM", NF);
 			sData.get(i).correspondences = correspondences;
 		}
-		return sData;
-	}
-
-	/**
-	 * This method generates synthetic sequences based on the model selected
-	 * @param numSequences is the number of sequences to synthesize
-	 * @param modelNum is the number corresponding to which model to use (will probably be a text file soon)
-	 * @return
-	 */
-	public static Vector<Sequence> generateSyntheticData(int numSequences,int range)
-	{
-		Sequence S = new Sequence("Synthetic organism","AAAA");
-		S.addNodeData("");
-
-		Vector<Sequence> sData = new Vector<Sequence>();
-
-		sData.add(new Sequence("",""));
-
-		for (int i = 0; i < numSequences; i++)
-		{
-			String seq = S.generate(false);
-			System.out.println(seq);
-			seq = seq.replace("(","");
-			seq = seq.replace(")","");
-			seq = seq.replace("[","");
-			seq = seq.replace("]","");
-			seq = seq.replace("<","");
-			seq = seq.replace(">","");
-			seq = seq.replace("{","");
-			seq = seq.replace("}","");
-			seq = seq.replace("-","");
-			sData.add(new Sequence("Synthetic organism",seq));
-		}
-
 		return sData;
 	}
 
@@ -454,47 +399,6 @@ public class Alignment {
 	}// end align
 
 	/**
-	 * This method displays the alignment
-	 * @param pData contains plain string sequences
-	 * @param sData contains sequence objects
-	 */
-	public static void displayAlignment(List<Sequence> sData, int numSequences)
-	{
-		
-		List<String> pData = new Vector<String>();
-
-		for (int i = 0; i < Math.min(numSequences+1,sData.size()); i++)
-		{
-			pData.add(sData.get(i).parseData);
-		}
-		System.out.println("Displaying alignment ----------------"+pData.size());
-
-
-		int[] mask = stripDash(pData);
-
-		System.out.println("Alignment from Java parser:");
-		for(int j = 0; j < pData.size(); j++)
-		{
-			for(int i = 0; i < mask.length; i++)
-			{
-				if(mask[i] == 0)
-					System.out.print(pData.get(j).charAt(i));
-			}		
-			if(j == 0)
-			{
-				System.out.println(" " + sData.get(j).organism);
-			}
-			else
-			{
-			System.out.print(" " + sData.get(j).organism + " ");
-			for(int x = 0; x < sData.get(j).probablityCount(); x++)
-				System.out.print(sData.get(j).getMaxProbability(x) + " ");
-			System.out.println();
-			}
-		}
-	}
-
-	/**
 	 * This method displays the alignment in FASTA format
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
@@ -582,177 +486,6 @@ public class Alignment {
 			System.out.println();
 		}
 
-	}
-
-	/**
-	 * This method displays the alignment in FASTA format
-	 * @param pData contains plain string sequences
-	 * @param sData contains sequence objects
-	 */
-	public static void displayMaxLogProbs(List<Sequence> sData, int numSequences, int Motif, int R)
-	{		
-		System.out.println("Displaying alignment ---------------- "+sData.size());
-
-		System.out.println("Alignment from Java parser:");
-		for(int j = 1; j < sData.size(); j++)
-		{
-			System.out.print(Motif+" "+R+" ");
-			for(int x = 0; x < sData.get(j).probablityCount(); x++)
-				System.out.print(sData.get(j).getMaxProbability(x) + " ");
-			System.out.print(sData.get(j).organism + " ");
-			System.out.println();
-		}
-
-	}
-
-	
-	/**
-	 * This method displays the alignment
-	 * @param pData contains plain string sequences
-	 * @param sData contains sequence objects
-	 */
-	public static List<String> getAlignment(List<Sequence> sData, int numSequences)
-	{
-		List<String> pData = new Vector<String>();
-		
-		for (int i = 0; i < Math.min(sData.size(),numSequences+1); i++)
-		{
-			pData.add(sData.get(i).parseData);
-		}
-		
-		int[] mask = stripDash(pData);
-		String alnm = "";
-		Vector<String> alignmentVect = new Vector<String>();
-
-		alnm = "";
-		for(int i = 0; i < mask.length; i++)
-		{
-			if(mask[i] == 0)
-				alnm += pData.get(0).charAt(i);
-		}		
-		alignmentVect.add(alnm);                          // paste in header line
-		
-		for(int j = 1; j < pData.size(); j++)
-		{
-			alnm = "";
-			for(int i = 0; i < mask.length; i++)
-			{
-				if(mask[i] == 0)
-					alnm += pData.get(j).charAt(i);
-			}		
-			alignmentVect.add(alnm);
-			alignmentVect.add(">" + sData.get(j).organism);
-			alignmentVect.add("Score = " + sData.get(j).getMaxProbability(0));
-		}
-		return alignmentVect;	
-	}
-	
-	/**
-	 * This method displays the alignment
-	 * @param pData contains plain string sequences
-	 * @param sData contains sequence objects
-	 */
-	public static List<String> getSortedAlignment(List<String> seqNames, List<String> modNames, int numSequences, int range)
-	{
-		List<String> alignmentVect = new Vector<String>();
-		List<Sequence> sData = new Vector<Sequence>();
-		List<String> pData = new Vector<String>();
-		double[] modelSums = new double[modNames.size()];
-		double[] modelScores = new double[modNames.size()];
-		double sum = 0;
-		
-		// put all sequences in the same Vector
-		for(int l = 0; l < seqNames.size(); l++)
-		{
-			sData.addAll(Alignment.loadFasta(seqNames.get(l)));
-		}
-		
-		// parse all sequences against models
-		for(int k = 0; k < modNames.size(); k++)
-		{
-			sData = Alignment.doParse(sData, numSequences, modNames.get(k), 30);
-		}
-
-		// add up model scores for each sequence
-		for(int m = 0; m < sData.size(); m++)
-		{
-			for(int x = 0; x < sData.get(m).probablityCount(); x++)
-			{
-				sum = modelSums[x]; // get current sum for this model (x)				
-				sum += sData.get(m).getMaxProbability(x);
-				modelSums[x] = sum;
-			}
-		}
-		
-		System.out.println("Totals for each model: ");
-		for(int g = 0; g < modelSums.length; g++)
-			System.out.println(modNames.get(g) + " " + modelSums[g]);
-		
-		System.out.println("Average score for each model unsorted: ");
-		for(int g = 0; g < modelSums.length; g++)
-		{
-			modelScores[g] = (modelSums[g]/sData.size());
-			System.out.println(modNames.get(g) + " " + modelScores[g]);
-		}
-		
-		// re-sort models & their totals
-		// weird indexing array to keep track of the order things should be in
-		// it starts out as [0 1 2 3 4 5]
-		// then gets re-sorted according to modelScores
-		// ie [0 2 3 1 5 4] means that in other vectors, their index 0 is the first
-		// index 3 is second, 2 is the third, ect
-
-		int[] indices = new int[modNames.size()];
-		for(int k = 0; k < modNames.size(); k++)
-			indices[k] = k;
-		
-		for(int a = 0; a < modelScores.length; a++)
-		   {
-	            int max = a; //array position of largest element
-	            for(int b = a; b < modelScores.length; b++)
-	            {
-	                if(modelScores[b] > modelScores[max])
-	                	max = b;
-	            }
-	            // re-sort modelScores or else the sort wouldn't work
-	            double dtemp = modelScores[max];
-	            modelScores[max] = modelScores[a];
-	            modelScores[a] = dtemp;
-	            
-	            // re-sort indexing array for use with vectors
-	            int itemp = indices[max];
-	            indices[max] = indices[a];
-	            indices[a] = itemp;
-		    }
-		
-		System.out.println("Average score for each model sorted: ");
-		for(int g = 0; g < modelSums.length; g++)
-		{
-			System.out.println(modNames.get(indices[g]) + " " + modelScores[g]);
-		}
-		
-		for (int i = 0; i < sData.size(); i++)
-			pData.add(sData.get(i).parseData);
-
-		int[] mask = stripDash(pData);
-		String alnm = "";
-		
-		for(int j = 0; j < pData.size(); j++)
-		{
-			alnm = "";
-
-			for(int i = 0; i < mask.length; i++)
-			{
-				if(mask[i] == 0)
-					alnm += pData.get(j).charAt(i);
-			}		
-			alnm += " " + sData.get(j).organism + " ";
-			
-			for(int x = 0; x < sData.get(j).probablityCount(); x++)
-				alnm += modNames.get(indices[x]) + " score: " + sData.get(j).getMaxProbability(indices[x]) + " ";
-			alignmentVect.add(alnm);
-		}
-		return alignmentVect;
 	}
 
 	public static double[] getSortedHLAlignment(List<Sequence> sData, List<String> modNames, int numSequences, int range)
@@ -886,12 +619,11 @@ public class Alignment {
 		List<String> shortModNames = new Vector<String>();                   // for easier display
 		List<String> tinyModNames = new Vector<String>();                    // for even easier display
 		int[] reversed = new int[modNames.size()];             // is best model reversed?
- //       String scores = "";
         double[] scores = new double[2*modNames.size()];       // all scores computed
 
         List<Sequence> rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
 		
-		if(((String)modNames.get(0)).contains("http"))         // look online for models
+		if(modNames.get(0).contains("http"))         // look online for models
 		{
 		// remove http:// from model names
 			for(int k = 0; k < modNames.size(); k++)
@@ -1040,66 +772,6 @@ public class Alignment {
 		}
 
 		return scores;
-	}	
-
-	public static void printAlignment(List<String> aData, int numChars)
-	{
-		for(int f = 0; f < aData.get(1).length()/numChars+1; f++)
-		{
-			for(int j = 0; j < aData.size(); j++)
-			{
-				if((f+1)*numChars > aData.get(j).length())
-				{
-					System.out.println(aData.get(j).substring(f*numChars, aData.get(j).length()));
-				}
-				else
-					System.out.println(aData.get(j).substring(f*numChars, (f+1)*numChars));
-			}
-			System.out.println();
-		}
-	}
-
-	public static String tempdisplayAlignmentFASTA(List<Sequence> sData, int numSequences)
-	{
-		String temp = "";
-		Vector<String> pData = new Vector<String>();
-		
-		for (int i = 0; i < Math.min(numSequences+1,sData.size()); i++)
-		{
-			pData.add(sData.get(i).parseData);
-		}
-		temp += "Displaying alignment ----------------"+pData.size()+"\n";
-
-
-		int[] mask = stripDash(pData);
-		System.out.println("Alignment from Java parser:");
-		for(int j = 0; j < pData.size(); j++)
-		{
-			if(j == 0)
-			{
-				temp += "Mask\n";
-			}
-			else
-			{
-				temp += ">" + sData.get(j).organism + " ";
-				for(int x = 0; x < sData.get(j).probablityCount(); x++)
-					temp += sData.get(j).getMaxProbability(x);
-				temp += "\n";
-			}
-			for(int i = 0; i < mask.length; i++)
-			{
-				if (mask[i] == 0)
-				{
-					char a;
-					a = ((String)pData.get(j)).charAt(i);
-					if ((a!='{') && (a!='}') && (a!='<') && (a!='>')) 
-						temp += a;
-				}
-			}
-			temp += "\n";
-		}
-
-		return temp;
 	}
 	
 	public static ParseData doParse2(List<Sequence> sData, int numSequences, String nodeFileName, int range)
@@ -1149,17 +821,6 @@ public class Alignment {
 				current =  current.next;
 			}
 			sData.get(i).appendProbabilities(mProbs);
-			if (S.first.optimalMaxLogProb < -99999999)
-			{
-				current = S.first.next;
-				while (current != null)
-				{
-					if (current.previous.currentMaxLogProb < -99999999 && current.currentMaxLogProb > -999999999)
-					{
-					}
-					current = current.next;				
-				} // TODO REMOVE
-			}
 			probsM.add(mProbs);
 			sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 			
@@ -1205,13 +866,13 @@ public class Alignment {
 			{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-//				String temp = String.valueOf(((Vector)sData.elementAt(m).maxLogProbs.get(x)).get(0)); // get score for this sequence(m)
 				double tempo = sData.get(m).getMaxLogProbability(x, 0);   
 				scores[m][x] = tempo;
 			}
 		}
 		return scores;
 	}
+
 	public static double[] getILScoresSingle(List<Sequence> sData, String modName, int numSequences, int range)
 	{
 		double[] scores = new double[sData.size()-1];       // all scores computed
@@ -1397,18 +1058,6 @@ public class Alignment {
 				current =  current.next;
 			}
 			sData.get(i).appendProbabilities(mProbs);
-			if (S.first.optimalMaxLogProb < -99999999)
-			{
-				current = S.first.next;
-				while (current != null)
-				{
-					if (current.previous.currentMaxLogProb < -99999999 && current.currentMaxLogProb > -999999999)
-					{
-					}
-					current = current.next;				
-				}
-			}
-			
 			sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 			
 			String correspondences = ((InitialNode)S.first).showCorrespondences(S.nucleotides);
