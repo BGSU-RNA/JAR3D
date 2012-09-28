@@ -9,7 +9,7 @@ import java.util.*;
 public class ClusterNode extends BasicNode {
 
 	LinkedList interactions = new LinkedList();
-	Vector insertions;
+	Vector<InsertionDistribution> insertions;
 	int numLeftInt, numRightInt;
 	double normalizationZ;
 	int[] maxLengths;
@@ -18,7 +18,6 @@ public class ClusterNode extends BasicNode {
     double deleteProb;
     double deleteLogProb;
    
-	
 	/**
 	 * This is the constructor for ClusterNodes
 	 * @param prev contains a pointer to the previous node
@@ -33,10 +32,8 @@ public class ClusterNode extends BasicNode {
 		normalizationZ = nC;
 		deleteProb = dProb;                                   // deletion probability
 		deleteLogProb = Math.log(deleteProb);                 // log probability
-		
-		// System.out.println("ClusterNode.constructor normalization constant " + normalizationZ);
-		
-		insertions = new Vector(numLeftInt+numRightInt);
+				
+		insertions = new Vector<InsertionDistribution>(numLeftInt+numRightInt);
 		for (int i = 0; i<numLeftInt+numRightInt; i++)
 		{
             // This dummy setting is below changed when an insertion is added
@@ -99,7 +96,6 @@ public class ClusterNode extends BasicNode {
 				p *= ((ClusterInteraction)interactions.get(j)).getSubstProb(codes);
 			}
 			z += p;     // running total of probabilities
-//			System.out.println(z);
 			// push a 1 into codes and carry
 			codes[numBases-1] += 1;
 			
@@ -179,10 +175,8 @@ public class ClusterNode extends BasicNode {
 			
 			i++;
 			
-//			System.out.println(i+"  "+codes[0]+" "+codes[1]+" "+codes[2]+" "+codes[3]+" "+codes[4]+" "+codes[5]);
 		}
 		
-//		char letters[] = new char[]{'a','c','g','u'};
 		char letters[] = new char[]{'A','C','G','U'};
 		
 		
@@ -201,13 +195,13 @@ public class ClusterNode extends BasicNode {
 	 * This method generates insertions for the ClusterNode
 	 * @return
 	 */
-	public Vector generateInsertions()
+	public Vector<String> generateInsertions()
 	{
-		Vector ins = new Vector(numLeftInt+numRightInt);
+		Vector<String> ins = new Vector<String>(numLeftInt+numRightInt);
 		String temp = "";
 		for(int i = 0; i < ins.capacity(); i++)
 		{
-			 temp = ((InsertionDistribution)insertions.get(i)).generate();
+			 temp = insertions.get(i).generate();
 			 ins.add(temp);
 		}
 		return ins;
@@ -217,7 +211,7 @@ public class ClusterNode extends BasicNode {
 	{
 		String[] bases = generateInteractingBases();
 		
-		Vector subseq = generateInsertions();
+		Vector<String> subseq = generateInsertions();
 		
 		String left = "";
 		String right = "";
@@ -271,20 +265,15 @@ public class ClusterNode extends BasicNode {
 			p = deleteLogProb + super.child.getMaxLogProb(i,j); 
 			Deleted = true;                          // default, can be changed later
 
-			// System.out.println("ClusterNode.computeMaxLogProb " + deleteLogProb + " " + p + " " + super.child.getMaxLogProb(i,j));
-			
-
 			while(insLengths[0] <= maxLengths[0])
 			{
 				// if there is enough space between i and j for the int and ins bases,
 				if (i+numLeftInt+a <= j-numRightInt-b)                  // used to be < and -b-1, changed 9-29-07 CLZ
 				{
-					// System.out.println("ClusterNode.computeMaxLogProb: Considering next node getting "+(i+numLeftInt+a)+"<="+(j-numRightInt-b));
 					// pull out the numBases interacting base codes
 	
 					pnew = 0;
 	
-//				System.out.println();
 					int k = i;                                       // first base of the subsequence being parsed
 					for(int m = 0; m < numLeftInt; m++)              // go through insertions on the left
 					{
@@ -299,45 +288,33 @@ public class ClusterNode extends BasicNode {
 					k = j;                                           // last base of the subsequence being parsed
 					for(int m = numBases-1; m >= numLeftInt; m--)    // consider insertions on the right
 					{
-//				System.out.println(i+" "+j+" "+m+" "+k+" "+seq.code.length);
 						intCodes[m] = seq.code[k];                   // record codes of interacting bases, starting from the right
-//				System.out.print("Length: "+insLengths[m-1]+" ");
 						int[] insCodes = new int[insLengths[m-1]];   // (-1)
 						for (int q = 0; q < insLengths[m-1]; q++)    // (-1) loop through number of insertions at site m, moving from the *right*
 						{
 							insCodes[q] = seq.code[k-1-q];           // record code of base here
-//				System.out.print("Code: "+insCodes[q]+" ");
 						}
 						pnew += ((InsertionDistribution)insertions.get(m-1)).computeLogProb(insCodes);
 						k = k - insLengths[m-1] - 1;                 // (-1)
 
-//				System.out.println();
 					}
 					
 
 					
-//					System.out.print("Interacting codes: ");
 					for (int m = 0; m < numBases; m++)
 					{
-//						System.out.print(intCodes[m]);
 					}
-//					System.out.println("");
 
-//					System.out.print("Max lengths: ");
 					for (int m = 0; m < numBases; m++)
 					{
-//						System.out.print(maxLengths[m]);
 					}
-//					System.out.println("");
 
-					// score intCodes[] according to the various interactions
 					
 					for(int m = 0; m < interactions.size(); m++)
 					{
 						pnew += ((ClusterInteraction)interactions.get(m)).getLogSubstProb(intCodes);
 					}
 					
-					// System.out.println("ClusterNode.computeMaxLogProb: Next node gets "+(i+numLeftInt+a)+" "+(j-numRightInt-b));
 					
 					pnew += super.child.getMaxLogProb(i+numLeftInt+a, j-numRightInt-b);
 					
@@ -392,11 +369,9 @@ public class ClusterNode extends BasicNode {
   			if (Deleted)
   			{
   	  			myGen[i-iMin][j-jMin] = new genData(true);
-  	  			//System.out.println("ClusterNode.computeMaxLogProb.  Deletion is best. "+p);
   			}
   			else
   			{
-  				// System.out.println("ClusterNode.computeMaxLogProb: Next node gets "+(i+numLeftInt+opta)+" "+(j-numRightInt-optb));			
   				myGen[i-iMin][j-jMin] = new genData(optInsLengths,opta,optb);
   			}
 		} // end if loop
@@ -441,9 +416,7 @@ public class ClusterNode extends BasicNode {
 		int[] insert = optimalGen1.insLengths;
 		int i = optimalGen1.i;
 		int j = optimalGen1.j;
-		
-		// System.out.println("ClusterNode.showParse:  length of maxLengths is "+maxLengths.length);
-		
+				
   		if (optimalGen1.deleted)
   		{
   			String left = "-";

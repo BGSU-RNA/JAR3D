@@ -110,14 +110,14 @@ public class JAR3Database {
 				String folder, String loopType, String modelType, 
 				boolean structured) {
 			int numSequences = 10000; // make sure this is larger than needed	
-			Vector sData;	        
+			Vector<Sequence> sData;	        
 	        List<LoopResult> results;
 	        
 			System.setProperty("user.dir", folder);
 	
 			sData = Alignment.parseFastaText(QueryTxt, 0, 0);
 	        
-	        Vector modelNames = Sequence.getModelNames(folder, modelType, structured);
+	        Vector<String> modelNames = Sequence.getModelNames(folder, modelType, structured);
 	        
 	        HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, modelType);
 	        if (loopType.equalsIgnoreCase("IL")) {

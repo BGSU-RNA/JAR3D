@@ -1,8 +1,7 @@
 package edu.bgsu.rna.jar3d;
+
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
@@ -16,7 +15,6 @@ import java.io.*;
  *
  */
 public class Sequence {
-//	long start, stop, elapsed;
 	String organism;
 	String letters;            // as read from the fasta file
 	String nucleotides = "";   // with gaps stripped out
@@ -28,7 +26,7 @@ public class Sequence {
 	Node first, last;          // first and last nodes of parsing model
 
 	int code[];                // code for letters A, C, G, U
-	Vector maxLogProbs;
+	private List<List<Double>> maxLogProbs;
     String parseData;
     String correspondences;
     
@@ -41,20 +39,7 @@ public class Sequence {
 	public Sequence(String org, String let) {
 		organism = org;
 		letters = let;
-		maxLogProbs = new Vector();
-
-		/*                                        This will be done just before parsing
-		setNucleotides();
-		setArrays();
-
-		ctiFirst = new int[cti.length];
-		itcFirst = new int[itc.length];
-
-		for (int i = 0; i < cti.length; i++)
-			ctiFirst[i] = cti[i];
-		for (int i = 0; i < itc.length; i++)
-			itcFirst[i] = itc[i];
-		 */
+		maxLogProbs = new Vector<List<Double>>();
 	}
 
 	/**
@@ -68,7 +53,7 @@ public class Sequence {
 		letters = let;
 		setNucleotides();
 		setArrays();
-		maxLogProbs = new Vector();
+		maxLogProbs = new Vector<List<Double>>();
 
 		ctiFirst = new int[firstSeq.cti.length];
 		itcFirst = new int[firstSeq.itc.length];
@@ -90,7 +75,27 @@ public class Sequence {
 		setNucleotides();
 		setArrays();
 	}
-
+	
+	public int probablityCount() {
+	    return maxLogProbs.size();
+	}
+	
+	public List<Double> getMaxLogProbabilities(int index) {
+	    return maxLogProbs.get(index);
+	}
+	
+	public Double getMaxLogProbability(int i, int j) {
+	    return getMaxLogProbabilities(i).get(j);
+	}
+	
+	public Double getMaxProbability(int i) {
+	    return getMaxLogProbability(i, 0);
+	}
+	
+	public void appendProbabilities(List<Double> probs) {
+	    maxLogProbs.add(probs);
+	}
+	
 	/**
 	 * This method is used to strip dashes from the fasta file for
 	 * a plain nucleotide string
@@ -130,33 +135,6 @@ public class Sequence {
 
 		for (int k = 0; k < i; k++)
 			itc[k] = tem[k];                // fill in the values found earlier
-
-		/*
-		System.out.println("Sequence.setArrays");
-
-		for(int c = 0; c < letters.length(); c++)
-		{
-			System.out.print(letters.charAt(c));
-		}
-
-		System.out.println();
-
-		System.out.print("cti: ");
-		for(int c = 0; c < letters.length(); c++)
-		{
-			System.out.print(cti[c]+" ");
-		}
-
-		System.out.println();
-
-		System.out.print("itc: ");
-		for(int c = 0; c < itc.length; c++)
-		{
-			System.out.print(itc[c]+" ");
-		}
-
-		System.out.println();
-		 */
 
 		code = new int[nucleotides.length()];
 
@@ -212,20 +190,16 @@ public class Sequence {
 	 */
 	void addNodeDataModelText(String modelText)
 	{
-//		start = System.currentTimeMillis();
 		Node current = new Node();
 		Stack branchingNodes = new Stack(); // keep track of current junction
 		int newchild = 0;
 		int charCnt = 0;
 		String nodeLine = "";
 		String dataString = "";
-		String comment = "";
-		int numFix = 0;
 		StringTokenizer element;
 		boolean flag = true;
 		boolean isHairpin = true;
 		double[] nData;
-//		long start1 = System.currentTimeMillis();
 		int nodeNumber = 1;
 		int lineNum = 0;
 				
@@ -239,22 +213,15 @@ public class Sequence {
 			
 			if (!nodeLine.equals("//") && (!nodeLine.equals("")))
 			{
-				//System.out.println(nodeLine);
-				//Vector numData; // to hold data straight from txt file
-				Vector numDatas = new Vector(); // to hold arrays of doubles
-				Vector stringData = new Vector();
+				List numDatas = new Vector(); // to hold arrays of doubles
 				if(nodeLine.indexOf("//") != -1)
 				{
-					comment = nodeLine.substring(nodeLine.indexOf("//"),nodeLine.length());
 					nodeLine = nodeLine.substring(0,nodeLine.indexOf("//"));
 				}
 				StringTokenizer st = new StringTokenizer(nodeLine,"|");
 				dataString = st.nextToken(); // the name of the node
 				char type  = dataString.charAt(0);
 				char iType = dataString.charAt(2);
-				//System.out.print("Read node string: " + nodeLine);
-				//System.out.println("Node type: " + type);
-				//System.out.println("Comments: " + comment);
 
 				// allow comment lines in the data file, and blank lines too
 
@@ -263,7 +230,6 @@ public class Sequence {
 					dataString = st.nextToken();
 					element = new StringTokenizer(dataString, ",");
 					charCnt = element.countTokens();
-//						System.out.println("Number of characters to parse with: " + charCnt);
 					char[] codesFromDef = new char[charCnt];
 					for(int i = 0; i < charCnt; i++)
 						codesFromDef[i] = element.nextToken().charAt(0);
@@ -273,7 +239,6 @@ public class Sequence {
 					while(st.hasMoreTokens())
 					{
 						dataString = st.nextToken(); // each individual set of data
-						//System.out.println(dataString);
 						dataString = dataString.replace("[","*");
 						dataString = dataString.replace("]","*");
 						dataString = dataString.replace(",","*");
@@ -287,7 +252,6 @@ public class Sequence {
 						{
 							String nT;
 							nT = element.nextToken();
-							//System.out.println(nT);
 							nData[i] = Double.parseDouble(nT);
 						}
 						numDatas.add(nData);	
@@ -390,15 +354,7 @@ public class Sequence {
 				lineNum++;
 		}
 
-//		stop = System.currentTimeMillis();
-//		elapsed = stop - start1;
-//		System.out.println("Reading model data file time: " + elapsed + " milliseconds");
-
-//		start1 = System.currentTimeMillis();
-
-
 		// Common to all models we might make
-
 		last = current;
 		last.next = null; //The last element does not have a next, 
 		// so it is set to null so that it can be
@@ -414,44 +370,17 @@ public class Sequence {
 			current = current.previous;		 // current equals the one before
 		}
 
-//		stop = System.currentTimeMillis();
-//		elapsed = stop - start1;
-//		System.out.println("Connecting nodes 1 time: " + elapsed + " milliseconds");
-//		start1 = System.currentTimeMillis();
-
-
 		current = first; // set current equal to first for traversal and
 		// assignment of children
-
-		/*
-		while(current != null) // Go until end of list
-		{
-			if(current.getType().equals("ClusterNode"))
-				((ClusterNode)current).normalize();
-			if(current.getType().equals("HairpinNode"))
-				((HairpinNode)current).normalize();
-			current = current.next;
-		}
-		 */
 
 		while(current != null) // Go until end of list
 		{
 			if(current.getType().equals("ClusterNode"))
 				((ClusterNode)current).useFileNormalize();
-//				((ClusterNode)current).normalize();
 			if(current.getType().equals("HairpinNode"))
 				((HairpinNode)current).useFileNormalize();
-//				((HairpinNode)current).normalize();
 			current = current.next;
 		}
-
-
-//		stop = System.currentTimeMillis();
-//		elapsed = stop - start1;
-//		System.out.println("Connecting nodes 2 time: " + elapsed + " milliseconds");
-//		start1 = System.currentTimeMillis();
-
-
 
 		current = first; // set current equal to first for traversal and
 		// assignment of children
@@ -494,43 +423,9 @@ public class Sequence {
 			else 
 			{
 				current.child = current.next;
-				// System.out.println(current.getType());
 			}// end else if
 			current = current.next;
 		}//end
-
-
-
-		// For debugging purposes, show what junction goes with what children
-		/*
-		current = first; 
-
-		while(current != null) // Go until end of list
-		{
-			int lI, rI;
-			if(current.getType().equals("JunctionNode"))
-			{
-//				if ((current.leftIndex != ((Node)((BranchingNode)current).children.get(0)).leftIndex) || (current.rightIndex != ((Node)((BranchingNode)current).children.get(1)).rightIndex))
-				{
-					System.out.println(current.leftIndex+" "+current.rightIndex);
-					for(int i = 0; i < ((BranchingNode)current).children.size(); i++)
-					{
-						System.out.print("Child left index: " + ((Node)((BranchingNode)current).children.get(i)).leftIndex);
-						System.out.println(" Child right index: " + ((Node)((BranchingNode)current).children.get(i)).rightIndex);
-					}
-
-				}
-			}
-			current = current.next;
-		}
-		 */
-
-//		stop = System.currentTimeMillis();
-//		elapsed = stop - start1;
-//		System.out.println("Connecting nodes 3 time: " + elapsed + " milliseconds");
-
-//		elapsed = stop - start;
-//		System.out.println("Node data added time: " + elapsed + " milliseconds");
 	}// end method addNodedataModelText
 
 
@@ -561,8 +456,6 @@ public class Sequence {
 					System.out.println("Reading model file from absolute path");
 					File f3 = new File(modelFileName);
 					rdr = new BufferedReader(new FileReader(f3));
-//					System.out.println("Sequence.addNodeData: Model file not found.");
-//					System.exit(0);
 				}
 			}
 			else
@@ -611,20 +504,16 @@ public class Sequence {
 	 */
 	void addNodeDataOld(String modelFileName)
 	{
-//		start = System.currentTimeMillis();
 		Node current = new Node();
 		Stack branchingNodes = new Stack(); // keep track of current junction
 		int newchild = 0;
 		int charCnt = 0;
 		String nodeLine = "";
 		String dataString = "";
-		String comment = "";
-		int numFix = 0;
 		StringTokenizer element;
 		boolean flag = true;
 		boolean isHairpin = true;
 		double[] nData;
-//		long start1 = System.currentTimeMillis();
 
 		BufferedReader rdr;
 		
@@ -633,16 +522,9 @@ public class Sequence {
 			{
 				String curDir = System.getProperty("user.dir");
 		        curDir = curDir.replace(File.separator + "bin","");
-//				System.out.println("Sequence.addNodeData: Current directory is "+curDir);
-
-//				File f1 = new File (curDir + "\\..\\models");
-//				File[] modfiles = f1.listFiles();
-				int z = 0;
 	
 				try
 				{
-//					while(!modfiles[z].getName().equals(modelFileName))
-//						z++;
 				}
 				catch(ArrayIndexOutOfBoundsException e)
 				{
@@ -678,31 +560,22 @@ public class Sequence {
 			{
 				if (!nodeLine.equals("//") && (!nodeLine.equals("")))
 				{
-					//System.out.println(nodeLine);
-					//Vector numData; // to hold data straight from txt file
 					Vector numDatas = new Vector(); // to hold arrays of doubles
-					Vector stringData = new Vector();
 					if(nodeLine.indexOf("//") != -1)
 					{
-						comment = nodeLine.substring(nodeLine.indexOf("//"),nodeLine.length());
 						nodeLine = nodeLine.substring(0,nodeLine.indexOf("//"));
 					}
 					StringTokenizer st = new StringTokenizer(nodeLine,"|");
 					dataString = st.nextToken(); // the name of the node
 					char type  = dataString.charAt(0);
 					char iType = dataString.charAt(2);
-					//System.out.print("Read node string: " + nodeLine);
-					//System.out.println("Node type: " + type);
-					//System.out.println("Comments: " + comment);
 
 					// allow comment lines in the data file, and blank lines too
-
 					if(iType == 'a' ) // character definition
 					{
 						dataString = st.nextToken();
 						element = new StringTokenizer(dataString, ",");
 						charCnt = element.countTokens();
-//						System.out.println("Number of characters to parse with: " + charCnt);
 						char[] codesFromDef = new char[charCnt];
 						for(int i = 0; i < charCnt; i++)
 							codesFromDef[i] = element.nextToken().charAt(0);
@@ -712,7 +585,6 @@ public class Sequence {
 						while(st.hasMoreTokens())
 						{
 							dataString = st.nextToken(); // each individual set of data
-							//System.out.println(dataString);
 							dataString = dataString.replace("[","*");
 							dataString = dataString.replace("]","*");
 							dataString = dataString.replace(",","*");
@@ -726,7 +598,6 @@ public class Sequence {
 							{
 								String nT;
 								nT = element.nextToken();
-								//System.out.println(nT);
 								nData[i] = Double.parseDouble(nT);
 							}
 							numDatas.add(nData);	
@@ -819,13 +690,6 @@ public class Sequence {
 			System.out.println(e);
 		}
 
-//		stop = System.currentTimeMillis();
-//		elapsed = stop - start1;
-//		System.out.println("Reading model data file time: " + elapsed + " milliseconds");
-
-//		start1 = System.currentTimeMillis();
-
-
 		// Common to all models we might make
 
 		last = current;
@@ -842,46 +706,17 @@ public class Sequence {
 			current.previous.next = current; // assign the previous node's next
 			current = current.previous;		 // current equals the one before
 		}
-
-//		stop = System.currentTimeMillis();
-//		elapsed = stop - start1;
-//		System.out.println("Connecting nodes 1 time: " + elapsed + " milliseconds");
-//		start1 = System.currentTimeMillis();
-
-
 		current = first; // set current equal to first for traversal and
 		// assignment of children
-
-		/*
-		while(current != null) // Go until end of list
-		{
-			if(current.getType().equals("ClusterNode"))
-				((ClusterNode)current).normalize();
-			if(current.getType().equals("HairpinNode"))
-				((HairpinNode)current).normalize();
-			current = current.next;
-		}
-		 */
 
 		while(current != null) // Go until end of list
 		{
 			if(current.getType().equals("ClusterNode"))
 				((ClusterNode)current).useFileNormalize();
-//				((ClusterNode)current).normalize();
 			if(current.getType().equals("HairpinNode"))
 				((HairpinNode)current).useFileNormalize();
-//				((HairpinNode)current).normalize();
 			current = current.next;
 		}
-
-
-//		stop = System.currentTimeMillis();
-//		elapsed = stop - start1;
-//		System.out.println("Connecting nodes 2 time: " + elapsed + " milliseconds");
-//		start1 = System.currentTimeMillis();
-
-
-
 		current = first; // set current equal to first for traversal and
 		// assignment of children
 
@@ -910,7 +745,6 @@ public class Sequence {
 								((BranchingNode)branchingNodes.peek()).children.add(((eNode)((AlternativeNode)branchingNodes.peek()).eNodes.get(i)).next);
 						}
 						branchingNodes.pop();
-						//System.out.println("Done with one brachingNode.");
 					}
 					else
 					{
@@ -923,48 +757,9 @@ public class Sequence {
 			else 
 			{
 				current.child = current.next;
-				// System.out.println(current.getType());
 			}// end else if
 			current = current.next;
 		}//end
-
-
-
-		// For debugging purposes, show what junction goes with what children
-		/*
-		current = first; 
-
-		while(current != null) // Go until end of list
-		{
-			int lI, rI;
-			if(current.getType().equals("JunctionNode"))
-			{
-//				if ((current.leftIndex != ((Node)((BranchingNode)current).children.get(0)).leftIndex) || (current.rightIndex != ((Node)((BranchingNode)current).children.get(1)).rightIndex))
-				{
-					System.out.println(current.leftIndex+" "+current.rightIndex);
-					for(int i = 0; i < ((BranchingNode)current).children.size(); i++)
-					{
-						System.out.print("Child left index: " + ((Node)((BranchingNode)current).children.get(i)).leftIndex);
-						System.out.println(" Child right index: " + ((Node)((BranchingNode)current).children.get(i)).rightIndex);
-					}
-
-				}
-			}
-			current = current.next;
-		}
-		 */
-
-
-
-
-
-
-//		stop = System.currentTimeMillis();
-//		elapsed = stop - start1;
-//		System.out.println("Connecting nodes 3 time: " + elapsed + " milliseconds");
-
-//		elapsed = stop - start;
-//		System.out.println("Node data added time: " + elapsed + " milliseconds");
 	}// end method addNodedata
 
 	/**
@@ -995,24 +790,6 @@ public class Sequence {
 
 		System.out.println();
 		System.out.println("Printing last to first");
-
-		// print node data, last node to first
-
-		/*		current = last; // set current to last for backwards traversal
-
-		while(current != null)
-		{
-			System.out.println("Type: " + current.getType() + " Params: "+ current.getParams());
-			if(current.getType().equals("JunctionNode"))
-			{
-				for(int i = 0; i < ((JunctionNode)current).children.size(); i++)
-				{
-					System.out.println("Child params: " + ((Node)((JunctionNode)current).children.get(i)).getParams());
-				}
-			}					
-			current = current.previous;
-		}
-		 */
 	}
 
 	/**
@@ -1036,7 +813,6 @@ public class Sequence {
 	 */
 	void parseSequence(int range)
 	{
-//		start = System.currentTimeMillis();
 
 		Node current = last; 
 		while(current != null) // go until the end of the list
@@ -1062,22 +838,9 @@ public class Sequence {
 					current = current.previous;
 				}// while
 			}// for		     	
-//			stop = System.currentTimeMillis();
-//			elapsed = stop - start2;
-//			System.out.println("Subsequences of length "+p+" took "+elapsed+" milliseconds");
 
-		}// for	
-//		stop = System.currentTimeMillis();
-//		elapsed = stop - start;
-//		System.out.println("Time to compute max log prob: " + elapsed+ " milliseconds");
-
-
-//		start = System.currentTimeMillis();
-		
+		}// for
 		((InitialNode)first).traceback(0,nucleotides.length()-1);
-//		stop = System.currentTimeMillis();
-//		elapsed = stop - start;
-//		System.out.println("Time to traceback: " + elapsed+ " milliseconds");
 	}// end parseSequence()
 	
 	/**
@@ -1085,18 +848,14 @@ public class Sequence {
 	 * but if it can't look there, it looks online at rna.bgsu.edu/JAR3D.
 	 */
 	
-	public static Vector getModelNames(String loopType)
+	public static Vector<String> getModelNames(String loopType)
 	{
-		Vector modelNames = new Vector();
+		Vector<String> modelNames = new Vector<String>();
 		String listName = loopType + "_Models.txt";
 
 	try {
 		String curDir = System.getProperty("user.dir");
         curDir = curDir.replace(File.separator + "bin","");
-
-//		System.out.println("Sequence.getModelNames: Current directory is "+curDir);
-//        File f1 = new File (curDir + "\\models");
-//	    File[] modfiles = f1.listFiles();
 
 		BufferedReader rdr;
 
@@ -1105,11 +864,9 @@ public class Sequence {
 
 		String fileLine = "";
 		fileLine = rdr.readLine();
-//		System.out.println(fileLine);
 		
 		while(fileLine != null)
 		{
-//			System.out.println(fileLine);
 			modelNames.add(fileLine);
 			fileLine = rdr.readLine();
 		}
@@ -1137,9 +894,9 @@ public class Sequence {
 	}
 	
 	//Overloaded getModelNames for the new file system
-	public static Vector getModelNames(String folder, String modelType, boolean Structured)
+	public static Vector<String> getModelNames(String folder, String modelType, boolean Structured)
 	{
-		Vector modelNames = new Vector();
+		Vector<String> modelNames = new Vector<String>();
 		char fsep = File.separatorChar;
 		String listName;
 		if(Structured){
@@ -1152,10 +909,6 @@ public class Sequence {
 		String curDir = System.getProperty("user.dir");
         curDir = curDir.replace(File.separator + "bin","");
 
-//		System.out.println("Sequence.getModelNames: Current directory is "+curDir);
-//        File f1 = new File (curDir + "\\models");
-//	    File[] modfiles = f1.listFiles();
-
 		BufferedReader rdr;
 
 		File f2 = new File(listName);
@@ -1163,11 +916,9 @@ public class Sequence {
 
 		String fileLine = "";
 		fileLine = rdr.readLine();
-//		System.out.println(fileLine);
 		
 		while(fileLine != null)
 		{
-//			System.out.println(fileLine);
 			//remove _model.txt from file name to get group name
 			fileLine = fileLine.substring(0,fileLine.length()-10);
 			modelNames.add(fileLine);
@@ -1202,9 +953,9 @@ public class Sequence {
 	 * 
 	 */
 	
-	public static Vector readTextFile(String fileName)
+	public static Vector<String> readTextFile(String fileName)
 	{
-		Vector lineValues = new Vector();
+		Vector<String> lineValues = new Vector<String>();
 
 	try {
 		String curDir = System.getProperty("user.dir");

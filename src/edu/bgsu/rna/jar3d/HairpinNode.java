@@ -1,4 +1,5 @@
 package edu.bgsu.rna.jar3d;
+
 import java.util.LinkedList;
 import java.util.Vector;
 
@@ -10,7 +11,7 @@ import java.util.Vector;
 public class HairpinNode extends BasicNode {
 
 	LinkedList interactions = new LinkedList();
-	Vector insertions;
+	Vector<InsertionDistribution> insertions;
 	int numFixed;
 	double normalizationZ;
 	int[] maxLengths; // maximum possible numbers of insertions
@@ -26,8 +27,7 @@ public class HairpinNode extends BasicNode {
 		if (numfix > 0)
 		{			
 			numFixed    = numfix;
-//			System.out.println("HairpinNode "+numfix);
-			insertions  = new Vector(numFixed);
+			insertions  = new Vector<InsertionDistribution>(numFixed);
 			for (int i = 0; i<numFixed; i++)
 			{
 				insertions.add(new InsertionDistribution(new double[]{1.0}, new double[]{0.4, 0.3,0.2,0.1}));
@@ -36,7 +36,7 @@ public class HairpinNode extends BasicNode {
 		else
 		{
 			numFixed = 4;
-			insertions  = new Vector(numFixed);
+			insertions  = new Vector<InsertionDistribution>(numFixed);
 			for (int i = 0; i < numFixed; i++)
 			{
 				insertions.add(new InsertionDistribution(new double[]{1.0}, new double[]{0.4, 0.3,0.2,0.1}));
@@ -117,8 +117,6 @@ public class HairpinNode extends BasicNode {
 
 	public void pretendToNormalize()
 	{
-		double z = 0;
-		double p = 1;
 		int[] codes = new int[numFixed];
 		
 		maxLengths = new int[insertions.size()]; // maximum possible numbers of insertions
@@ -132,13 +130,10 @@ public class HairpinNode extends BasicNode {
 			codes[i] = 0;
 				
 		normalizationZ = 1;
-//		System.out.println("Normalization: "+z);
 	}
 	
 	public void useFileNormalize()
 	{
-		double z = 0;
-		double p = 1;
 		int[] codes = new int[numFixed];
 		
 		maxLengths = new int[insertions.size()]; // maximum possible numbers of insertions
@@ -150,9 +145,6 @@ public class HairpinNode extends BasicNode {
 		
 		for (int i = 0; i < numFixed; i++)
 			codes[i] = 0;
-				
-//		normalizationZ = 1;
-//		System.out.println("Normalization: "+z);
 	}
 
 	/**
@@ -193,23 +185,18 @@ public class HairpinNode extends BasicNode {
 			for(int j = 0; j < interactions.size(); j++)
 			{
 				p *= ((ClusterInteraction)interactions.get(j)).getSubstProb(codes);
-//				System.out.println(((ClusterInteraction)interactions.get(j)).getSubstProb(codes));
 			}
 			z += p;
 			
 			i++;
 			
-//			System.out.println(i+"  "+codes[0]+" "+codes[1]+" "+codes[2]+" "+codes[3]+" "+z+" "+limit);
 		}
 		
-//		char letters[] = new char[]{'a','c','g','u'};
 		char letters[] = new char[]{'A','C','G','U'};
 		
 		
 // 		take first numLeftInt and return separately from numRightInt
 		String leftStr = "";
-
-//		System.out.println(codes[0]+" "+codes[1]+" "+codes[2]+" "+codes[3]+" ");
 		
 		for(int f = 0; f < numFixed; f++)
 			leftStr += letters[codes[f]];
@@ -221,13 +208,13 @@ public class HairpinNode extends BasicNode {
 	 * This method generates insertions for the HairpinNode
 	 * @return
 	 */
-	public Vector generateInsertions()
+	public Vector<String> generateInsertions()
 	{
-		Vector ins = new Vector(numFixed);
+		Vector<String> ins = new Vector<String>(numFixed);
 		String temp = "";
 		for(int i = 0; i < ins.capacity(); i++)
 		{
-			 temp = ((InsertionDistribution)insertions.get(i)).generate();
+			 temp = insertions.get(i).generate();
 			 ins.add(temp);
 		}
 		return ins;
@@ -237,7 +224,7 @@ public class HairpinNode extends BasicNode {
 	{
 		String bases = generateInteractingBases();
 		
-		Vector subseq = generateInsertions();
+		Vector<String> subseq = generateInsertions();
 		
 		String left = "";
 		for(int i = 0; i < numFixed; i++)
@@ -370,7 +357,6 @@ public class HairpinNode extends BasicNode {
 					left += "-";
 				}
 				i += insert[l]+1;
-// System.out.println("HairpinNode.showParse "+i+" "+npadded.length()+" "+numFixed);
                 left += npadded.substring(i,i+1);
 			}
 		
