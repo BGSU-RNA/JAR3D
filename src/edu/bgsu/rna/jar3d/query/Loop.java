@@ -6,4 +6,6 @@ public interface Loop extends Iterable<String> {
 
 	public List<String> getSequences();
 	public String getType();
+	public long getId();
+	public String getName();
 }
