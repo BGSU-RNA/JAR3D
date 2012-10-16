@@ -426,8 +426,8 @@ public class Alignment {
 			else
 			{
 				System.out.print(">" + sData.get(j).organism + " ");
-				for(int x = 0; x < sData.get(j).probablityCount(); x++)
-					System.out.print(sData.get(j).getMaxProbability(x));
+				for(int x = 0; x < sData.get(j).getMaxLogProbabilitySize(); x++)
+					System.out.print(sData.get(j).getMaxLogProbability(x));
 				System.out.println();
 			}
 			for(int i = 0; i < mask.length; i++)
@@ -470,8 +470,8 @@ public class Alignment {
 			else
 			{
 				System.out.print(">" + sData.get(j).organism + " ");
-				for(int x = 0; x < sData.get(j).probablityCount(); x++)
-					System.out.print(sData.get(j).getMaxProbability(x));
+				for(int x = 0; x < sData.get(j).getMaxLogProbabilitySize(); x++)
+					System.out.print(sData.get(j).getMaxLogProbability(x));
 				System.out.println();
 			}
 			for(int i = 0; i < mask.length; i++)
@@ -525,9 +525,9 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.get(m).probablityCount(); x++)
+			for(int x = 0; x < sData.get(m).getMaxLogProbabilitySize(); x++)
 			{
-				double tempo = sData.get(0).getMaxProbability(x);
+				double tempo = sData.get(0).getMaxLogProbability(x);
 				modelSums[x] += tempo;
 			}
 		}
@@ -598,10 +598,10 @@ public class Alignment {
 			}		
 			alnm += " " + sData.get(j).organism + " ";
 			
-			for(int x = 0; x < sData.get(j).probablityCount(); x++)
+			for(int x = 0; x < sData.get(j).getMaxLogProbabilitySize(); x++)
 			{
 				fmt = new Formatter();
-				fmt.format("%10.6f", sData.get(j).getMaxProbability(indices[x]));
+				fmt.format("%10.6f", sData.get(j).getMaxLogProbability(indices[x]));
 				alnm += tinyModNames.get(indices[x]) + " score: " + fmt + " ";
 			}
 			alignmentVect.add(alnm);
@@ -651,14 +651,14 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.get(m).probablityCount(); x++)
+			for(int x = 0; x < sData.get(m).getMaxLogProbabilitySize(); x++)
 			{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-			    double tempo = sData.get(m).getMaxProbability(x);   
+			    double tempo = sData.get(m).getMaxLogProbability(x);   
 				modelSums[x] += tempo;
 
-				tempo = rsData.get(m).getMaxProbability(x);
+				tempo = rsData.get(m).getMaxLogProbability(x);
 				rmodelSums[x] += tempo;
 			}
 		}
@@ -762,9 +762,9 @@ public class Alignment {
 			{
 				fmt = new Formatter();
 				if (reversed[indices[x]] == 0)
-					fmt.format("%12.6f", sData.get(j).getMaxProbability(indices[x]));
+					fmt.format("%12.6f", sData.get(j).getMaxLogProbability(indices[x]));
 				else
-					fmt.format("%12.6f", rsData.get(j).getMaxProbability(indices[x]));
+					fmt.format("%12.6f", rsData.get(j).getMaxLogProbability(indices[x]));
 				alnm += tinyModNames.get(indices[x]) + " score: " + fmt + " ";
 			}
 			}
@@ -862,11 +862,11 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.get(m).probablityCount(); x++)
+			for(int x = 0; x < sData.get(m).getMaxLogProbabilitySize(); x++)
 			{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-				double tempo = sData.get(m).getMaxLogProbability(x, 0);   
+				double tempo = sData.get(m).getMaxLogProbabilityOf(x, 0);   
 				scores[m][x] = tempo;
 			}
 		}
@@ -880,7 +880,7 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size()-1; m++)
 		{
-				double tempo = sData.get(m+1).getMaxLogProbability(0, 0);   
+				double tempo = sData.get(m+1).getMaxLogProbabilityOf(0, 0);   
 				scores[m] = tempo;
 		}
 		return scores;
@@ -916,13 +916,13 @@ public class Alignment {
 //Add up model scores for each sequence, find mean score, compare regular and reversed scores
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.get(m).probablityCount(); x++)
+			for(int x = 0; x < sData.get(m).getMaxLogProbabilitySize(); x++)
 			{
-				double tempo = sData.get(m).getMaxLogProbability(x, 0);   
+				double tempo = sData.get(m).getMaxLogProbabilityOf(x, 0);   
 				modelSums[x] += tempo;
 				modelScoreMat[x][m] = tempo;
 
-				tempo = sData.get(m).getMaxLogProbability(x, 0);
+				tempo = sData.get(m).getMaxLogProbabilityOf(x, 0);
 				rmodelSums[x] += tempo;
 				rmodelScoreMat[x][m] = tempo;
 			}

@@ -161,7 +161,7 @@ public class JAR3DMatlab {
 					alnm += pData.get(j).charAt(i);
 			}		
 			alnm += " "+((Sequence)sData.elementAt(j)).organism+" ";
-			for(int x = 0; x < ((Sequence)sData.elementAt(j)).probablityCount(); x++)
+			for(int x = 0; x < ((Sequence)sData.elementAt(j)).getMaxLogProbabilitySize(); x++)
 				alnm += ((Sequence)sData.elementAt(j)).getMaxLogProbabilities(x).get(0);
 			alignmentVect.add(alnm);
 		}

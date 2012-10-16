@@ -76,7 +76,7 @@ public class Sequence {
 		setArrays();
 	}
 	
-	public int probablityCount() {
+	public int getMaxLogProbabilitySize() {
 	    return maxLogProbs.size();
 	}
 	
@@ -84,12 +84,12 @@ public class Sequence {
 	    return maxLogProbs.get(index);
 	}
 	
-	public Double getMaxLogProbability(int i, int j) {
+	public Double getMaxLogProbabilityOf(int i, int j) {
 	    return getMaxLogProbabilities(i).get(j);
 	}
 	
-	public Double getMaxProbability(int i) {
-	    return getMaxLogProbability(i, 0);
+	public Double getMaxLogProbability(int i) {
+	    return getMaxLogProbabilityOf(i, 0);
 	}
 	
 	public void appendProbabilities(List<Double> probs) {
