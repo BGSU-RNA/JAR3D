@@ -80,7 +80,8 @@ public class Alignment {
 			}
 			catch (FileNotFoundException e)
 			{
-				System.out.println("Reading sequence file from relative path");
+				// Please retain the following commented-out line for debugging
+				// System.out.println("Reading sequence file from relative path");
 				rdr = new BufferedReader(new FileReader(curDir + File.separator + "sequences" + File.separator + fileName));
 			}
 				

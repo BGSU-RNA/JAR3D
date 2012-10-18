@@ -453,7 +453,8 @@ public class Sequence {
 				}
 				catch(FileNotFoundException e)
 				{
-					System.out.println("Reading model file from absolute path");
+					// Please retain the following commented-out line for debugging
+					//					System.out.println("Reading model file from absolute path");
 					File f3 = new File(modelFileName);
 					rdr = new BufferedReader(new FileReader(f3));
 				}
