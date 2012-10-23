@@ -32,7 +32,6 @@ public class Alignment {
 	 * @param EndCol
 	 * @return
 	 */
-
 	public static Vector<Sequence> loadFasta(String fileName)
 	{
 		return loadFastaColumns(fileName,0,0);
@@ -46,7 +45,6 @@ public class Alignment {
 	 * @param EndCol
 	 * @return
 	 */
-
 	public static Vector<Sequence> loadFastaColumns(String fileName, int StartCol, int EndCol)
 	{
 		return loadFastaColumnsDNA(fileName,StartCol,EndCol,0);
@@ -62,7 +60,6 @@ public class Alignment {
 	 * @param DNA
 	 * @return
 	 */
-	
 	public static Vector<Sequence> loadFastaColumnsDNA(String fileName, int StartCol, int EndCol, int DNA)
 		{
 		Vector<Sequence> sData = new Vector<Sequence>();
@@ -210,11 +207,10 @@ public class Alignment {
 
 	/**
 	 * This method reverses the strand orders in sequenceData and returns a new vector of sequence data
-	 * @param numSequences
 	 * @param sequenceData
 	 * @return
 	 */
-	public static List<Sequence> reverse(int numSequences, List<Sequence> sequenceData)
+	public static List<Sequence> reverse(List<Sequence> sequenceData)
 	{
 		List<Sequence> reverseSData = new Vector<Sequence>();
 
@@ -226,7 +222,7 @@ public class Alignment {
 		
 		reverseSData.add(new Sequence("","")); // save space for header information to be added later as element 0 of this vector
 		
-		for (int i=1; i < Math.min(sequenceData.size(),numSequences+1); i++)
+		for (int i=1; i < sequenceData.size(); i++)
 		{
 			temp = sequenceData.get(i).letters;
 			organism = sequenceData.get(i).organism;
@@ -244,19 +240,18 @@ public class Alignment {
 	}
 
 	/**
-	 * This method initiates parsing.  It loops through all Sequence objects in sData, up to numSequences sequences.
+	 * This method initiates parsing.  It loops through all Sequence objects in sData.
 	 * It adds node data just once, to a new Sequence object called S.  Then it adds the organism and letters from each Sequence object.
 	 * Then it runs the parseSequence method of the Sequence class.
 	 * It runs through all nodes to store max log probability information
 	 * Finally, it calls the showParse method of the first node of the model, which accumulates a very, very wide version of the
 	 * alignments in row-column format.  Many columns of the alignment then need to get removed later.
 	 * @param sData
-	 * @param numSequences
 	 * @param nodeFileName
 	 * @param range
 	 * @return
 	 */
-	public static List<Sequence> doParse(List<Sequence> sData, int numSequences, String nodeFileName, int range)
+	public static List<Sequence> doParse(List<Sequence> sData, String nodeFileName, int range)
 	{
 		Node current;
 		Vector<Double> mProbs = new Vector<Double>();
@@ -270,7 +265,7 @@ public class Alignment {
 		firstS.setNucleotides();
 		firstS.setArrays();
 		
-		for (int i = 1; i < Math.min(sData.size(),numSequences+1); i++) 
+		for (int i = 1; i < sData.size(); i++) 
 		{
 			S.organism = sData.get(i).organism;             // focus on one sequence
 			S.letters  = sData.get(i).letters;
@@ -404,12 +399,12 @@ public class Alignment {
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
 	 */
-	public static void displayAlignmentFASTA(List<Sequence> sData, int numSequences)
+	public static void displayAlignmentFASTA(List<Sequence> sData)
 	{
 		
 		List<String> pData = new Vector<String>();
 		
-		for (int i = 0; i < Math.min(numSequences+1,sData.size()); i++)
+		for (int i = 0; i < sData.size(); i++)
 		{
 			pData.add(sData.get(i).parseData);
 		}
@@ -450,12 +445,12 @@ public class Alignment {
 	 * @param pData contains plain string sequences
 	 * @param sData contains sequence objects
 	 */
-	public static void listAlignmentAsCorrespondences(List<Sequence> sData, int numSequences, String SeqName, String ModelName)
+	public static void listAlignmentAsCorrespondences(List<Sequence> sData, String SeqName, String ModelName)
 	{
 		
 		List<String> pData = new Vector<String>();
 		
-		for (int i = 0; i < Math.min(numSequences+1,sData.size()); i++)
+		for (int i = 0; i < sData.size(); i++)
 		{
 			pData.add(sData.get(i).parseData);
 		}
@@ -489,7 +484,7 @@ public class Alignment {
 
 	}
 
-	public static double[] getSortedHLAlignment(List<Sequence> sData, List<String> modNames, int numSequences, int range)
+	public static double[] getSortedHLAlignment(List<Sequence> sData, List<String> modNames, int range)
 	{
 		List<String> alignmentVect = new Vector<String>();
 		List<String> pData = new Vector<String>();
@@ -520,7 +515,7 @@ public class Alignment {
 		// parse all sequences against models
 		for(int k = 0; k < modNames.size(); k++)
 		{
-			sData  = Alignment.doParse(sData, numSequences, modNames.get(k), range);
+			sData  = Alignment.doParse(sData, modNames.get(k), range);
 		}
 
 		// add up model scores for each sequence
@@ -610,7 +605,7 @@ public class Alignment {
 		return scores;
 	}	
 
-	public static double[] getSortedILAlignment(List<Sequence> sData, List<String> modNames, int numSequences, int range)
+	public static double[] getSortedILAlignment(List<Sequence> sData, List<String> modNames, int range)
 	{
 		Vector<String> pData = new Vector<String>();                           // parse data
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
@@ -622,7 +617,7 @@ public class Alignment {
 		int[] reversed = new int[modNames.size()];             // is best model reversed?
         double[] scores = new double[2*modNames.size()];       // all scores computed
 
-        List<Sequence> rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
+        List<Sequence> rsData = Alignment.reverse(sData);  // reversed sequence data
 		
 		if(modNames.get(0).contains("http"))         // look online for models
 		{
@@ -645,8 +640,8 @@ public class Alignment {
 		// parse sequence data in sData against models
 		for(int k = 0; k < modNames.size(); k++)
 		{
-			sData  = Alignment.doParse(sData, numSequences, modNames.get(k), range);
-			rsData = Alignment.doParse(rsData, numSequences, modNames.get(k), range);
+			sData  = Alignment.doParse(sData, modNames.get(k), range);
+			rsData = Alignment.doParse(rsData, modNames.get(k), range);
 		}
 
 		// add up model scores for each sequence
@@ -730,13 +725,13 @@ public class Alignment {
 		
 		//		 align again to get max prob alignment
         if (reversed[indices[0]]==0) {
-        	sData  = Alignment.doParse(sData, numSequences, modNames.get(indices[0]), range);
+        	sData  = Alignment.doParse(sData, modNames.get(indices[0]), range);
         	System.out.println("parsing forward again " + modNames.get(indices[0]) + " " + indices[0]);
     		for (int i = 0; i < sData.size(); i++)
     			pData.add(sData.get(i).parseData);  
         }
         else {
-        	rsData = Alignment.doParse(rsData, numSequences, modNames.get(indices[0]),range);
+        	rsData = Alignment.doParse(rsData, modNames.get(indices[0]),range);
         	System.out.println("parsing reversed again " + modNames.get(indices[0]) + " " + indices[0]);
     		for (int i = 0; i < sData.size(); i++)
     			pData.add(rsData.get(i).parseData); 
@@ -775,7 +770,7 @@ public class Alignment {
 		return scores;
 	}
 	
-	public static ParseData doParse2(List<Sequence> sData, int numSequences, String nodeFileName, int range)
+	public static ParseData doParse2(List<Sequence> sData, String nodeFileName, int range)
 	{
 		Node current;
 		List<Double> mProbs = new Vector<Double>();
@@ -790,7 +785,7 @@ public class Alignment {
 		firstS.setNucleotides();
 		firstS.setArrays();
 		
-		for (int i = 1; i < Math.min(sData.size(),numSequences+1); i++) 
+		for (int i = 1; i < sData.size(); i++) 
 		{
 			S.organism = sData.get(i).organism;             // focus on one sequence
 			S.letters  = sData.get(i).letters;
@@ -850,14 +845,14 @@ public class Alignment {
 		return probsArray;
 	}
 
-	public static double[][] getILScores(List<Sequence> sData, List<String> modNames, int numSequences, int range)
+	public static double[][] getILScores(List<Sequence> sData, List<String> modNames, int range)
 	{
         double[][] scores = new double[sData.size()][modNames.size()];       // all scores computed
 		
 		// parse sequence data in sData against models
 		for(int k = 0; k < modNames.size(); k++)
 		{
-			sData  = Alignment.doParse(sData, numSequences, modNames.get(k), range);
+			sData  = Alignment.doParse(sData, modNames.get(k), range);
 		}
 
 		// add up model scores for each sequence
@@ -874,10 +869,10 @@ public class Alignment {
 		return scores;
 	}
 
-	public static double[] getILScoresSingle(List<Sequence> sData, String modName, int numSequences, int range)
+	public static double[] getILScoresSingle(List<Sequence> sData, String modName, int range)
 	{
 		double[] scores = new double[sData.size()-1];       // all scores computed
-		sData  = Alignment.doParse(sData,numSequences,modName,range);
+		sData  = Alignment.doParse(sData, modName, range);
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size()-1; m++)
 		{
@@ -888,7 +883,7 @@ public class Alignment {
 	}
 	
 	//Takes a JAR3D query and submits results to MySQL database
-	public static List<LoopResult> doILdbQuery(int loopID, Query query, List<Sequence> sData, List<String> modNames, HashMap<String, MotifGroup> groupData, int numSequences, int range)
+	public static List<LoopResult> doILdbQuery(int loopID, Query query, List<Sequence> sData, List<String> modNames, HashMap<String, MotifGroup> groupData, int range)
 	{
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
@@ -901,7 +896,7 @@ public class Alignment {
 		double[] scores = new double[2*modNames.size()];
 		List<LoopResult> loopRes = new Vector<LoopResult>();
 		
-		List<Sequence> rsData = Alignment.reverse(numSequences, sData);  // reversed sequence data
+		List<Sequence> rsData = Alignment.reverse(sData);  // reversed sequence data
 	    
 	    shortModNames = new Vector<String>(modNames);
 	    Vector<String> tinyModNames = new Vector<String>(shortModNames);
@@ -910,8 +905,8 @@ public class Alignment {
 	    for(int k = 0; k < modNames.size(); k++)
 		{
 	    	group = groupData.get(modNames.get(k));
-			sData  = Alignment.doParse(sData,numSequences,group.Model,range,Boolean.TRUE);
-			rsData = Alignment.doParse(rsData,numSequences,group.Model,range,Boolean.TRUE);
+			sData  = Alignment.doParse(sData, group.Model, range, true);
+			rsData = Alignment.doParse(rsData, group.Model, range, true);
 		}
 		
 //Add up model scores for each sequence, find mean score, compare regular and reversed scores
@@ -1012,7 +1007,7 @@ public class Alignment {
 	}
 	
 	//Overloaded doParse that can take group data as a string instead of a file name
-	public static List<Sequence> doParse(List<Sequence> sData, int numSequences, String nodeInfo, int range, boolean fullModelText)
+	public static List<Sequence> doParse(List<Sequence> sData, String nodeInfo, int range, boolean fullModelText)
 	{
 		Node current;
 		List<Double> mProbs = new Vector<Double>();
@@ -1030,7 +1025,7 @@ public class Alignment {
 		firstS.setNucleotides();
 		firstS.setArrays();
 		
-		for (int i = 1; i < Math.min(sData.size(),numSequences+1); i++) 
+		for (int i = 1; i < sData.size(); i++) 
 		{
 			S.organism = sData.get(i).organism;             // focus on one sequence
 			S.letters  = sData.get(i).letters;			

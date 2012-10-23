@@ -128,7 +128,7 @@ public class SimpleAlign {
 		
 		//reverse sequences in seqFile1 if reverse is true
 		if(reverse){
-			sD1 = Alignment.reverse(sD1.size(), sD1);
+			sD1 = Alignment.reverse(sD1);
 		}
 		
 		String[] seqs1 = getSeqStrings(sD1);

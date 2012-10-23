@@ -56,7 +56,6 @@ public class Application {
 	public List<LoopResult> motifParse(long loopID, Query query, String QueryTxt, 
 			String folder, String loopType, String modelType, 
 			boolean structured) {
-		int numSequences = 10000; // make sure this is larger than needed	
 		Vector<Sequence> sData;	        
         List<LoopResult> results;
         
@@ -68,7 +67,7 @@ public class Application {
         
         HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, modelType);
         if (loopType.equalsIgnoreCase("IL")) {
-            results = Alignment.doILdbQuery((int)loopID, query, sData, modelNames, groupData, numSequences, 20);
+            results = Alignment.doILdbQuery((int)loopID, query, sData, modelNames, groupData, 20);
            	
         } else {
         	results = new ArrayList<LoopResult>();

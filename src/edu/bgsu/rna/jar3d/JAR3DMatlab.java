@@ -22,13 +22,15 @@ public class JAR3DMatlab {
 	public static String ModelCorrespondences(String fastaFileName, String modelFileName, int numSequences)
 	{
 		List<Sequence> sequenceData = Alignment.loadFasta(fastaFileName);
-		sequenceData = Alignment.doParse(sequenceData,numSequences,modelFileName,15);
+		numSequences = Math.min(numSequences + 1, sequenceData.size());
+		sequenceData = sequenceData.subList(0, numSequences + 1);
+		sequenceData = Alignment.doParse(sequenceData, modelFileName, 15);
 
-		Alignment.displayAlignmentFASTA(sequenceData, numSequences);
+		Alignment.displayAlignmentFASTA(sequenceData);
 		
 		String correspondences = "";
 
-		for (int i = 1; i < Math.min(numSequences+1,sequenceData.size()); i++)
+		for (int i = 1; i < sequenceData.size(); i++)
 		{
             correspondences += ((Sequence)sequenceData.get(i)).correspondences;
 		}
@@ -40,8 +42,10 @@ public class JAR3DMatlab {
 	{
 		System.setProperty("user.dir",UserDir);
 		List sequenceData = Alignment.loadFastaColumnsDNA(FastaFile,0,0,DNA); 
+		numSequences = Math.min(numSequences + 1, sequenceData.size());
+		sequenceData = sequenceData.subList(0, numSequences + 1);
 
-		sequenceData = Alignment.doParse(sequenceData,numSequences,ModelFile,range);
+		sequenceData = Alignment.doParse(sequenceData, ModelFile, range);
 		return sequenceData;
 	}
 
@@ -49,14 +53,15 @@ public class JAR3DMatlab {
 	{
 		System.setProperty("user.dir",UserDir);
 		Vector sequenceData = Alignment.loadFastaColumnsDNA(FastaFile,0,0,DNA); 
+		numSequences = Math.min(numSequences + 1, sequenceData.size());
+		sequenceData = (Vector)sequenceData.subList(0, numSequences + 1);
 		ParseData PD = new ParseData();
-		PD = Alignment.doParse2(sequenceData,numSequences,ModelFile,range);
+		PD = Alignment.doParse2(sequenceData, ModelFile, range);
 		return PD;
 	}
 	
 	public static double[][] MotifTest(String UserDir, String loopType) 
 	{
-		int numSequences = 1000;                            // make sure this is larger than needed	
 		String FASTAName = "";
 		Vector<Sequence> sData;
         
@@ -78,7 +83,7 @@ public class JAR3DMatlab {
 	        double[] newscores = new double[2*modelNames.size()];
             if (loopType.equals("IL"))
             {
-            	newscores = Alignment.getSortedILAlignment(sData,modelNames,numSequences,100);
+            	newscores = Alignment.getSortedILAlignment(sData, modelNames, 100);
             	for (int g=0; g < 2*modelNames.size(); g++)
             		S[m][g] = newscores[g];
             }
@@ -98,7 +103,6 @@ public class JAR3DMatlab {
 
 	public static double[][] MotifTestGeneral(String UserDir, String loopType, String sequenceNameFile, String modelNameFile) 
 	{
-		int numSequences = 10000;                     // make sure this is larger than needed	
 		String FASTAName = "";
 		Vector<Sequence> sData;
         
@@ -125,12 +129,12 @@ public class JAR3DMatlab {
 	        double[] newscores = new double[2*modelNames.size()];
             if (loopType.equals("IL"))
             {
-            	newscores = Alignment.getSortedILAlignment(sData,modelNames,numSequences,100);
+            	newscores = Alignment.getSortedILAlignment(sData, modelNames, 100);
             	for (int g=0; g < 2*modelNames.size(); g++)
             		S[m][g] = newscores[g];
             }
             else if (loopType.equals("HL"))
-            	newscores = Alignment.getSortedHLAlignment(sData,modelNames,numSequences,100);
+            	newscores = Alignment.getSortedHLAlignment(sData, modelNames, 100);
             	for (int g=0; g < modelNames.size(); g++)
             		S[m][g] = newscores[g];
       	    }	    
@@ -171,7 +175,6 @@ public class JAR3DMatlab {
     // Parse the sequences in the fasta file seq file against all models in the model directory
 	public static double[][] MotifParseAll(String UserDir, String SeqFile, String loopType) 
 	{
-		int numSequences = 10000;                            // make sure this is larger than needed	
 		Vector<Sequence> sData;
 		
 		System.setProperty("user.dir",UserDir);
@@ -183,13 +186,12 @@ public class JAR3DMatlab {
 	    double S[][] = new double[sData.size()][2*modelNames.size()];
         if (loopType.equals("IL"))
         {
-          	S = Alignment.getILScores(sData,modelNames,numSequences,100);
+          	S = Alignment.getILScores(sData, modelNames, 100);
         }
 	    return S;
 	}
 	public static double[] MotifParseSingle(String UserDir, String SeqFile, String ModFile) 
 	{
-		int numSequences = 100010;                            // make sure this is larger than needed	
 		Vector<Sequence> sData;
 		
 		System.setProperty("user.dir",UserDir);
@@ -198,10 +200,10 @@ public class JAR3DMatlab {
 	    
 	    double S[] = new double[sData.size()];
         
-        S = Alignment.getILScoresSingle(sData,ModFile,numSequences,100);
-
+        S = Alignment.getILScoresSingle(sData, ModFile, 100);
         // Please retain the following commented-out line for debugging purposes
 //        Alignment.displayAlignmentFASTA(sData, numSequences);
+        
 
 	    return S;
 	}
