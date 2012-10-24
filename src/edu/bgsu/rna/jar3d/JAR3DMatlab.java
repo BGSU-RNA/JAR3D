@@ -22,8 +22,6 @@ public class JAR3DMatlab {
 	public static String ModelCorrespondences(String fastaFileName, String modelFileName, int numSequences)
 	{
 		List<Sequence> sequenceData = Alignment.loadFasta(fastaFileName);
-		numSequences = Math.min(numSequences + 1, sequenceData.size());
-		sequenceData = sequenceData.subList(0, numSequences + 1);
 		sequenceData = Alignment.doParse(sequenceData, modelFileName, 15);
 
 		Alignment.displayAlignmentFASTA(sequenceData);
@@ -42,8 +40,6 @@ public class JAR3DMatlab {
 	{
 		System.setProperty("user.dir",UserDir);
 		List sequenceData = Alignment.loadFastaColumnsDNA(FastaFile,0,0,DNA); 
-		numSequences = Math.min(numSequences + 1, sequenceData.size());
-		sequenceData = sequenceData.subList(0, numSequences + 1);
 
 		sequenceData = Alignment.doParse(sequenceData, ModelFile, range);
 		return sequenceData;
@@ -53,8 +49,6 @@ public class JAR3DMatlab {
 	{
 		System.setProperty("user.dir",UserDir);
 		Vector sequenceData = Alignment.loadFastaColumnsDNA(FastaFile,0,0,DNA); 
-		numSequences = Math.min(numSequences + 1, sequenceData.size());
-		sequenceData = (Vector)sequenceData.subList(0, numSequences + 1);
 		ParseData PD = new ParseData();
 		PD = Alignment.doParse2(sequenceData, ModelFile, range);
 		return PD;
