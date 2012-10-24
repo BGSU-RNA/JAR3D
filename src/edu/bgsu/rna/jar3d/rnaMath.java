@@ -60,6 +60,7 @@ public class rnaMath {
 	 * This method checks to see if all array entries add up to 1, if not it fixes that
 	 * @param dist is a distribution matrix
 	 * @return
+	 * NOTE : Normalization has been disabled!
 	 */
 	public static double[] normalize(double[] dist)
 	{
@@ -71,7 +72,8 @@ public class rnaMath {
 		}
 		for(int i = 0; i < dist.length; i++)
 		{
-			newdist[i] = dist[i]/sum;
+			//Does NOT normalize!
+			newdist[i] = dist[i];
 		}
 		return newdist;
 	}
@@ -80,6 +82,7 @@ public class rnaMath {
 	 * This method checks to see if all array entries add up to 1, if not it fixes that
 	 * @param dist is  a doubly indexed distribution matrix
 	 * @return
+	 * NOTE : Normalization has been disabled!
 	 */
 	public static double[][] normalize(double[][] dist)
 	{
@@ -96,7 +99,8 @@ public class rnaMath {
 		{
 			for(int j = 0; j < dist.length; j++)
 			{
-				newdist[i][j] = dist[i][j]/sum;
+				//Does NOT normalize!
+				newdist[i][j] = dist[i][j];
 			}
 		}
 		return newdist;
