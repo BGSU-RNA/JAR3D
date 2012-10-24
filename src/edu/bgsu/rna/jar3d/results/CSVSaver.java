@@ -48,7 +48,7 @@ public class CSVSaver extends AbstractResultsSaver {
 		String score = format(result.score());
 		String percentile = format(result.percentile());
 		String editDistance = new Integer(result.editDistance()).toString();
-		String rotated = new Boolean(result.isRotated()).toString();
+		String rotated = Boolean.valueOf(result.isRotated()).toString();
 		String line = join(loopIdString, sequenceId, motifId, score, percentile, editDistance, rotated);
 		try {
 			sequenceWriter.write(line);
