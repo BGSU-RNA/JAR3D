@@ -199,8 +199,9 @@ public class JAR3DMatlab {
 	    double S[] = new double[sData.size()];
         
         S = Alignment.getILScoresSingle(sData,ModFile,numSequences,100);
-        
-        Alignment.displayAlignmentFASTA(sData, numSequences);
+
+        // Please retain the following commented-out line for debugging purposes
+//        Alignment.displayAlignmentFASTA(sData, numSequences);
 
 	    return S;
 	}
@@ -236,4 +237,76 @@ public class JAR3DMatlab {
 		return EditDistances;
 	}
 	
+	public static double[] getQuantilesFromFile(double[] Scores, String quantileFileName) {
+
+		File distFile = new File(quantileFileName);
+
+		Vector modDist = new Vector();
+		Vector modVals = new Vector();
+
+		try {
+			FileReader inStream = new FileReader(distFile);
+			BufferedReader in = new BufferedReader(inStream);
+			String lineS;
+			String ValueS;
+			String DistS;
+			double Value;
+			double Dist;
+			int BreakP;
+			while((lineS = in.readLine()) != null){
+				BreakP = lineS.indexOf(" ");
+				ValueS = lineS.substring(0, BreakP);
+				DistS = lineS.substring(BreakP+1);
+				Dist = Double.parseDouble(DistS);
+				modDist.add(Dist);
+				Value = Double.parseDouble(ValueS);
+				modVals.add(Value);
+			}
+		} catch(Exception e) {
+			System.out.println("webJAR3D.getQuantilesFromFile: Error reading file " + quantileFileName + "\n" + e);
+		}
+
+		int n = Scores.length;
+		double[] quantiles = new double[n];
+		int DistLength = modVals.size();
+
+		for(int i = 0; i < n; i++){
+			int found = 0;
+			int j = DistLength/2;
+			int step = j;
+			double current;
+			double next;
+			while(found==0){
+				if(j==DistLength-1) {
+					quantiles[i] = 1;
+					found = 1;
+				}
+				else if(j==0){
+					current = ((Double)modVals.get(j)).doubleValue();
+					if(Scores[i] == current || Scores[i] > current){
+						quantiles[i] = ((Double)modDist.get(j)).doubleValue();
+						found = 1;
+					}else{
+						quantiles[i] = 0;
+						found = 1;
+					}
+				}else{
+					current = ((Double)modVals.get(j)).doubleValue();
+					next = ((Double)modVals.get(j+1)).doubleValue();
+					if(Scores[i] == current || (Scores[i] > current && Scores[i] < next)){
+						quantiles[i] = ((Double)modDist.get(j)).doubleValue();
+						found = 1;
+					}else if(Scores[i] <current){
+						step = Math.max(step/2,1);
+						j = j - step;
+					}else {
+						step = Math.max(step/2,1);
+						j = j + step;
+					}
+				}
+			}
+		}
+		return quantiles;
+	}
+
 }
