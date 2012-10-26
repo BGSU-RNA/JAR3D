@@ -195,9 +195,14 @@ public class JAR3DMatlab {
 	    double S[] = new double[sData.size()];
         
         S = Alignment.getILScoresSingle(sData, ModFile, 100);
+<<<<<<< HEAD
         // Please retain the following commented-out line for debugging purposes
 //        Alignment.displayAlignmentFASTA(sData, numSequences);
         
+=======
+        
+        Alignment.displayAlignmentFASTA(sData);
+>>>>>>> a5900d766e161e9ba02a869b90b1033eb944df8d
 
 	    return S;
 	}
