@@ -13,7 +13,7 @@ import edu.bgsu.rna.jar3d.results.DBResultSaver;
 import edu.bgsu.rna.jar3d.results.LoopResult;
 
 public class JAR3Database {
-	
+
 	public static void main(String[] args) {
 		String base = args[0];
 		String QueryID = args[1];
@@ -24,7 +24,7 @@ public class JAR3Database {
 		DBResultSaver rs = null;
 		DBLoader db = null;
 		List<List<LoopResult>> allResults = new ArrayList<List<LoopResult>>();
-		
+
 		try {
 			db = new DBLoader(usrName,pswd,dbConnection);
 		} catch(Exception e) {
@@ -32,9 +32,9 @@ public class JAR3Database {
 			System.err.println("Could not connect db for loading.");
 			markFailure(usrName, pswd, dbConnection, QueryID);
 		}
-		
+
 		Query query = null;
-		
+
 		try {
 			query = db.load(QueryID);
 		} catch(Exception e) {
@@ -44,7 +44,7 @@ public class JAR3Database {
 		} finally {
 			db.cleanUp();
 		}
-		
+
 		try {
 			allResults = JAR3Database.MotifParse(base, query);
 		} catch(Exception e){
@@ -52,7 +52,7 @@ public class JAR3Database {
 			System.err.println("Could not score query: " + QueryID);
 			markFailure(usrName, pswd, dbConnection, QueryID);
 		}
-		
+
 		try {
 			rs = new DBResultSaver(usrName,pswd,dbConnection);
 			for(List<LoopResult> results: allResults) {
@@ -65,10 +65,10 @@ public class JAR3Database {
 		} finally {
 			rs.cleanUp();
 		}
-		
+
 		System.exit(0);
 	}
-	
+
 	private static void markFailure(String user, String password, String db, String queryId) {
 		try {
 			DBResultSaver rs = new DBResultSaver(user, password, db);
@@ -87,7 +87,7 @@ public class JAR3Database {
 		for(Loop loop: query) {
 			StringBuilder fasta = new StringBuilder();
 			String folder = base + File.separator + loop.getType() + File.separator + "0.6";
-			
+
 			for(String sequence: loop) {
 				fasta.append(">\n"); // TODO use generated FASTA header.
 				fasta.append(sequence);
@@ -102,29 +102,27 @@ public class JAR3Database {
 	}
 
 	//Overloaded MotifParse for new file system
-		//Query should be either the full filename for the query fasta file or the full text
-		//folder should be the folder with the data for the models, including loopType and version
-		//modelType indicates which models to use, for example "bp".  Should be the prefix before the first "_" in model folder
-		//structured is a boolean which indicates whether to use only structured models or all models
-		public static List<LoopResult> MotifParse(long loopID, Query query, String QueryTxt, 
-				String folder, String loopType, String modelType, 
-				boolean structured) {
-			Vector<Sequence> sData;	        
-	        List<LoopResult> results;
-	        
-			System.setProperty("user.dir", folder);
-	
-			sData = Alignment.parseFastaText(QueryTxt, 0, 0);
-	        
-	        Vector<String> modelNames = Sequence.getModelNames(folder, modelType, structured);
-	        
-	        HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, modelType);
-	        if (loopType.equalsIgnoreCase("IL")) {
-	            results = Alignment.doILdbQuery((int)loopID, query, sData, modelNames, groupData, 20);
-	           	
-	        } else {
-	        	results = new ArrayList<LoopResult>();
-	        }
-		    return results;
-		}
+	//Query should be either the full filename for the query fasta file or the full text
+	//folder should be the folder with the data for the models, including loopType and version
+	//modelType indicates which models to use, for example "bp".  Should be the prefix before the first "_" in model folder
+	//structured is a boolean which indicates whether to use only structured models or all models
+	public static List<LoopResult> MotifParse(long loopID, Query query, String QueryTxt, String folder,
+			String loopType, String modelType, boolean structured) {
+		Vector<Sequence> sData;
+	    List<LoopResult> results;
+
+		System.setProperty("user.dir", folder);
+
+		sData = Alignment.parseFastaText(QueryTxt, 0, 0);
+	    Vector<String> modelNames = Sequence.getModelNames(folder, modelType, structured);
+
+	    HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, modelType);
+	    if (loopType.equalsIgnoreCase("IL")) { 
+	    	results = Alignment.doILdbQuery((int)loopID, query, sData, modelNames, groupData, 20);
+
+	    } else { 
+	    	results = new ArrayList<LoopResult>();
+	    }
+		return results;
+	}
 }
