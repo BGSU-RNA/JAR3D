@@ -993,6 +993,11 @@ public class Sequence {
 		return letters;
 	}
 
+    /**
+     * Get the String identifer for this Sequence.
+     *
+     * @return The id.
+     */
     public String getId() {
         return organism;
     }
