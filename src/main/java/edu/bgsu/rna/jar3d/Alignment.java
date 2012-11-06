@@ -1018,7 +1018,7 @@ public class Alignment {
 					seqRes.add(seqR);
 				}
 
-				LoopResult loopR = new BasicLoopResult(loopID, groupName, rev, sig, seqRes, "NA", "");
+				LoopResult loopR = new BasicLoopResult(groupName, rev, sig, seqRes, "NA");
 				loopRes.add(loopR);
 			}
 		}

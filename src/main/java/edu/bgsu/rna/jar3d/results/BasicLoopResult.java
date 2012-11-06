@@ -10,13 +10,9 @@ public final class BasicLoopResult implements LoopResult {
 
 	private Loop loop;
 
-	private final int loopId;
-
 	private final String modelId;
 
 	private final String signature;
-
-	public final String name;
 
 	private double meanEditDistance;
 
@@ -36,25 +32,23 @@ public final class BasicLoopResult implements LoopResult {
 
 	private String correspondices;
 
-	public BasicLoopResult(int loopId, String modelId, boolean rotation, 
-			String signature, List<SequenceResult> sequenceResults, 
-			String correspondecies, String name) {
+	public BasicLoopResult(String modelId, boolean rotation,
+			String signature, List<SequenceResult> sequenceResults,
+			String correspondecies) {
 		this.sequenceResults = sequenceResults;
 		this.modelId = modelId;
-		this.loopId = loopId;
 		this.rotation = rotation;
 		this.signature = signature;
 		this.correspondices = correspondecies;
-		this.name = name;
 		computeData();
 	}
-	
+
 	private void computeData() {
 		int numSeqs = sequenceResults.size();
 		double[] scores = new double[numSeqs];
 		double[] percentiles = new double[numSeqs];
 		int[] edDists = new int[numSeqs];
-		
+
 		for(int i = 0; i < numSeqs; i++){
 			SequenceResult seqR = sequenceResults.get(i);
 			seqR.setLoopResult(this);
@@ -62,7 +56,7 @@ public final class BasicLoopResult implements LoopResult {
 			percentiles[i] = seqR.percentile();
 			edDists[i] = seqR.editDistance();
 		}
-		
+
 		this.medianScore = ArrayMath.median(scores);
 		this.meanScore = ArrayMath.mean(scores);
 		this.meanPercentile = 100*ArrayMath.mean(percentiles);
@@ -70,53 +64,55 @@ public final class BasicLoopResult implements LoopResult {
 		this.meanEditDistance = ArrayMath.mean(edDists);
 		this.medianEditDistance = ArrayMath.median(edDists);
 	}
-	
-	public int loopId() {
-		return loopId;
-	}
 
+    @Override
 	public String modelId() {
 		return modelId;
 	}
 
+    @Override
 	public double meanEditDistance() {
 		return meanEditDistance;
 	}
 
+    @Override
 	public double meanScore() {
 		return meanScore;
 	}
 
+    @Override
 	public double meanPercentile() {
 		return meanPercentile;
 	}
 
+    @Override
 	public double medianScore() {
 		return medianScore;
 	}
 
+    @Override
 	public double medianPercentile() {
 		return medianPercentile;
 	}
 
+    @Override
 	public double medianEditDistance() {
 		return medianEditDistance;
 	}
 
+    @Override
 	public String signature() {
 		return signature;
 	}
 
+    @Override
 	public boolean isRotated() {
 		return rotation;
 	}
 
+    @Override
 	public String correspondences() {
 		return correspondices;
-	}
-
-	public String name() {
-		return name;
 	}
 
 	@Override
