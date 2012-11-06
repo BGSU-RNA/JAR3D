@@ -32,6 +32,17 @@ public final class BasicLoopResult implements LoopResult {
 
 	private String correspondices;
 
+    /**
+     * Build a new BasicLoopResult. The given SequenceResults will have their
+     * LoopResult set to this object.
+     *
+     * @param modelId The model id that was used.
+     * @param rotation True if the loop was run in a rotated direction.
+     * @param signature The base pairing signature of the loop used.
+     * @param sequenceResults The individual SequenceResults.
+     * @param correspondecies The correspondences between the model and
+     * sequences.
+     */
 	public BasicLoopResult(String modelId, boolean rotation,
 			String signature, List<SequenceResult> sequenceResults,
 			String correspondecies) {
@@ -43,6 +54,11 @@ public final class BasicLoopResult implements LoopResult {
 		computeData();
 	}
 
+    /**
+     * Compute the mean and median data. This goes through all Sequence results,
+     * and computes the means and medians as well as setting the LoopResult of
+     * each to this object.
+     */
 	private void computeData() {
 		int numSeqs = sequenceResults.size();
 		double[] scores = new double[numSeqs];
