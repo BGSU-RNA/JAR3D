@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
@@ -1011,7 +1012,7 @@ public class Alignment {
 
 			//put goodness of fit checks here later?
 			if (true) {
-				Vector<SequenceResult> seqRes = new Vector<SequenceResult>();
+				List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
 				for(int m = 0; m < sData.size() - 1; m++) {
 					SequenceResult seqR = new BasicSequenceResult(groupScores[m], quants[m], minDist[m], rev);
 					seqRes.add(seqR);
