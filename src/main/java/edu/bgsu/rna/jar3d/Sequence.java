@@ -993,6 +993,10 @@ public class Sequence {
 		return letters;
 	}
 
+    public String getId() {
+        return organism;
+    }
+
     public Sequence reverse() { 
       StringTokenizer tokens = new StringTokenizer(letters,"*");
       StringBuffer buff = new StringBuffer();

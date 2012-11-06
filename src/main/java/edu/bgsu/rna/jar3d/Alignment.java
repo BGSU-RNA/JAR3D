@@ -1014,7 +1014,7 @@ public class Alignment {
 			if (true) {
 				List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
 				for(int m = 0; m < sData.size() - 1; m++) {
-					SequenceResult seqR = new BasicSequenceResult(groupScores[m], quants[m], minDist[m], rev);
+					SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], quants[m], minDist[m], rev);
 					seqRes.add(seqR);
 				}
 
