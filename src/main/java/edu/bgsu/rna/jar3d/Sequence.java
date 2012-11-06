@@ -29,7 +29,7 @@ public class Sequence {
 	private List<List<Double>> maxLogProbs;
     String parseData;
     String correspondences;
-    
+
 	/**
 	 * Constructor for Sequence class
 	 * sets up a new sequence using parameters read from the fasta file
@@ -75,27 +75,27 @@ public class Sequence {
 		setNucleotides();
 		setArrays();
 	}
-	
+
 	public int getMaxLogProbabilitySize() {
 	    return maxLogProbs.size();
 	}
-	
+
 	public List<Double> getMaxLogProbabilities(int index) {
 	    return maxLogProbs.get(index);
 	}
-	
+
 	public Double getMaxLogProbabilityOf(int i, int j) {
 	    return getMaxLogProbabilities(i).get(j);
 	}
-	
+
 	public Double getMaxLogProbability(int i) {
 	    return getMaxLogProbabilityOf(i, 0);
 	}
-	
+
 	public void appendProbabilities(List<Double> probs) {
 	    maxLogProbs.add(probs);
 	}
-	
+
 	/**
 	 * This method is used to strip dashes from the fasta file for
 	 * a plain nucleotide string
@@ -107,7 +107,7 @@ public class Sequence {
 		while(st.hasMoreTokens())
 		{
 			nucleotides+=st.nextToken();
-		}	 
+		}
 	}
 
 	/**
@@ -202,15 +202,15 @@ public class Sequence {
 		double[] nData;
 		int nodeNumber = 1;
 		int lineNum = 0;
-				
+
 		String[] modelArray;
 		modelArray = modelText.split("\\n");
-					
+
 		while(lineNum < modelArray.length)
 		{
 			nodeLine = modelArray[lineNum];
 			nodeLine = nodeLine.replace(" ","");
-			
+
 			if (!nodeLine.equals("//") && (!nodeLine.equals("")))
 			{
 				List numDatas = new Vector(); // to hold arrays of doubles
@@ -254,11 +254,11 @@ public class Sequence {
 							nT = element.nextToken();
 							nData[i] = Double.parseDouble(nT);
 						}
-						numDatas.add(nData);	
+						numDatas.add(nData);
 					}
-					
+
 					switch(type)
-					{	
+					{
 					case 'I':
 						switch(iType)
 						{
@@ -356,7 +356,7 @@ public class Sequence {
 
 		// Common to all models we might make
 		last = current;
-		last.next = null; //The last element does not have a next, 
+		last.next = null; //The last element does not have a next,
 		// so it is set to null so that it can be
 		// be used as a stopping case
 
@@ -388,7 +388,7 @@ public class Sequence {
 		while(current != null) // Go until end of list
 		{
 			if(current.getType().equals("JunctionNode") || current.getType().equals("AlternativeNode")) // if the type
-			{	
+			{
 				branchingNodes.push(current); // add this junction to the stack
 				((BranchingNode)current).children.add(current.next); // add the next
 			}					             						// as a child
@@ -420,7 +420,7 @@ public class Sequence {
 					}
 				}
 			}
-			else 
+			else
 			{
 				current.child = current.next;
 			}// end else if
@@ -439,7 +439,7 @@ public class Sequence {
 		String nodeLine = "";
 
 		BufferedReader rdr;
-		
+
 		try {
 			if(!(modelFileName.contains("http")))
 			{
@@ -466,28 +466,28 @@ public class Sequence {
 				URL dirurl = new URL("http://rna.bgsu.edu/JAR3D/");
 		        URLConnection dircon = dirurl.openConnection();
 		        rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
-	
+
 		        String ln = rdr.readLine();
 				while(ln != null)
 					{
 					ln = rdr.readLine();
 					}
-	
+
 				dirurl = new URL(modelFileName);
 		        dircon = dirurl.openConnection();
-		        rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream())); 
+		        rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
 			}
-			
+
 			nodeLine = rdr.readLine();
 			nodeLine = nodeLine.replace(" ","");
-			
+
 			while(nodeLine != null)
 			{
 				nodeLine = nodeLine.replace(" ","");
 				modelText = modelText + nodeLine + "\n";
 				nodeLine = rdr.readLine();
-			}		
-			
+			}
+
 			addNodeDataModelText(modelText);
 			}
 		catch (IOException e) {
@@ -495,8 +495,8 @@ public class Sequence {
 			System.out.println(e);
 		}
 	}
-	
-	
+
+
 	/**
 	 * This method is used to set up the sequence of nodes in a linked list type structure that
 	 * also has a branching structure, depending on whether the list is traversed using next
@@ -517,13 +517,13 @@ public class Sequence {
 		double[] nData;
 
 		BufferedReader rdr;
-		
+
 		try {
 			if(!(modelFileName.contains("http")))
 			{
 				String curDir = System.getProperty("user.dir");
 		        curDir = curDir.replace(File.separator + "bin","");
-	
+
 				try
 				{
 				}
@@ -542,21 +542,21 @@ public class Sequence {
 				URL dirurl = new URL("http://rna.bgsu.edu/JAR3D/");
 		        URLConnection dircon = dirurl.openConnection();
 		        rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
-	
+
 		        String ln = rdr.readLine();
 				while(ln != null)
 					{
 					ln = rdr.readLine();
 					}
-	
+
 				dirurl = new URL(modelFileName);
 		        dircon = dirurl.openConnection();
-		        rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream())); 
+		        rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
 			}
-			
+
 			nodeLine = rdr.readLine();
 			nodeLine = nodeLine.replace(" ","");
-			
+
 			while(nodeLine != null)
 			{
 				if (!nodeLine.equals("//") && (!nodeLine.equals("")))
@@ -601,11 +601,11 @@ public class Sequence {
 								nT = element.nextToken();
 								nData[i] = Double.parseDouble(nT);
 							}
-							numDatas.add(nData);	
+							numDatas.add(nData);
 						}
-						
+
 						switch(type)
-						{	
+						{
 						case 'I':
 							switch(iType)
 							{
@@ -694,7 +694,7 @@ public class Sequence {
 		// Common to all models we might make
 
 		last = current;
-		last.next = null; //The last element does not have a next, 
+		last.next = null; //The last element does not have a next,
 		// so it is set to null so that it can be
 		// be used as a stopping case
 
@@ -724,7 +724,7 @@ public class Sequence {
 		while(current != null) // Go until end of list
 		{
 			if(current.getType().equals("JunctionNode") || current.getType().equals("AlternativeNode")) // if the type
-			{	
+			{
 				branchingNodes.push(current); // add this junction to the stack
 				((BranchingNode)current).children.add(current.next); // add the next
 			}					             						// as a child
@@ -755,7 +755,7 @@ public class Sequence {
 					}
 				}
 			}
-			else 
+			else
 			{
 				current.child = current.next;
 			}// end else if
@@ -784,7 +784,7 @@ public class Sequence {
 				{
 					System.out.println("Child params: " + ((Node)((BranchingNode)current).children.get(i)).getParams());
 				}
-			}			
+			}
 			current = current.next;
 		}
 
@@ -809,13 +809,13 @@ public class Sequence {
 
 	/**
 	 * This method converts the sequence into an array of numbers [0,1,2,3]
-	 * and allocates space in each node for maxprob, according to the length 
+	 * and allocates space in each node for maxprob, according to the length
 	 * of this sequence
 	 */
 	void parseSequence(int range)
 	{
 
-		Node current = last; 
+		Node current = last;
 		while(current != null) // go until the end of the list
 		{
 			current.currentMaxLogProb = -1d/0d;
@@ -824,7 +824,7 @@ public class Sequence {
 		}
 
 //		System.out.println("Sequence.parseSequence: nucleotides 0 to "+(nucleotides.length()-1)+" "+nucleotides);
-		
+
 		// CYK algorithm for determining maximum log probability parse
 		for (int p=1; p <= nucleotides.length(); p++)         // length of subsequence
 		{
@@ -838,17 +838,17 @@ public class Sequence {
 					current.computeMaxLogProb(this,i,j);         // determine how this node would generate subsequence i to j
 					current = current.previous;
 				}// while
-			}// for		     	
+			}// for
 
 		}// for
 		((InitialNode)first).traceback(0,nucleotides.length()-1);
 	}// end parseSequence()
-	
+
 	/**
 	 * This method looks in the local folder for HL, IL, or JL model names,
 	 * but if it can't look there, it looks online at rna.bgsu.edu/JAR3D.
 	 */
-	
+
 	public static Vector<String> getModelNames(String loopType)
 	{
 		Vector<String> modelNames = new Vector<String>();
@@ -865,7 +865,7 @@ public class Sequence {
 
 		String fileLine = "";
 		fileLine = rdr.readLine();
-		
+
 		while(fileLine != null)
 		{
 			modelNames.add(fileLine);
@@ -893,7 +893,7 @@ public class Sequence {
 	}
 	return modelNames;
 	}
-	
+
 	//Overloaded getModelNames for the new file system
 	public static Vector<String> getModelNames(String folder, String modelType, boolean Structured)
 	{
@@ -917,7 +917,7 @@ public class Sequence {
 
 		String fileLine = "";
 		fileLine = rdr.readLine();
-		
+
 		while(fileLine != null)
 		{
 			//remove _model.txt from file name to get group name
@@ -951,9 +951,9 @@ public class Sequence {
 
 	/**
 	 * This method reads a text file and returns the lines as a vector
-	 * 
+	 *
 	 */
-	
+
 	public static Vector<String> readTextFile(String fileName)
 	{
 		Vector<String> lineValues = new Vector<String>();
@@ -969,7 +969,7 @@ public class Sequence {
 
 		String fileLine = "";
 		fileLine = rdr.readLine();
-		
+
 		while(fileLine != null)
 		{
 			lineValues.add(fileLine);
@@ -984,7 +984,7 @@ public class Sequence {
 
 	return lineValues;
 	}
-	
+
   /**
    * Get the String sequence of this Sequence.
    *
@@ -1010,7 +1010,7 @@ public class Sequence {
      *
      * @return A reversed Sequence.
      */
-    public Sequence reverse() { 
+    public Sequence reverse() {
       StringTokenizer tokens = new StringTokenizer(letters,"*");
       StringBuffer buff = new StringBuffer();
       while(tokens.hasMoreTokens()) {
