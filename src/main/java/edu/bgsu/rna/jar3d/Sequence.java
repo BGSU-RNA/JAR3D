@@ -976,6 +976,7 @@ public class Sequence {
 			fileLine = rdr.readLine();
 		}
 
+		rdr.close();
 		}
 	catch (Exception e) {
 			System.out.println(e.getMessage());
