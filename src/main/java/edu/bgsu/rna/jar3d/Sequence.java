@@ -1003,6 +1003,13 @@ public class Sequence {
         return organism;
     }
 
+    /**
+     * Reverse this sequence. This will return a new sequence with the same id,
+     * but the strands will be in the reversed order. Strands are seperated by
+     * '*'.
+     *
+     * @return A reversed Sequence.
+     */
     public Sequence reverse() { 
       StringTokenizer tokens = new StringTokenizer(letters,"*");
       StringBuffer buff = new StringBuffer();
