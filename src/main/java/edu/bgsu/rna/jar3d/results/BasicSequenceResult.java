@@ -4,20 +4,31 @@ import edu.bgsu.rna.jar3d.Sequence;
 import edu.bgsu.rna.jar3d.loop.Loop;
 import edu.bgsu.rna.jar3d.query.Query;
 
+/**
+ * BasicSequenceResult is the a simple implementation of the SequenceResult
+ * interface.
+ */
 public class BasicSequenceResult implements SequenceResult {
 
+    /** Score of this result. */
 	private double score;
 
+    /** Percentile of this result. */
 	private double percentile;
 
+    /** Edit distance of this result. */
 	private int editDistance;
 
+    /** True if this was run in the rotated direction. */
 	private boolean rotation;
 
+    /** The sequence id of the sequence run. */
 	private String sequenceId;
 
+    /** Motif Id that was run. */
 	private String motifId;
 
+    /** Loop result this belongs to. */
 	private LoopResult result;
 
 	/**
