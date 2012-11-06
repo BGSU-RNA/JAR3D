@@ -1,5 +1,7 @@
 package edu.bgsu.rna.jar3d.results;
 
+import edu.bgsu.rna.jar3d.Sequence;
+import edu.bgsu.rna.jar3d.loop.Loop;
 import edu.bgsu.rna.jar3d.query.Query;
 
 public class BasicSequenceResult implements SequenceResult {
@@ -47,41 +49,6 @@ public class BasicSequenceResult implements SequenceResult {
 	 */
 	public BasicSequenceResult(double score, double percentile, int editDistance, boolean rotation) {
 		this(null, score, percentile, editDistance, rotation);
-	}
-
-	/**
-	 * @param sequenceId the sequenceId to set
-	 */
-	public void setSequenceId(String sequenceId) {
-		this.sequenceId = sequenceId;
-	}
-
-	/**
-	 * @param score the score to set
-	 */
-	public void setScore(double score) {
-		this.score = score;
-	}
-
-	/**
-	 * @param percentile the percentile to set
-	 */
-	public void setPercentile(double percentile) {
-		this.percentile = percentile;
-	}
-
-	/**
-	 * @param editDistance the editDistance to set
-	 */
-	public void setEditDistance(int editDistance) {
-		this.editDistance = editDistance;
-	}
-
-	/**
-	 * @param rotation the rotation to set
-	 */
-	public void setRotation(boolean rotation) {
-		this.rotation = rotation;
 	}
 
     @Override
@@ -138,4 +105,14 @@ public class BasicSequenceResult implements SequenceResult {
 	public LoopResult getLoopResult() {
 		return result;
 	}
+
+    @Override
+    public Loop loop() {
+        return getLoopResult().getLoop();
+    }
+
+    @Override
+    public Sequence sequence() {
+        return null;
+    }
 }
