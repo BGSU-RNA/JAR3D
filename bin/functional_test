@@ -1,0 +1,67 @@
+#!/bin/sh
+
+# This is a script to compile, run and test JAR3D. This should serve as both an
+# example of how to run JAR3D as well as a functional test of the system.
+
+set -e
+
+VERSION=0.0.1
+ARTIFACT=jar3d-$VERSION-SNAPSHOT.jar
+MODELS=~/groups
+
+function compare {
+  computed=$1
+  correct=$2
+  type=$3
+  tmp=`mktemp /tmp/jar3d-XXXXXX`
+
+  set +e
+  diff $computed $correct > $tmp
+
+  if [[ $? -ne 0 ]]; then
+    diffs=target/diff.txt
+    cat $tmp
+    cp $tmp $diffs
+    echo "TEST FAILURE. Expected and computed $type results do not match"
+    echo "  See: $diffs"
+    exit 1
+  fi
+
+  set -e
+}
+
+function run {
+  sequences=$1
+  loop_answers=$2
+  sequence_answers=$3
+  loop_results=target/loop-output.csv
+  sequence_results=target/sequence-output.csv
+
+  # This line executes the JAR3D executable. -Xmx500m is used to raise the
+  # memory limit of the JVM. In some cases it needs more memory than the
+  # default limit.
+  echo "Command: 'java -Xmx500m -jar target/$ARTIFACT $sequences $MODELS $loop_results $sequence_results'"
+  java -Xmx500m -jar target/$ARTIFACT $sequences $MODELS $loop_results $sequence_results
+
+  compare $loop_results $loop_answers "loop"
+  compare $sequence_results $sequence_answers "sequence"
+
+  rm $loop_results $sequence_answers
+}
+
+# Compile JAR3D using Maven
+echo "Building JAR3D: 'mvn clean package'"
+mvn clean package > /dev/null
+
+# Run JAR3D on test data with some simple models
+sequences=~/lab/code/seq-var/tmp/IL_1L9A_006.fasta
+for sequences in "src/test/resources/test-data/*.fasta"; do
+
+  base=`basename $sequences .fasta`
+  loop_answer=$base-loops.csv
+  sequence_answer=$base-sequences.csv
+
+  echo "Testing with: $sequences"
+  run $sequences $loop_answer $sequence_answer
+  echo "Test passed"
+done
