@@ -833,19 +833,12 @@ public class Alignment {
 		return PD;
 	}
 
-	public static Double[][] vec2array(List<List<Double>> probsM)
-	{
+	public static Double[][] vec2array(List<List<Double>> probsM) {
 		int n = probsM.size();
-		List<Double> dummy = probsM.get(0);
-		int m = dummy.size();
-		Double[][] probsArray = new Double[n][m];
-		for(int i=0; i<n; i++)
-		{
-			List<Double> vec = probsM.get(i);
-			for(int j=0; j<m; j++)
-			{
-				probsArray[i][j] = vec.get(j);
-			}
+		Double[][] probsArray = new Double[n][];
+        Double[] blank = new Double[0];
+		for(int i=0; i<n; i++) {
+            probsArray[i] = probsM.get(i).toArray(blank);
 		}
 		return probsArray;
 	}
