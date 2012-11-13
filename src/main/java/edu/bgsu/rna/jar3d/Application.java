@@ -23,13 +23,13 @@ import edu.bgsu.rna.jar3d.results.LoopResult;
 public class Application {
 
 	/** Default range limit */
-	public static int DEFAULT_RANGE_LIMIT = 20;
+	public static final int DEFAULT_RANGE_LIMIT = 20;
 
 	/** Default model type */
-	public static String DEFAULT_MODEL_TYPE = "bp";
+	public static final String DEFAULT_MODEL_TYPE = "bp";
 
 	/** Default model version */
-	public static String DEFAULT_VERSION = "0.6";
+	public static final String DEFAULT_VERSION = "0.6";
 
 	/** The query loader to use. */
 	private final QueryLoader loader;
