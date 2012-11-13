@@ -22,30 +22,55 @@ import edu.bgsu.rna.jar3d.results.LoopResult;
  */
 public class Application {
 
+	/** Default range limit */
+	public static int DEFAULT_RANGE_LIMIT = 20;
+
+	/** Default model type */
+	public static String DEFAULT_MODEL_TYPE = "bp";
+
+	/** Default model version */
+	public static String DEFAULT_VERSION = "0.6";
+
 	/** The query loader to use. */
 	private final QueryLoader loader;
 
 	/** The object to save results with. */
 	private final ResultSaver saver;
 
-	/** Default range limit */
-	private static int RANGE_LIMIT = 20;
+	/** The model type to use. */
+	private final String modelType;
 
-	/** Default model type */
-	private static String MODEL_TYPE = "bp";
+	/** The model version to use. */
+	private final String version;
 
-	/** Default model version */
-	private static String VERSION = "0.6";
+	/** The range limit to scan. */
+	private final int rangeLimit;
 
 	/**
-	 * Create a new Application.
+	 * Build a new Application.
+	 * 
+	 * @param loader The query loader to use.
+	 * @param saver The result saver to use.
+	 * @param modelType The model type to use.
+	 * @param version The version to use.
+	 * @param rangeLimit The range limit to scan.
+	 */
+	public Application(QueryLoader loader, ResultSaver saver, String modelType, String version, int rangeLimit) {
+		this.loader = loader;
+		this.saver = saver;
+		this.modelType = modelType;
+		this.version = version;
+		this.rangeLimit = rangeLimit;
+	}
+
+	/**
+	 * Create a new Application. The modelType, version, and rangeLimit are set to the default ones.
 	 * 
 	 * @param loader The query loader to use.
 	 * @param saver The results saver to use.
 	 */
 	public Application(QueryLoader loader, ResultSaver saver) {
-		this.loader = loader;
-		this.saver = saver;
+		this(loader, saver, DEFAULT_MODEL_TYPE, DEFAULT_VERSION, DEFAULT_RANGE_LIMIT);
 	}
 
 	/**
@@ -78,7 +103,7 @@ public class Application {
 	}
 
 	/**
-	 * Run a loop against a single loop and return the results. This will only score internal loops, all other loop 
+	 * Run a loop against a single loop and return the results. This will only score internal loops, all other loop
 	 * types will give empty results.
 	 * 
 	 * @param base The base path to the models.
@@ -88,14 +113,14 @@ public class Application {
 	private List<LoopResult> motifParse(String base, Loop loop) {
 		List<LoopResult> result = new ArrayList<LoopResult>();
 
-		String folder = base + File.separator + loop.getTypeString() + File.separator + VERSION;
+		String folder = base + File.separator + loop.getTypeString() + File.separator + version;
 		System.setProperty("user.dir", folder);
 
-		Vector<String> modelNames = Sequence.getModelNames(folder, MODEL_TYPE, true);
-		HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, MODEL_TYPE);
+		Vector<String> modelNames = Sequence.getModelNames(folder, modelType, true);
+		HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, modelType);
 
 		if (loop.getLoopType() == LoopType.INTERNAL) {
-			result = Alignment.doILdbQuery(loop, modelNames, groupData, RANGE_LIMIT);
+			result = Alignment.doILdbQuery(loop, modelNames, groupData, rangeLimit);
 		} else {
 			result = new ArrayList<LoopResult>();
 		}
