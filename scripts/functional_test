@@ -5,8 +5,8 @@
 
 set -e
 
-VERSION="0.0.1"
-ARTIFACT="jar3d-$VERSION-SNAPSHOT.jar"
+VERSION=`grep version pom.xml | head -1 | cut -d '>' -f2 | cut -d '<' -f1`
+ARTIFACT="jar3d-$VERSION.jar"
 RESOURCES="src/test/resources"
 MODELS="$RESOURCES/models"
 
