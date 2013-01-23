@@ -62,6 +62,9 @@ function run {
   rm $loop_results $sequence_results
 }
 
+# Include a mktemp for thoses systems that lack one.
+source "scripts/mktemp"
+
 # Compile JAR3D using Maven
 cmd='mvn clean package'
 echo "Building JAR3D: '$cmd'"
