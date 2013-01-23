@@ -11,3 +11,4 @@ META-INF/
 target/
 .settings/
 .DS_Store
+bin
