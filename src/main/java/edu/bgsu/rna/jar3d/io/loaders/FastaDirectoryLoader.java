@@ -48,7 +48,6 @@ public class FastaDirectoryLoader implements QueryLoader {
     /**
      * Load the query. The query id is used only to set the query id of the returned query.
      */
-    @Override
     public Query load(String queryId) throws QueryLoadingFailed {
 
         List<Loop> loops = new ArrayList<Loop>();
@@ -73,6 +72,5 @@ public class FastaDirectoryLoader implements QueryLoader {
     /**
      * Does nothing.
      */
-    @Override
     public void cleanUp() throws QueryLoadingFailed { }
 }

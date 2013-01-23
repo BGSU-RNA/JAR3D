@@ -60,27 +60,22 @@ public class BasicSequenceResult implements SequenceResult {
 		this(null, sequence, score, percentile, editDistance, rotation);
 	}
 
-    @Override
 	public double score() {
 		return score;
 	}
 
-    @Override
 	public double percentile() {
 		return percentile;
 	}
 
-    @Override
 	public int editDistance() {
 		return editDistance;
 	}
 
-    @Override
 	public boolean isRotated() {
 		return rotation;
 	}
 
-    @Override
 	public Query query() {
         LoopResult result = getLoopResult();
         if (result != null) {
@@ -89,7 +84,6 @@ public class BasicSequenceResult implements SequenceResult {
 		return null;
 	}
 
-    @Override
 	public long loopId() {
         Loop result = loop();
         if (result != null) {
@@ -98,7 +92,6 @@ public class BasicSequenceResult implements SequenceResult {
 		return -1;
 	}
 
-    @Override
 	public String queryId() {
         Query query = query();
         if (query != null) {
@@ -107,7 +100,6 @@ public class BasicSequenceResult implements SequenceResult {
 		return null;
 	}
 
-    @Override
 	public String sequenceId() {
         Sequence sequence = sequence();
         if (sequence != null) {
@@ -116,7 +108,6 @@ public class BasicSequenceResult implements SequenceResult {
 		return null;
 	}
 
-    @Override
 	public String motifId() {
         LoopResult result = getLoopResult();
         if (result != null) {
@@ -125,17 +116,14 @@ public class BasicSequenceResult implements SequenceResult {
 		return null;
 	}
 
-	@Override
 	public void setLoopResult(LoopResult result) {
 		this.result = result;
 	}
 
-	@Override
 	public LoopResult getLoopResult() {
 		return result;
 	}
 
-    @Override
     public Loop loop() {
         LoopResult result = getLoopResult();
         if (result != null) {
@@ -144,7 +132,6 @@ public class BasicSequenceResult implements SequenceResult {
 		return null;
     }
 
-    @Override
     public Sequence sequence() {
         return sequence;
     }

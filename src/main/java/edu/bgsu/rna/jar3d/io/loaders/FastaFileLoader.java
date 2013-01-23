@@ -37,7 +37,6 @@ public class FastaFileLoader implements QueryLoader {
 	/**
 	 * Load a Query from this FastaFileLoader. The given query id is used only as the query id of the returned query.
 	 */
-	@Override
 	public Query load(String queryId) throws QueryLoadingFailed {
 		List<Sequence> sequences = new ArrayList<Sequence>();
 		try {
@@ -70,7 +69,6 @@ public class FastaFileLoader implements QueryLoader {
 		return query;
 	}
 
-	@Override
 	public void cleanUp() throws QueryLoadingFailed {
 		try {
 			reader.close();

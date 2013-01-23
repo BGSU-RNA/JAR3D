@@ -81,72 +81,58 @@ public final class BasicLoopResult implements LoopResult {
 		this.medianEditDistance = ArrayMath.median(edDists);
 	}
 
-    @Override
 	public String modelId() {
 		return modelId;
 	}
 
-    @Override
 	public double meanEditDistance() {
 		return meanEditDistance;
 	}
 
-    @Override
 	public double meanScore() {
 		return meanScore;
 	}
 
-    @Override
 	public double meanPercentile() {
 		return meanPercentile;
 	}
 
-    @Override
 	public double medianScore() {
 		return medianScore;
 	}
 
-    @Override
 	public double medianPercentile() {
 		return medianPercentile;
 	}
 
-    @Override
 	public double medianEditDistance() {
 		return medianEditDistance;
 	}
 
-    @Override
 	public String signature() {
 		return signature;
 	}
 
-    @Override
 	public boolean isRotated() {
 		return rotation;
 	}
 
-    @Override
 	public String correspondences() {
 		return correspondices;
 	}
 
-	@Override
 	public Loop getLoop() {
 		return loop;
 	}
 
-	@Override
 	public void setLoop(Loop loop) {
 		this.loop = loop;
 	}
 
-	@Override
 	public Query getQuery() {
 		return getLoop().getQuery();
 	}
 
-	@Override
 	public List<SequenceResult> sequenceResults() {
 		return sequenceResults;
 	}

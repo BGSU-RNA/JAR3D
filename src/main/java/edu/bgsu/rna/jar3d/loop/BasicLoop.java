@@ -88,7 +88,6 @@ public class BasicLoop implements Loop {
 		this(Long.valueOf(id).toString(), id, loops, LoopType.fromSequence(loops.get(0)));
 	}
 
-	@Override
 	public List<String> getSequenceStrings() {
 		List<String> sequenceStrings = new ArrayList<String>();
 		for(Sequence sequence: sequences) {
@@ -97,47 +96,38 @@ public class BasicLoop implements Loop {
 		return sequenceStrings;
 	}
 
-	@Override
 	public String getTypeString() {
 		return getLoopType().getShortName();
 	}
 
-	@Override
 	public Iterator<Sequence> iterator() {
 		return getSequences().iterator();
 	}
 
-	@Override
 	public long getId() {
 		return id;
 	}
 
-	@Override
 	public String getName() {
 		return name;
 	}
 
-	@Override
 	public List<Sequence> getSequences() {
 		return sequences;
 	}
 
-	@Override
 	public Query getQuery() {
 		return query;
 	}
 
-	@Override
 	public void setQuery(Query query) {
 		this.query = query;
 	}
 
-	@Override
 	public LoopType getLoopType() {
 		return type;
 	}
 
-    @Override
     public Loop reverse() {
         List<Sequence> reversed = new ArrayList<Sequence>();
         for (Sequence sequence : getSequences().subList(1, getSequences().size())) {

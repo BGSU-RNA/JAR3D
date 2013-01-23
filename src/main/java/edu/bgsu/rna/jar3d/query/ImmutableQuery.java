@@ -31,32 +31,26 @@ public class ImmutableQuery extends AbstractQuery {
 		this.modelType = modelType;
 	}
 
-	@Override
 	public String modelType() {
 		return modelType;
 	}
 
-	@Override
 	public boolean onlyStructured() {
 		return onlyStructured;
 	}
 
-	@Override
 	public List<Loop> getLoops() {
 		return loops;
 	}
 
-	@Override
 	public String getId() {
 		return id;
 	}
 
-	@Override
 	public String getILSetName() {
 		return ilSet;
 	}
 
-	@Override
 	public String getHLSetName() {
 		return hlSet;
 	}
