@@ -76,11 +76,18 @@ public interface SequenceResult {
 	public double percentile();
 
     /**
-     * Get the edit distance of this result.
+     * Get the edit interior distance of this result.
      *
      * @return The edit distance.
      */
-	public int editDistance();
+	public int InteriorEditDistance();
+	
+	/**
+     * Get the full edit interior distance of this result.
+     *
+     * @return The edit distance.
+     */
+	public int FullEditDistance();
 
     /**
      * Return true if this sequence was run in a rotated orientation.

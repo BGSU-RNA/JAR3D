@@ -40,11 +40,18 @@ public interface LoopResult {
 	public String modelId();
 
 	/**
-	 * Mean edit distance between sequences in the loop and the sequences in the model.
+	 * Mean interior edit distance between sequences in the loop and the sequences in the model.
 	 * 
 	 * @return The edit distance.
 	 */
-	public double meanEditDistance();
+	public double meanInteriorEditDistance();
+	
+	/**
+	 * Mean full interior edit distance between sequences in the loop and the sequences in the model.
+	 * 
+	 * @return The edit distance.
+	 */
+	public double meanFullEditDistance();
 
 	/**
 	 * The mean score of sequences in this loop.
@@ -75,11 +82,18 @@ public interface LoopResult {
 	public double medianPercentile();
 
 	/**
-	 * Median edit distance between sequences in the loop and the sequences in the model.
+	 * Median interior edit distance between sequences in the loop and the sequences in the model.
 	 * 
 	 * @return The edit distance.
 	 */
-	public double medianEditDistance();
+	public double medianInteriorEditDistance();
+	
+	/**
+	 * Median full edit distance between sequences in the loop and the sequences in the model.
+	 * 
+	 * @return The edit distance.
+	 */
+	public double medianFullEditDistance();
 
 	/**
 	 * This is the base pairing signature for the scanned model.

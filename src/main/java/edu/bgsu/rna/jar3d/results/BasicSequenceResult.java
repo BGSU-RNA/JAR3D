@@ -16,8 +16,11 @@ public class BasicSequenceResult implements SequenceResult {
     /** Percentile of this result. */
 	private double percentile;
 
-    /** Edit distance of this result. */
-	private int editDistance;
+    /** Interior edit distance of this result. */
+	private int InteriorEditDistance;
+	
+    /** Full edit distance of this result. */
+	private int FullEditDistance;
 
     /** True if this was run in the rotated direction. */
 	private boolean rotation;
@@ -38,12 +41,13 @@ public class BasicSequenceResult implements SequenceResult {
 	 * @param editDistance The edit distance.
 	 * @param rotation True if the sequence was rotated relative to the model.
 	 */
-	public BasicSequenceResult(LoopResult result, Sequence sequence, double score, double percentile, int editDistance, boolean rotation) {
+	public BasicSequenceResult(LoopResult result, Sequence sequence, double score, double percentile, int InteriorEditDistance, int FullEditDistance, boolean rotation) {
 		this.result = result;
         this.sequence = sequence;
 		this.score = score;
 		this.percentile = percentile;
-		this.editDistance = editDistance;
+		this.InteriorEditDistance = InteriorEditDistance;
+		this.FullEditDistance = FullEditDistance;
 		this.rotation = rotation;
 	}
 
@@ -56,8 +60,8 @@ public class BasicSequenceResult implements SequenceResult {
 	 * @param editDistance The edit distance.
 	 * @param rotation True if the sequence was rotated relative to the model.
 	 */
-	public BasicSequenceResult(Sequence sequence, double score, double percentile, int editDistance, boolean rotation) {
-		this(null, sequence, score, percentile, editDistance, rotation);
+	public BasicSequenceResult(Sequence sequence, double score, double percentile, int InteriorEditDistance, int FullEditDistance, boolean rotation) {
+		this(null, sequence, score, percentile, InteriorEditDistance, FullEditDistance, rotation);
 	}
 
 	public double score() {
@@ -68,8 +72,12 @@ public class BasicSequenceResult implements SequenceResult {
 		return percentile;
 	}
 
-	public int editDistance() {
-		return editDistance;
+	public int FullEditDistance() {
+		return FullEditDistance;
+	}
+	
+	public int InteriorEditDistance() {
+		return InteriorEditDistance;
 	}
 
 	public boolean isRotated() {

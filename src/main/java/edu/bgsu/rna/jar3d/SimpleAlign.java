@@ -116,10 +116,14 @@ public class SimpleAlign {
 	}
 	
 	public static int[][] calcILEditDistances(List<Sequence> sD1,List<Sequence> sD2,boolean reverse){
-		return calcILEditDistances(sD1,sD2,reverse,false);
+		return calcILEditDistances(sD1,sD2,reverse,false,true);
+	}
+
+	public static int[][] calcILEditDistances(List<Sequence> sD1,List<Sequence> sD2,boolean reverse, boolean Verbose){
+		return calcILEditDistances(sD1,sD2,reverse,Verbose,true);
 	}
 	
-	public static int[][] calcILEditDistances(List<Sequence> sD1,List<Sequence> sD2,boolean reverse,boolean Verbose){
+	public static int[][] calcILEditDistances(List<Sequence> sD1,List<Sequence> sD2,boolean reverse,boolean Verbose,boolean Interior){
 		//calculates the edit distance between every sequence in fasta file seqFile1
 		//and every sequence in faste file seqFile2.  the first dim of the returned
 		//2d array corresponds to the files in seqFile1, the second to seqFile2
@@ -143,27 +147,41 @@ public class SimpleAlign {
 		int breakpoint;
 
 		//break up sequences to left and right substrings
-		for(int i = 0; i < n1; i++){
-			breakpoint = seqs1[i].indexOf("*");
-			if(breakpoint > 2){
-				seqs1left[i] = seqs1[i].substring(1, breakpoint-1);
+		if(Interior == true){
+			for(int i = 0; i < n1; i++){
+				breakpoint = seqs1[i].indexOf("*");
+				if(breakpoint > 2){
+					seqs1left[i] = seqs1[i].substring(1, breakpoint-1);
+				}
+				else seqs1left[i] = "";
+				if(breakpoint < seqs1[i].length()-3){
+					seqs1right[i] = seqs1[i].substring(breakpoint+2,seqs1[i].length()-1);
+				}
+				else seqs1right[i] = "";
 			}
-			else seqs1left[i] = "";
-			if(breakpoint < seqs1[i].length()-3){
-				seqs1right[i] = seqs1[i].substring(breakpoint+2,seqs1[i].length()-1);
+			for(int i = 0; i < n2; i++){
+				breakpoint = seqs2[i].indexOf("*");
+				if(breakpoint > 2){
+					seqs2left[i] = seqs2[i].substring(1, breakpoint-1);
+				}
+				else seqs2left[i] = "";
+				if(breakpoint < seqs2[i].length()-3){
+					seqs2right[i] = seqs2[i].substring(breakpoint+2,seqs2[i].length()-1);
+				}
+				else seqs2right[i] = "";
 			}
-			else seqs1right[i] = "";
-		}
-		for(int i = 0; i < n2; i++){
-			breakpoint = seqs2[i].indexOf("*");
-			if(breakpoint > 2){
-				seqs2left[i] = seqs2[i].substring(1, breakpoint-1);
+		}else{
+			for(int i = 0; i < n1; i++){
+				breakpoint = seqs1[i].indexOf("*");
+				seqs1left[i] = seqs1[i].substring(0, breakpoint);
+				seqs1right[i] = seqs1[i].substring(breakpoint+1,seqs1[i].length());
 			}
-			else seqs2left[i] = "";
-			if(breakpoint < seqs2[i].length()-3){
-				seqs2right[i] = seqs2[i].substring(breakpoint+2,seqs2[i].length()-1);
-			}
-			else seqs2right[i] = "";
+			for(int i = 0; i < n2; i++){
+				breakpoint = seqs2[i].indexOf("*");
+				seqs2left[i] = seqs2[i].substring(0, breakpoint);
+				seqs2right[i] = seqs2[i].substring(breakpoint+1,seqs2[i].length());
+			}			
+		
 		}
 		int leftDist;
 		int rightDist;
@@ -185,10 +203,14 @@ public class SimpleAlign {
 	}
 	
 	public static int[][] calcHLEditDistances(Vector<Sequence> sD1,Vector<Sequence> sD2){
-		return calcHLEditDistances(sD1,sD2,false);
+		return calcHLEditDistances(sD1,sD2,false,true);
 	}
 	
-	public static int[][] calcHLEditDistances(Vector<Sequence> sD1,Vector<Sequence> sD2,boolean Verbose){
+	public static int[][] calcHLEditDistances(Vector<Sequence> sD1,Vector<Sequence> sD2, boolean Verbose){
+		return calcHLEditDistances(sD1,sD2,Verbose,true);
+	}
+	
+	public static int[][] calcHLEditDistances(Vector<Sequence> sD1,Vector<Sequence> sD2,boolean Verbose,boolean Interior){
 		//calculates the edit distance between every sequence in fasta file seqFile1
 		//and every sequence in faste file seqFile2.  the first dim of the returned
 		//2d array corresponds to the files in seqFile1, the second to seqFile2
@@ -204,8 +226,13 @@ public class SimpleAlign {
 
 		for(int i = 0; i < n1; i ++){
 			for(int j = 0; j < n2; j ++){
-				seq1mf = seqs1[i].substring(1, seqs1[i].length()-2);
-				seq2mf = seqs2[j].substring(1, seqs2[j].length()-2);
+				if(Interior == true){
+					seq1mf = seqs1[i].substring(1, seqs1[i].length()-2);
+					seq2mf = seqs2[j].substring(1, seqs2[j].length()-2);
+				}else{
+					seq1mf = seqs1[i];
+					seq2mf = seqs2[j];
+				}
 				EdDists[i][j]=editDist(seq1mf,seq2mf);
 				if(Verbose){
 					System.out.println(String.format("Finding minimum edit distance between %s and %s.", seqs1[i],seqs2[j]));

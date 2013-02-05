@@ -14,13 +14,17 @@ public final class BasicLoopResult implements LoopResult {
 
 	private final String signature;
 
-	private double meanEditDistance;
+	private double meanInteriorEditDistance;
 
+	private double medianInteriorEditDistance;
+	
 	private double meanScore;
 
 	private double meanPercentile;
 
-	private double medianEditDistance;
+	private double meanFullEditDistance;
+	
+	private double medianFullEditDistance;
 
 	private double medianPercentile;
 
@@ -63,30 +67,39 @@ public final class BasicLoopResult implements LoopResult {
 		int numSeqs = sequenceResults.size();
 		double[] scores = new double[numSeqs];
 		double[] percentiles = new double[numSeqs];
-		int[] edDists = new int[numSeqs];
+		int[] fullEdDists = new int[numSeqs];
+		int[] interiorEdDists = new int[numSeqs];
 
+		
 		for(int i = 0; i < numSeqs; i++){
 			SequenceResult seqR = sequenceResults.get(i);
 			seqR.setLoopResult(this);
 			scores[i] = seqR.score();
 			percentiles[i] = seqR.percentile();
-			edDists[i] = seqR.editDistance();
+			interiorEdDists[i] = seqR.InteriorEditDistance();
+			fullEdDists[i] = seqR.FullEditDistance();
 		}
 
 		this.medianScore = ArrayMath.median(scores);
 		this.meanScore = ArrayMath.mean(scores);
 		this.meanPercentile = 100*ArrayMath.mean(percentiles);
 		this.medianPercentile = 100*ArrayMath.median(percentiles);
-		this.meanEditDistance = ArrayMath.mean(edDists);
-		this.medianEditDistance = ArrayMath.median(edDists);
+		this.meanInteriorEditDistance = ArrayMath.mean(interiorEdDists);
+		this.medianInteriorEditDistance = ArrayMath.median(interiorEdDists);
+		this.meanFullEditDistance = ArrayMath.mean(fullEdDists);
+		this.medianFullEditDistance = ArrayMath.median(fullEdDists);
 	}
 
 	public String modelId() {
 		return modelId;
 	}
 
-	public double meanEditDistance() {
-		return meanEditDistance;
+	public double meanInteriorEditDistance() {
+		return meanInteriorEditDistance;
+	}
+	
+	public double meanFullEditDistance() {
+		return meanFullEditDistance;
 	}
 
 	public double meanScore() {
@@ -105,8 +118,12 @@ public final class BasicLoopResult implements LoopResult {
 		return medianPercentile;
 	}
 
-	public double medianEditDistance() {
-		return medianEditDistance;
+	public double medianInteriorEditDistance() {
+		return medianInteriorEditDistance;
+	}
+	
+	public double medianFullEditDistance() {
+		return medianFullEditDistance;
 	}
 
 	public String signature() {

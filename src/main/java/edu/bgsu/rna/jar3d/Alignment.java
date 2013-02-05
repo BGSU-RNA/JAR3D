@@ -997,17 +997,20 @@ public class Alignment {
 
 			//Calculate edit distances
 			Vector<Sequence> modsData = Alignment.parseFastaText(group.Sequences,0,0);
-			int[][] EditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rev);
-			int[] minDist = new int[EditDistances.length];
-			for(int i = 0; i < EditDistances.length; i ++){
-				minDist[i] = ArrayMath.min(EditDistances[i]);
+			int[][] InteriorEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rev);
+			int[][] FullEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rev,false,false);
+			int[] InteriorMinDist = new int[InteriorEditDistances.length];
+			int[] FullMinDist = new int[FullEditDistances.length];
+			for(int i = 0; i < InteriorEditDistances.length; i ++){
+				InteriorMinDist[i] = ArrayMath.min(InteriorEditDistances[i]);
+				FullMinDist[i] = ArrayMath.min(FullEditDistances[i]);
 			}
 
 			//put goodness of fit checks here later?
 			if (true) {
 				List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
 				for(int m = 0; m < sData.size() - 1; m++) {
-					SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], quants[m], minDist[m], rev);
+					SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], quants[m], InteriorMinDist[m], FullMinDist[m],rev);
 					seqRes.add(seqR);
 				}
 

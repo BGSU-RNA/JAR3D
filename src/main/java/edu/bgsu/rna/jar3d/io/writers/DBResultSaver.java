@@ -28,8 +28,8 @@ public class DBResultSaver implements ResultSaver {
 	
 	public DBResultSaver(String username, String password, String db) throws SQLException {
         connection = DriverManager.getConnection(db, username, password);
-        String loopResultSQL = "insert into jar3d_results_by_loop (query_id, loop_id, motif_id, meanscore, meanpercentile, meaneditdist, medianscore, medianpercentile, medianeditdist, signature, rotation, correspondences) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-        String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (query_id, seq_id, loop_id, score, percentile, editdist, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?);";
+        String loopResultSQL = "insert into jar3d_results_by_loop (query_id, loop_id, motif_id, meanscore, meanpercentile, meaninterioreditdist, meanfulleditdist, medianscore, medianpercentile, medianinterioreditdist, medianfulleditdist, signature, rotation, correspondences) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (query_id, seq_id, loop_id, score, percentile, interioreditdist, fulleditdistance, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?);";
         String updateLoopSQL = "UPDATE jar3d_query_info SET status=1, time_completed=? WHERE query_id = ?;";
         String updateSequenceSQL = "UPDATE jar3d_query_sequences SET status=1, time_completed=? WHERE query_id = ? and seq_id = ? and loop_id = ?;";
         String failureSQL = "UPDATE jar3d_query_info SET status=-1, time_completed = ? WHERE query_id = ?;";
@@ -62,13 +62,15 @@ public class DBResultSaver implements ResultSaver {
 			insertLoopResult.setString(3, results.modelId());
 			insertLoopResult.setFloat(4, (float)results.meanScore());
 			insertLoopResult.setFloat(5, (float)results.meanPercentile());
-			insertLoopResult.setFloat(6, (float)results.meanEditDistance());
-			insertLoopResult.setFloat(7, (float)results.medianScore());
-			insertLoopResult.setFloat(8, (float)results.medianPercentile());
-			insertLoopResult.setFloat(9, (float)results.medianEditDistance());
-			insertLoopResult.setString(10, results.signature());
-			insertLoopResult.setInt(11, rotationInt(results.isRotated()));
-			insertLoopResult.setString(12, "Intentially left empty.");
+			insertLoopResult.setFloat(6, (float)results.meanInteriorEditDistance());
+			insertLoopResult.setFloat(7, (float)results.meanFullEditDistance());
+			insertLoopResult.setFloat(8, (float)results.medianScore());
+			insertLoopResult.setFloat(9, (float)results.medianPercentile());
+			insertLoopResult.setFloat(10, (float)results.medianInteriorEditDistance());
+			insertLoopResult.setFloat(11, (float)results.medianFullEditDistance());
+			insertLoopResult.setString(12, results.signature());
+			insertLoopResult.setInt(13, rotationInt(results.isRotated()));
+			insertLoopResult.setString(14, "Intentially left empty.");
 			updateLoopQuery.setTimestamp(1, now);
 			updateLoopQuery.setString(2, results.getLoop().getQuery().getId());
 		} catch (SQLException e) {
@@ -105,9 +107,10 @@ public class DBResultSaver implements ResultSaver {
 			insertSequenceResult.setInt(3, (int)result.loopId());
 			insertSequenceResult.setFloat(4, (float)result.score());
 			insertSequenceResult.setFloat(5, (float)result.percentile());
-			insertSequenceResult.setInt(6, result.editDistance());
-			insertSequenceResult.setInt(7, rotated);
-			insertSequenceResult.setString(8, result.motifId());
+			insertSequenceResult.setInt(6, result.InteriorEditDistance());
+			insertSequenceResult.setInt(7, result.FullEditDistance());
+			insertSequenceResult.setInt(8, rotated);
+			insertSequenceResult.setString(9, result.motifId());
 			updateSequenceQuery.setTimestamp(1, now);
 			updateSequenceQuery.setString(2, result.queryId());
 			updateSequenceQuery.setString(3, result.sequenceId());
