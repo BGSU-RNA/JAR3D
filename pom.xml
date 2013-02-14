@@ -50,7 +50,7 @@
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
+            <artifactId>maven-assembly-plugin</artifactId>
             <version>2.4</version>
             <configuration>
               <archive>
@@ -58,7 +58,19 @@
                   <mainClass>edu.bgsu.rna.jar3d.JAR3Database</mainClass>
                 </manifest>
               </archive>
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
             </configuration>
+            <executions>
+              <execution>
+                <id>make-jar-with-dependecies</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
         </plugins>
       </build>
