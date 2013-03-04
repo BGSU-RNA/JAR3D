@@ -255,60 +255,7 @@ public class Alignment {
 	 */
 	public static List<Sequence> doParse(List<Sequence> sData, String nodeFileName, int range)
 	{
-		Node current;
-		Vector<Double> mProbs = new Vector<Double>();
-
-		Sequence S = new Sequence("","");                        // blank sequence to use repeatedly
-		S.addNodeData(nodeFileName);	                         // only add node data once
-
-		sData.get(0).parseData = ((InitialNode)S.first).header(); // add a header line
-
-		Sequence firstS = sData.get(1);          // first sequence, which matches the model
-		firstS.setNucleotides();
-		firstS.setArrays();
-
-		for (int i = 1; i < sData.size(); i++)
-		{
-			S.organism = sData.get(i).organism;             // focus on one sequence
-			S.letters  = sData.get(i).letters;
-
-			S.setNucleotides();                                    // strip dashes from sequence
-			S.setArrays();                                         // define cti, itc, convert letters to numbers
-
-			// keep copies of cti and itc for the first sequence, which must match the model
-			S.ctiFirst = new int[firstS.cti.length];
-			S.itcFirst = new int[firstS.itc.length];
-
-			for (int j = 0; j < S.ctiFirst.length; j++)
-				S.ctiFirst[j] = firstS.cti[j];
-			for (int j = 0; j < S.itcFirst.length; j++)
-				S.itcFirst[j] = firstS.itc[j];
-
-			S.parseSequence(range);                             	      // parse this sequence
-
-			mProbs = new Vector<Double>();
-			current = S.first;
-			while(current != null)
-			{
-				mProbs.add(new Double(current.optimalMaxLogProb));
-				current =  current.next;
-			}
-			sData.get(i).appendProbabilities(mProbs);
-			sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
-
-			String correspondences = ((InitialNode)S.first).showCorrespondences(S.nucleotides);
-
-			correspondences = correspondences.replace("JAR3D_aligns_to", "aligns_to_JAR3D");
-
-			String SF = "Sequence_"+i+"_"+S.organism;
-			SF = SF.replace(" ","_");
-			correspondences = correspondences.replace("SSS",SF);
-
-			String NF = "MMM";                           // model name goes here
-			correspondences = correspondences.replace("MMM", NF);
-			sData.get(i).correspondences = correspondences;
-		}
-		return sData;
+		return Alignment.doParse(sData, nodeFileName, range, false);
 	}
 
 
@@ -775,6 +722,9 @@ public class Alignment {
 		return scores;
 	}
 
+	
+	// doParse2 is probably outmoded and should be avoided - CLZ 2013-03-04
+	
 	public static ParseData doParse2(List<Sequence> sData, String nodeFileName, int range)
 	{
 		Node current;
@@ -1026,7 +976,8 @@ public class Alignment {
 	{
 		Node current;
 		List<Double> mProbs = new Vector<Double>();
-
+		double mlp;
+		
 		Sequence S = new Sequence("","");                    // blank sequence to use repeatedly
 		if(fullModelText){
 			S.addNodeDataModelText(nodeInfo);				 // add model data from string
@@ -1056,7 +1007,7 @@ public class Alignment {
 			for (int j = 0; j < S.itcFirst.length; j++)
 				S.itcFirst[j] = firstS.itc[j];
 
-			S.parseSequence(range);                             	      // parse this sequence
+			mlp = S.parseSequence(range);                             	      // parse this sequence
 
 			// We also need to store the parse information somewhere!  All we have is a parse sequence.
 			// We need to store the max log probabilities too
@@ -1066,8 +1017,11 @@ public class Alignment {
 			while(current != null)
 			{
 				mProbs.add(new Double(current.optimalMaxLogProb));
+				System.out.println("Alignment.doParse optimalMaxLogProb for a node is "+current.optimalMaxLogProb);
 				current =  current.next;
 			}
+			System.out.println("Alignment.doParse actual MLP is "+mlp);
+			
 			sData.get(i).appendProbabilities(mProbs);
 			sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 
@@ -1121,7 +1075,6 @@ public class Alignment {
 				S.itcFirst[j] = firstS.itc[j];
 
 			totalProb = S.calculateTotalProbability(range); // calculate total probability for this sequence
-
 			sData.get(i).totalProbability = totalProb;      // record total probability for each sequence
 		}
 		return sData;

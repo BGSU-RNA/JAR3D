@@ -813,7 +813,7 @@ public class Sequence {
 	 * and allocates space in each node for maxprob, according to the length
 	 * of this sequence
 	 */
-	void parseSequence(int range)
+	public double parseSequence(int range)
 	{
 
 		Node current = last;
@@ -842,7 +842,14 @@ public class Sequence {
 			}// for
 
 		}// for
-		((InitialNode)first).traceback(0,nucleotides.length()-1);
+
+		double mlp = first.maxLogProb[0][nucleotides.length()-1-first.jMin];
+		
+		
+		((InitialNode)first).traceback(0,nucleotides.length()-1);  // start traceback from first node, full sequence
+		
+		return mlp;
+	
 	}// end parseSequence()
 
 	/**
@@ -1059,12 +1066,14 @@ public class Sequence {
 		{
 			for (int j = first.jMin; j <= first.jMax; j++) {
 				double p = first.totalProb[i-first.iMin][j-first.jMin];
-				if (p > 0)
-					System.out.println("i "+i+" j "+j+" prob "+p);
+//				if (p > 0)
+//					System.out.println("i "+i+" j "+j+" prob "+p);
 			}
 		}
 			
-		return first.totalProb[0][nucleotides.length()];
+//		System.out.println(nucleotides+" "+nucleotides.length());
+//		System.out.println("Total probability is "+first.totalProb[0][nucleotides.length()-1-first.jMin]);
+		return first.totalProb[0][nucleotides.length()-1-first.jMin];
 
 	}// end calculateTotalProbability()
 

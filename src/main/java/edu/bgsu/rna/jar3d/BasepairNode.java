@@ -134,6 +134,7 @@ public class BasepairNode extends BasicNode {
   	  			} // end for loop
   	  		} // end for loop
   			maxLogProb[i-iMin][j-jMin] = p;
+  			
 			if ((p < -99999999) && (!Deleted))
 			{
 				System.out.println("Basepair node with -Inf prob.  "+i+" "+j+" "+leftIndex+" "+rightIndex);
@@ -184,7 +185,6 @@ public class BasepairNode extends BasicNode {
   			System.out.println("Right side: " + super.jMin + "<=" + j + "<=" + super.jMax);
   			System.out.println("Indices of basepair: " + i + "<=" + j);
   			System.out.println("Deletion probability: " + deleteProb);
-  			
   		}
   	}
     	

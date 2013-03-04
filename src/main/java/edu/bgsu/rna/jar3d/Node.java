@@ -123,9 +123,9 @@ class Node {
 		jMax = seq.cti[rightCol] + range;
 		
 		iMin = Math.max(iMin,0);
-		iMax = Math.min(iMax,seq.nucleotides.length());
+		iMax = Math.min(iMax,seq.nucleotides.length()-1);
 		jMin = Math.max(jMin,0);
-		jMax = Math.min(jMax,seq.nucleotides.length());
+		jMax = Math.min(jMax,seq.nucleotides.length()-1);
 
 		if((iMax > iMin) && (jMax > jMin))
 		{
@@ -164,8 +164,8 @@ class Node {
 	{
 		if ((i >= iMin) && (i <= iMax) && (j >= jMin) && (j <= jMax))
 		{
-			if (maxLogProb[i-iMin][j-jMin] > currentMaxLogProb)
-				currentMaxLogProb = maxLogProb[i-iMin][j-jMin];
+//			if (maxLogProb[i-iMin][j-jMin] > currentMaxLogProb)
+//				currentMaxLogProb = maxLogProb[i-iMin][j-jMin];
 			return maxLogProb[i-iMin][j-jMin];
 		}
 		else
@@ -229,18 +229,7 @@ class Node {
 	 */
 	public void setOptimalAndRelease(int i, int j)
 	{
-		// if this hasn't already been done, then do this:
 		optimalMaxLogProb = maxLogProb[i-iMin][j-jMin];
-		
-		
-		if (optimalMaxLogProb < -99999999)
-		{
-/*			System.out.print("Node.setOptimalAndRelease "+mytype+" "+iMin+"<="+i+"<="+iMax+" "+jMin+"<="+j+"<="+jMax);
-			System.out.print(" length "+myGen.length);
-			System.out.print(" leftIndex "+leftIndex);
-			System.out.print(" rightIndex "+rightIndex);
-			System.out.println(" maxlogprob " + optimalMaxLogProb);
-*/		}
 		
 		optimalGen1 = myGen[i-iMin][j-jMin];
 		optimalGen1.i = i;
