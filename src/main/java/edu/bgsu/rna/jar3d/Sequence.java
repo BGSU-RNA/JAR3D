@@ -29,6 +29,7 @@ public class Sequence {
 	private List<List<Double>> maxLogProbs;
     String parseData;
     String correspondences;
+	double totalProbability;   // total probability for the entire sequence
 
 	/**
 	 * Constructor for Sequence class
@@ -1020,5 +1021,51 @@ public class Sequence {
       buff.deleteCharAt(buff.length() - 1);
       return new Sequence(organism, buff.reverse().toString());
   }
+
+	/**
+	 * This method converts the sequence into an array of numbers [0,1,2,3]
+	 * and allocates space in each node for maxprob, according to the length
+	 * of this sequence
+	 */
+	public double calculateTotalProbability(int range)
+	{
+
+		Node current = last;
+		while(current != null) // go until the end of the list
+		{
+			current.setMinMax(range, this);
+			current = current.previous;		 // current equals the one before
+		}
+
+		// CYK algorithm for determining total generation probability
+		for (int p=1; p <= nucleotides.length(); p++)         // length of subsequence
+		{
+			for(int i=0; i+p <= nucleotides.length(); i++)   // starting point of subsequence
+			{
+				int j = i+p-1;                          // right side of this subsequence
+				current = last;					        // start with last node
+				while (current != null)
+				{
+					current.computeTotalProbability(this,i,j);   // determine prob of this node and children generating subsequence i to j
+					current = current.previous;				
+				}// while
+
+			}// for
+
+		}// for
+		
+
+		for (int i = first.iMin; i <= first.iMax; i++)
+		{
+			for (int j = first.jMin; j <= first.jMax; j++) {
+				double p = first.totalProb[i-first.iMin][j-first.jMin];
+				if (p > 0)
+					System.out.println("i "+i+" j "+j+" prob "+p);
+			}
+		}
+			
+		return first.totalProb[0][nucleotides.length()];
+
+	}// end calculateTotalProbability()
 
 }// end class

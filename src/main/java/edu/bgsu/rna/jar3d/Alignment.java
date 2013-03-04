@@ -1021,7 +1021,7 @@ public class Alignment {
 		return loopRes;
 	}
 
-	//Overloaded doParse that can take group data as a string instead of a file name
+	//Overloaded doParse that can take model/node data as a string instead of a file name
 	public static List<Sequence> doParse(List<Sequence> sData, String nodeInfo, int range, boolean fullModelText)
 	{
 		Node current;
@@ -1082,6 +1082,47 @@ public class Alignment {
 			String NF = "MMM";                           // model name goes here
 			correspondences = correspondences.replace("MMM", NF);
 			sData.get(i).correspondences = correspondences;
+		}
+		return sData;
+	}
+
+	//Overloaded doParse that can take model/node data as a string instead of a file name
+	public static List<Sequence> calculateTotalProbability(List<Sequence> sData, String nodeInfo, int range, boolean fullModelText)
+	{
+        double totalProb;
+        
+		Sequence S = new Sequence("","");                    // blank sequence to use repeatedly
+		if(fullModelText){
+			S.addNodeDataModelText(nodeInfo);				 // add model data from string
+		}else{
+			S.addNodeData(nodeInfo);	                     // add model data from file
+		}
+
+		sData.get(0).parseData = ((InitialNode)S.first).header(); // add a header line
+
+		Sequence firstS = sData.get(1);          // first sequence, which matches the model
+		firstS.setNucleotides();
+		firstS.setArrays();
+
+		for (int i = 1; i < sData.size(); i++)              // loop through sequences
+		{
+			S.organism = sData.get(i).organism;             // focus on one sequence
+			S.letters  = sData.get(i).letters;
+			S.setNucleotides();                             // strip dashes from sequence
+			S.setArrays();                                  // define cti, itc, convert letters to numbers
+
+			// keep copies of cti and itc for the first sequence, which must match the model
+			S.ctiFirst = new int[firstS.cti.length];
+			S.itcFirst = new int[firstS.itc.length];
+
+			for (int j = 0; j < S.ctiFirst.length; j++)
+				S.ctiFirst[j] = firstS.cti[j];
+			for (int j = 0; j < S.itcFirst.length; j++)
+				S.itcFirst[j] = firstS.itc[j];
+
+			totalProb = S.calculateTotalProbability(range); // calculate total probability for this sequence
+
+			sData.get(i).totalProbability = totalProb;      // record total probability for each sequence
 		}
 		return sData;
 	}

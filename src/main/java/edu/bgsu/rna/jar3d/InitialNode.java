@@ -163,4 +163,64 @@ public class InitialNode extends BasicNode {
  			
   			return left + super.child.showCorrespondences(letters) + right;
   	}
+
+
+	/**
+	 * This method loops through all ways to insert letters on left and right
+	 * and calculates the total probability of generating the subsequence from i to j
+	 * @author Craig Zirbel
+	 *
+	 */
+
+	public void computeTotalProbability(Sequence seq, int i, int j)
+	{
+		/**
+		 * If the subsequence from i to j is in the range to be parsed by this node, 
+		 */
+		if ((i >= super.iMin) && (i <= super.iMax) && (j >= super.jMin) && (j <= super.jMax) && (i <= j))
+		{
+			double p;	// total probability found so far
+			double pll;	// contribution to total prob from left length
+			double pli;	// contribution to total prob from left inserted letters
+			double prl; // contribution to total prob from right length
+			double pri; // contribution to total prob from right inserted letters
+			double priarray[] = new double[rInsDist.lengthDist.length];
+			double pnew; // probability for this insertion combination
+			int a; 		// number of insertions on the left
+			int b; 		// number of insertions on the right
+			
+			p = 0;               // start with zero probability
+
+			// for loop that sets totalProb[i-super.iMin][j-super.jMin]
+			pli = 1;					// 0 left insertions so far
+
+			priarray[0] = 1;
+			for(b = 1; b < Math.min(j-i+1,rInsDist.lengthDist.length); b++)
+  			{
+				priarray[b] = priarray[b-1];
+				int c = seq.code[j-b+1];
+				priarray[b] *= rInsDist.letterDist[c];
+  			} // end for loop
+
+			for(a = 0; a < Math.min(j-i+1,lInsDist.lengthDist.length); a++)
+  	  		{
+  				if (a > 0) {
+  					pli *= lInsDist.letterDist[seq.code[i+a-1]];
+  				}
+  				for(b = 0; b < Math.min(j-i+1-a,rInsDist.lengthDist.length); b++)
+  	  			{
+  					pnew = lInsDist.lengthDist[a];
+  					pnew *= pli;
+  					pnew *= super.child.getTotalProb(i+a,j-b);
+  					pnew *= rInsDist.lengthDist[b];
+  					pnew *= priarray[b];
+
+  	  				p += pnew;
+  	  			} // end for loop
+  	  		} // end for loop
+  			totalProb[i-iMin][j-jMin] = p;
+		} // end if loop
+	}// end method computeTotalProbability
+
+
 } // end class InitialNode

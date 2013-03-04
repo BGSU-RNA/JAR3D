@@ -14,7 +14,7 @@ public class ClusterInteraction {
 	 * This is the ClusterInteraction constructor
 	 * @param a is the left side base
 	 * @param b is the right side base
-	 * @param subs is a matrix containing substituion probabilities
+	 * @param subs is a matrix containing substitution probabilities
 	 */
 	public ClusterInteraction(int a, int b, double[][]subs)
 	{

@@ -62,9 +62,27 @@ public class InsertionDistribution {
 		}
 			return p;
 	}
-	
+
 	/**
-	 * This method returns the maximum number of insertions possile
+	 * This method computes the logarithm of the probability of a certain
+	 * sequence being generated based on the stored length and letter 
+	 * distribution matrices
+	 * @param codes
+	 * @return
+	 */
+	double computeProb(int[] codes)
+	{
+		double p;
+		p = lengthDist[codes.length];       // probability of this length of insertion
+		for (int i = 0; i < codes.length; i++)
+		{
+			p *= letterDist[codes[i]];
+		}
+			return p;
+	}
+
+	/**
+	 * This method returns the maximum number of insertions possible
 	 * @return
 	 */
 	int maxNumInsertions()

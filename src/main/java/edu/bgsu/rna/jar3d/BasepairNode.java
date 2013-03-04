@@ -123,7 +123,7 @@ public class BasepairNode extends BasicNode {
   					prl = rInsDist.logLengthDist[b];
   					pri = priarray[b];
 					pnew = super.child.getMaxLogProb(i+a+1,j-b-1);
-					pnew = pnew + pairLogProb[seq.code[i]][seq.code[j]];
+					pnew = pnew + pairLogProb[seq.code[i+a]][seq.code[j-b]];  // changed on 2013-03-04
 					pnew = pnew + pll + pli + prl + pri;
   	  				if (pnew > p) {
   	  					p = pnew;
@@ -263,4 +263,72 @@ public class BasepairNode extends BasicNode {
   			return left + super.child.showCorrespondences(letters) + right;
   		}
   	}
+	
+	
+	/**
+	 * This method loops through all ways to insert letters on left and right
+	 * and calculates the total probability of generating the subsequence from i to j
+	 * @author Craig Zirbel
+	 *
+	 */
+
+	void computeTotalProbability(Sequence seq, int i, int j)
+  	{
+  		if ((i >= super.iMin) && (i <= super.iMax) && (j >= super.jMin) && (j <= super.jMax)  && (i <= j)) {
+			double p;	// total probability so far
+			double pli;	// contribution to total prob from left inserted letters
+			double priarray[] = new double[rInsDist.logLengthDist.length];
+			double pnew; // probability of current insertion possibility
+			int a; 		// number of insertions on the left
+			int b; 		// number of insertions on the right
+			
+			// consider the possibility that this node generates nothing at all
+			
+			p = deleteProb * super.child.getTotalProb(i,j);
+
+			// consider the possibility of generating a pair and various numbers of insertions
+			
+			// for loop that sets maxLogProb[i-super.iMin][j-super.jMin]
+			
+			pli = 1;					// 0 left insertions so far
+			
+			priarray[0] = 1;
+			// this loop sets the probabilities of insertions on the right
+			for(b = 1; b < Math.min(j-i-1,rInsDist.lengthDist.length); b++)
+  			{
+				priarray[b] = priarray[b-1] * rInsDist.letterDist[seq.code[j-b]];
+  			} // end for loop
+
+			// for loop from 0 to the distance between i and j, or to the length of the left
+			// length distribution array, whichever is less
+			for(a = 0; a < Math.min(j-i-1,lInsDist.lengthDist.length); a++)
+  	  		{
+  				if (a > 0) {
+  					pli *= lInsDist.letterDist[seq.code[i+a]];
+  				}
+  				for(b = 0; b < Math.min(j-i-1-a,rInsDist.lengthDist.length); b++)
+  	  			{
+  					pnew = lInsDist.lengthDist[a];
+//					System.out.println("BasepairNode.computeTotalProbability 1: "+pnew);
+  					pnew *= pli;
+//					System.out.println("BasepairNode.computeTotalProbability 2: "+pnew);
+					pnew *= pairProb[seq.code[i+a]][seq.code[j-b]];
+//					System.out.println("BasepairNode.computeTotalProbability 3: "+pnew);
+					pnew *= super.child.getTotalProb(i+a+1,j-b-1);
+//					System.out.println("BasepairNode.computeTotalProbability 4: "+pnew);
+  					pnew *= rInsDist.lengthDist[b];
+//					System.out.println("BasepairNode.computeTotalProbability 5: "+pnew);
+  					pnew *= priarray[b];
+					p += pnew;
+
+//					System.out.println("BasepairNode.computeTotalProbability 6: "+pnew);
+//					System.out.println("BasepairNode.computeTotalProbability 7: "+p);
+  	  			} // end for loop
+  	  		} // end for loop
+  			totalProb[i-iMin][j-jMin] = p;
+
+  		} // if loop
+  	} // method declaration
+
+	
 } // class

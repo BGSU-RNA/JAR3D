@@ -323,8 +323,6 @@ public class HairpinNode extends BasicNode {
   			myGen[i-iMin][j-jMin] = new genData(optInsLengths);
 		} // end if loop
 	}// end method computMaxLogProb
-
-	
 	
 	public void traceback(int i, int j)
   	{
@@ -397,4 +395,91 @@ public class HairpinNode extends BasicNode {
 		
 			return left;
   	}
+
+	/**
+	 * This method loops through all ways to insert letters between the fixed bases
+	 * and calculates the total probability of generating the hairpin
+	 * @author Craig Zirbel
+	 */
+	
+	public void computeTotalProbability(Sequence seq, int i, int j)
+	{
+		/**
+		 * If the subsequence from i to j is in the range to be parsed by this node, 
+		 */
+		if ((i >= super.iMin) && (i <= super.iMax) && (j >= super.jMin) && (j <= super.jMax) && (i <= j))
+		{
+			double p;	    // total probability found so far
+			double pnew;    // probability of current insertion possibility
+			int a = 0; 		// number of insertions on the left
+			int[] intCodes = new int[numFixed];               // codes of interacting bases
+			int[] insLengths = new int[insertions.size()];    // one combination of insertion numbers 
+			
+			for(int l = 0; l < insertions.size(); l++)
+			{
+                insLengths[l] = 0;
+			}
+			/*
+			 * loop through insertion combinations.
+			 * */
+			p = 0;               // start with zero probability
+			
+			while(insLengths[0] <= maxLengths[0])
+			{
+				// if the number of insertions is correct to fill in the space ...
+				if (i+numFixed+a-1 == j)
+				{
+					// pull out the numFixed interacting base codes
+	
+					pnew = 1;                           // probability for current insertion possibility
+	
+					int k = i;                          // location of current insertion
+					for(int m = 0; m < numFixed; m++)   // loop through insertion locations
+					{
+						intCodes[m] = seq.code[k];
+						int[] insCodes = new int[insLengths[m]];
+						for (int q = 0; q < insLengths[m]; q++)
+							insCodes[q] = seq.code[k+1+q];
+						pnew *= ((InsertionDistribution)insertions.get(m)).computeProb(insCodes);
+						k += insLengths[m] + 1;
+					}
+						
+					// score codes[] according to the various interactions
+					
+					for(int m = 0; m < interactions.size(); m++)
+					{
+						pnew *= ((ClusterInteraction)interactions.get(m)).getSubstProb(intCodes);
+					}
+					
+
+					p += pnew;                          // add to total probability
+					
+//System.out.println("HairpinNode.computeTotalProbability: "+p);					
+				}
+				
+				// push a 1 into insLengths and carry, so that all insLengths get explored
+				insLengths[numFixed-1]++;
+
+				int place = numFixed-1;
+				while((insLengths[place] > maxLengths[place]) && (place > 0))// carry
+				{
+					insLengths[place] = 0;
+					place--;
+					insLengths[place]++;
+				}
+
+				// update the total number of insertions
+				
+				a = 0;
+				for(int m = 0; m < numFixed; m++)
+				{
+					a += insLengths[m];
+				}
+			
+			}	// for loop that sets maxLogProb[i-super.iMin][j-super.jMin]
+			p = p/normalizationZ;                     // Normalize the probability
+  			totalProb[i-iMin][j-jMin] = p;
+		} // end if loop
+	}// end method computeTotalProbability
+
 }

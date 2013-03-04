@@ -17,6 +17,7 @@ class Node {
 	public int rightIndex, leftIndex;
 	public double currentMaxLogProb;
 	public int number = 0;
+	public double totalProb[][];
 	
 	/**
 	 * This is the Node constructor
@@ -68,7 +69,9 @@ class Node {
 	}
 	
 	/**
-	 * This method sets the minimum and maximum number of probabilities stored
+	 * This method sets the minimum and maximum number of probabilities stored.
+	 * For each node, only certain values of i and j will be stored, depending on
+	 * the value of range and how the current sequence maps to the model sequence.
 	 * @param a 
 	 * @param b
 	 * @param c
@@ -126,12 +129,13 @@ class Node {
 
 		if((iMax > iMin) && (jMax > jMin))
 		{
-			maxLogProb = new double[iMax-iMin+1][jMax-jMin+1];
-			myGen = new genData[iMax-iMin+1][jMax-jMin+1];
+			maxLogProb = new double[iMax-iMin+1][jMax-jMin+1];  // space to store max log probabilities
+			myGen = new genData[iMax-iMin+1][jMax-jMin+1];      // space to store optimal generation history
+			totalProb = new double[iMax-iMin+1][jMax-jMin+1];   // space to store total probabilities
 		}
 		else
 		{//look here
-			System.out.println("This sequence is too short for the model and the limits on iMin and iMax");
+			System.out.println("Node: This sequence is too short for the model and the limits on iMin and iMax");
 			System.out.println(leftIndex+" "+rightIndex);
 			System.out.println(iMin+" "+iMax+" "+jMin+" "+jMax+" ");
 			System.out.println(mytype);
@@ -142,7 +146,7 @@ class Node {
 	
 	/**
 	 * This is the overloaded method that computes the logarithm of the
-	 * maxium probability way that a node generated a certain sequence
+	 * maximum probability way that a node generated a certain sequence
 	 * @param seq
 	 * @param i
 	 * @param j
@@ -244,4 +248,33 @@ class Node {
 		myGen = new genData[0][0];
 		maxLogProb = new double[0][0];
 	}
+
+	/**
+	 * This is the overloaded method that computes the logarithm of the
+	 * maximum probability way that a node generated a certain sequence
+	 * @param seq
+	 * @param i
+	 * @param j
+	 */
+	void computeTotalProbability(Sequence seq, int i, int j)
+	{}
+
+	/**
+	 * This method returns the total probability
+	 * @param i
+	 * @param j
+	 * @return
+	 */
+	public double getTotalProb(int i, int j)
+	{
+		if ((i >= iMin) && (i <= iMax) && (j >= jMin) && (j <= jMax))
+		{
+			return totalProb[i-iMin][j-jMin];
+		}
+		else
+		{
+			return 0.0; // return negative infinity
+		}
+	}
+
 }
