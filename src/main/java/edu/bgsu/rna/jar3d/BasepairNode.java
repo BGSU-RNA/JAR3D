@@ -124,7 +124,7 @@ public class BasepairNode extends BasicNode {
   					prl = rInsDist.logLengthDist[b];
   					pri = priarray[b];
 					pnew = super.child.getMaxLogProb(i+a+1,j-b-1) + notDeleteLogProb;
-					pnew = pnew + pairLogProb[seq.code[i+a]][seq.code[j-b]];  // changed on 2013-03-04
+					pnew = pnew + pairLogProb[seq.code[i]][seq.code[j]];
 					pnew = pnew + pll + pli + prl + pri;
   	  				if (pnew > p) {
   	  					p = pnew;
@@ -292,7 +292,7 @@ public class BasepairNode extends BasicNode {
 			
 			pli = 1;					// 0 left insertions so far
 			
-			priarray[0] = 1;
+			priarray[0] = 1;            // letter probability when 0 insertions on the right
 			// this loop sets the probabilities of insertions on the right
 			for(b = 1; b < Math.min(j-i-1,rInsDist.lengthDist.length); b++)
   			{
@@ -310,7 +310,7 @@ public class BasepairNode extends BasicNode {
   	  			{
   					pnew = lInsDist.lengthDist[a];
   					pnew *= pli;
-					pnew *= pairProb[seq.code[i+a]][seq.code[j-b]];
+					pnew *= pairProb[seq.code[i]][seq.code[j]];     // the pair is always i with j
 					pnew *= super.child.getTotalProb(i+a+1,j-b-1);
   					pnew *= rInsDist.lengthDist[b];
   					pnew *= priarray[b];
