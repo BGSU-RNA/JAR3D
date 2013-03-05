@@ -309,20 +309,12 @@ public class BasepairNode extends BasicNode {
   				for(b = 0; b < Math.min(j-i-1-a,rInsDist.lengthDist.length); b++)
   	  			{
   					pnew = lInsDist.lengthDist[a];
-//					System.out.println("BasepairNode.computeTotalProbability 1: "+pnew);
   					pnew *= pli;
-//					System.out.println("BasepairNode.computeTotalProbability 2: "+pnew);
 					pnew *= pairProb[seq.code[i+a]][seq.code[j-b]];
-//					System.out.println("BasepairNode.computeTotalProbability 3: "+pnew);
 					pnew *= super.child.getTotalProb(i+a+1,j-b-1);
-//					System.out.println("BasepairNode.computeTotalProbability 4: "+pnew);
   					pnew *= rInsDist.lengthDist[b];
-//					System.out.println("BasepairNode.computeTotalProbability 5: "+pnew);
   					pnew *= priarray[b];
 					p += pnew;
-
-//					System.out.println("BasepairNode.computeTotalProbability 6: "+pnew);
-//					System.out.println("BasepairNode.computeTotalProbability 7: "+p);
   	  			} // end for loop
   	  		} // end for loop
   			totalProb[i-iMin][j-jMin] = p;

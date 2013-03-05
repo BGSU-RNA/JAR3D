@@ -845,7 +845,6 @@ public class Sequence {
 
 		double mlp = first.maxLogProb[0][nucleotides.length()-1-first.jMin];
 		
-		
 		((InitialNode)first).traceback(0,nucleotides.length()-1);  // start traceback from first node, full sequence
 		
 		return mlp;

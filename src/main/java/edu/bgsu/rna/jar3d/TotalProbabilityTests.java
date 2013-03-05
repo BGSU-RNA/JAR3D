@@ -31,11 +31,14 @@ public class TotalProbabilityTests {
 			// for index restrictions to work, the first sequence needs to be at least as long as
 			// the sequence in the 3D structure from which the model was derived, and preferably
 			// not much longer
-
-			String modelName = "C:/Users/zirbel/Documents/GitHub/JAR3D/totalprobabilitytests/IL_87904.3_model.txt";
-			String seqName = "C:/Users/zirbel/Documents/GitHub/JAR3D/totalprobabilitytests/IL_87904.3.fasta";
+			String modelName;
+			String seqName;
+			List<Sequence> sequenceData;
 			
-			List<Sequence> sequenceData = Alignment.loadFasta(seqName);
+			modelName = "C:/Users/zirbel/Documents/GitHub/JAR3D/totalprobabilitytests/IL_87904.3_model.txt";
+			seqName = "C:/Users/zirbel/Documents/GitHub/JAR3D/totalprobabilitytests/IL_87904.3.fasta";
+			
+			sequenceData = Alignment.loadFasta(seqName);
 			numSequences = sequenceData.size()-1;
 			sequenceData = Alignment.doParse(sequenceData, modelName,15);
 			sequenceData = sequenceData.subList(0, numSequences + 1);
@@ -47,7 +50,24 @@ public class TotalProbabilityTests {
 			for (int i=1; i<sequenceData.size(); i++) {
 				System.out.println(sequenceData.get(i).letters+" "+sequenceData.get(i).totalProbability);
 			}
+
+			modelName = "C:/Users/zirbel/Documents/GitHub/JAR3D/totalprobabilitytests/IL_85647.2_model.txt";
+			seqName = "C:/Users/zirbel/Documents/GitHub/JAR3D/totalprobabilitytests/IL_85647.2.fasta";
 			
+			sequenceData = Alignment.loadFasta(seqName);
+			numSequences = sequenceData.size()-1;
+			sequenceData = Alignment.doParse(sequenceData, modelName,15);
+			sequenceData = sequenceData.subList(0, numSequences + 1);
+//			Alignment.displayAlignmentFASTA(sequenceData);
+
+			sequenceData = Alignment.loadFasta(seqName);			
+			sequenceData = Alignment.calculateTotalProbability(sequenceData, modelName, range, false);
+
+			for (int i=1; i<sequenceData.size(); i++) {
+				System.out.println(sequenceData.get(i).letters+" "+sequenceData.get(i).totalProbability);
+			}
+
+
 		}
 	}
 	

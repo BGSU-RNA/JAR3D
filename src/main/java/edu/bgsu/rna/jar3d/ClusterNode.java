@@ -528,4 +528,123 @@ public class ClusterNode extends BasicNode {
   			return left + super.child.showCorrespondences(letters) + right;
   		}
   	}
+
+
+	public void computeTotalProbability(Sequence seq, int i, int j)
+	{
+		/**
+		 * If the subsequence from i to j is in the range to be parsed by this node, 
+		 * Note, however, that i+numLeftInt might exceed j-numRightInt; in that case, this node really must be deleted and generate nothing
+		 */
+		if ((i >= super.iMin) && (i <= super.iMax) && (j >= super.jMin) && (j <= super.jMax) && (i <= j))
+		{
+			double p;									// total probability found so far
+			double pnew; 								// probability of current insertion possibility
+			int a = 0; 									// number of insertions on the left
+			int b = 0; 									// number of insertions on the right
+			int numBases = numLeftInt + numRightInt;    // number of interacting bases in this Cluster
+			int[] intCodes = new int[numBases];            	// codes of interacting bases
+			int[] insLengths = new int[insertions.size()]; 	// one combination of insertion numbers 
+			
+			// consider the possibility that this node generates nothing at all
+			
+			p = deleteProb * super.child.getTotalProb(i,j); 
+			
+//			System.out.println("ClusterNode1: " + p);
+
+			// start off with no insertions anywhere, score this possibility
+			for(int l = 0; l < insertions.size(); l++)
+			{
+                insLengths[l] = 0;
+			}
+			/*
+			 * loop through insertion combinations.
+			 * pull out interacting base codes
+			 * for each one, add up log probabilities for:
+			 * 1. the interacting bases, following this model:
+			 * 			p = 0;
+			 * */
+
+			while(insLengths[0] <= maxLengths[0])
+			{
+				// if there is enough space between i and j for the interacting and inserted bases,
+				if (i+numLeftInt+a <= j-numRightInt-b)               // 
+				{
+					// pull out the numBases interacting base codes
+
+					
+					pnew = 1;
+
+					int k = i;                                       // first base of the subsequence being parsed
+					for(int m = 0; m < numLeftInt; m++)              // go through insertions on the left
+					{
+						intCodes[m] = seq.code[k];                   // record code of interacting base
+						int[] insCodes = new int[insLengths[m]];     // place for codes of insertions
+						for (int q = 0; q < insLengths[m]; q++)      // loop through number of insertions at site m
+							insCodes[q] = seq.code[k+1+q];           // record codes of right number of inserted bases here
+						pnew *= ((InsertionDistribution)insertions.get(m)).computeProb(insCodes);
+						k += insLengths[m] + 1;
+					}
+
+					k = j;                                           // last base of the subsequence being parsed
+					for(int m = numBases-1; m >= numLeftInt; m--)    // consider insertions on the right
+					{
+						intCodes[m] = seq.code[k];                   // record codes of interacting bases, starting from the right
+						int[] insCodes = new int[insLengths[m-1]];   // (-1)
+						for (int q = 0; q < insLengths[m-1]; q++)    // (-1) loop through number of insertions at site m, moving from the *right*
+						{
+							insCodes[q] = seq.code[k-1-q];           // record code of base here
+						}
+						pnew *= ((InsertionDistribution)insertions.get(m-1)).computeProb(insCodes);
+						k = k - insLengths[m-1] - 1;                 // (-1)
+					}
+
+
+					for(int m = 0; m < interactions.size(); m++)
+					{
+						pnew *= ((ClusterInteraction)interactions.get(m)).getSubstProb(intCodes);
+					}
+
+					pnew *= super.child.getTotalProb(i+numLeftInt+a, j-numRightInt-b);
+
+					pnew = pnew / normalizationZ;                    // normalize the probability
+
+					p += pnew;
+				}
+					
+				// push a 1 into insLengths and carry
+				// this is how it manages to consider all possible insertion numbers and locations
+				// "carrying" is done when the number of insertions at a particular location exceeds the allowed number there
+				insLengths[numBases-1]++;
+
+				int place = numBases-1;
+				while((insLengths[place] > maxLengths[place]) && (place > 0))    // carry
+				{
+					insLengths[place] = 0;
+					place--;
+					insLengths[place]++;
+				}
+
+				// update the total number of left and right insertions
+				a = 0;
+				for(int m = 0; m < numLeftInt; m++)
+				{
+					a += insLengths[m];
+				}
+					
+				b = 0;
+				for(int m = numBases-1; m >= numLeftInt; m--)
+				{
+					b += insLengths[m];
+				}
+
+			}
+			// for loop that sets maxLogProb[i-super.iMin][j-super.jMin]
+
+  			totalProb[i-iMin][j-jMin] = p;
+
+		} // end if loop
+	}// end method computeTotalProbability
+
+
 }

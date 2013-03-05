@@ -984,7 +984,7 @@ public class Alignment {
 		}else{
 			S.addNodeData(nodeInfo);	                     // add model data from file
 		}
-
+		
 		sData.get(0).parseData = ((InitialNode)S.first).header(); // add a header line
 
 		Sequence firstS = sData.get(1);          // first sequence, which matches the model
@@ -1017,10 +1017,10 @@ public class Alignment {
 			while(current != null)
 			{
 				mProbs.add(new Double(current.optimalMaxLogProb));
-				System.out.println("Alignment.doParse optimalMaxLogProb for a node is "+current.optimalMaxLogProb);
+//				System.out.println("Alignment.doParse optimalMaxLogProb for a node is "+current.optimalMaxLogProb);
 				current =  current.next;
 			}
-			System.out.println("Alignment.doParse actual MLP is "+mlp);
+//			System.out.println("Alignment.doParse actual MLP is "+mlp);
 			
 			sData.get(i).appendProbabilities(mProbs);
 			sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
