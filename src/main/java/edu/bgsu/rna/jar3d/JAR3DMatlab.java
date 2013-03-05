@@ -184,6 +184,7 @@ public class JAR3DMatlab {
         }
 	    return S;
 	}
+	
 	public static double[] MotifParseSingle(String UserDir, String SeqFile, String ModFile) 
 	{
 		Vector<Sequence> sData;
@@ -302,6 +303,24 @@ public class JAR3DMatlab {
 			}
 		}
 		return quantiles;
+	}
+
+	public static double[] MotifTotalProbSingle(String UserDir, String SeqFile, String ModFile) 
+	{
+		System.setProperty("user.dir",UserDir);
+
+		List<Sequence> sData;
+		sData = Alignment.loadFasta(SeqFile);
+		sData = Alignment.calculateTotalProbability(sData, ModFile, 0, false);
+      
+		double[] scores = new double[sData.size()-1];       // all scores computed
+
+		for(int m = 1; m < sData.size(); m++)
+		{
+			scores[m-1] = sData.get(m).totalProbability;
+		}
+
+	    return scores;
 	}
 
 }

@@ -985,7 +985,7 @@ public class Alignment {
 			S.addNodeData(nodeInfo);	                     // add model data from file
 		}
 		
-		sData.get(0).parseData = ((InitialNode)S.first).header(); // add a header line
+		sData.get(0).parseData = ((Node)S.first).header(); // add a header line
 
 		Sequence firstS = sData.get(1);          // first sequence, which matches the model
 		firstS.setNucleotides();
@@ -1044,6 +1044,7 @@ public class Alignment {
 	public static List<Sequence> calculateTotalProbability(List<Sequence> sData, String nodeInfo, int range, boolean fullModelText)
 	{
         double totalProb;
+        int userange;
         
 		Sequence S = new Sequence("","");                    // blank sequence to use repeatedly
 		if(fullModelText){
@@ -1074,7 +1075,12 @@ public class Alignment {
 			for (int j = 0; j < S.itcFirst.length; j++)
 				S.itcFirst[j] = firstS.itc[j];
 
-			totalProb = S.calculateTotalProbability(range); // calculate total probability for this sequence
+			if (range == 0)
+				userange = S.letters.length();
+			else
+				userange = range;
+			
+			totalProb = S.calculateTotalProbability(userange); // calculate total probability for this sequence
 			sData.get(i).totalProbability = totalProb;      // record total probability for each sequence
 		}
 		return sData;

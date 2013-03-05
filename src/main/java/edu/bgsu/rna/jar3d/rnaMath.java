@@ -72,8 +72,7 @@ public class rnaMath {
 		}
 		for(int i = 0; i < dist.length; i++)
 		{
-			//Does NOT normalize!
-			newdist[i] = dist[i];
+			newdist[i] = dist[i] / sum;
 		}
 		return newdist;
 	}
@@ -99,8 +98,7 @@ public class rnaMath {
 		{
 			for(int j = 0; j < dist.length; j++)
 			{
-				//Does NOT normalize!
-				newdist[i][j] = dist[i][j];
+				newdist[i][j] = dist[i][j]/sum;
 			}
 		}
 		return newdist;

@@ -34,7 +34,11 @@ public class TotalProbabilityTests {
 			String modelName;
 			String seqName;
 			List<Sequence> sequenceData;
+			double[] scores;
+			double[] mlpscores;
 			
+			// -------------------------------------------------------------
+
 			modelName = "C:/Users/zirbel/Documents/GitHub/JAR3D/totalprobabilitytests/IL_87904.3_model.txt";
 			seqName = "C:/Users/zirbel/Documents/GitHub/JAR3D/totalprobabilitytests/IL_87904.3.fasta";
 			
@@ -47,10 +51,13 @@ public class TotalProbabilityTests {
 			sequenceData = Alignment.loadFasta(seqName);			
 			sequenceData = Alignment.calculateTotalProbability(sequenceData, modelName, range, false);
 
-			for (int i=1; i<sequenceData.size(); i++) {
-				System.out.println(sequenceData.get(i).letters+" "+sequenceData.get(i).totalProbability);
+			scores = JAR3DMatlab.MotifTotalProbSingle("C:/", seqName, modelName);
+			for (int i=0; i<scores.length; i++) {
+				System.out.println(sequenceData.get(i+1).letters+" "+sequenceData.get(i+1).totalProbability+" "+scores[i]);
 			}
 
+			// -------------------------------------------------------------
+			
 			modelName = "C:/Users/zirbel/Documents/GitHub/JAR3D/totalprobabilitytests/IL_85647.2_model.txt";
 			seqName = "C:/Users/zirbel/Documents/GitHub/JAR3D/totalprobabilitytests/IL_85647.2.fasta";
 			
@@ -63,11 +70,12 @@ public class TotalProbabilityTests {
 			sequenceData = Alignment.loadFasta(seqName);			
 			sequenceData = Alignment.calculateTotalProbability(sequenceData, modelName, range, false);
 
-			for (int i=1; i<sequenceData.size(); i++) {
-				System.out.println(sequenceData.get(i).letters+" "+sequenceData.get(i).totalProbability);
+			scores = JAR3DMatlab.MotifTotalProbSingle("C:/", seqName, modelName);
+			mlpscores = JAR3DMatlab.MotifParseSingle("C:/", seqName, modelName);
+			for (int i=0; i<scores.length; i++) {
+				System.out.println(sequenceData.get(i+1).letters+" "+sequenceData.get(i+1).totalProbability+"   "+scores[i]+"   "+Math.exp(mlpscores[i])+"   "+(scores[i]-Math.exp(mlpscores[i])));
 			}
-
-
+			
 		}
 	}
 	

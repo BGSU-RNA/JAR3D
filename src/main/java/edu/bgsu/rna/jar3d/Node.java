@@ -127,7 +127,7 @@ class Node {
 		jMin = Math.max(jMin,0);
 		jMax = Math.min(jMax,seq.nucleotides.length()-1);
 
-		if((iMax > iMin) && (jMax > jMin))
+		if((iMax >= iMin) && (jMax >= jMin))
 		{
 			maxLogProb = new double[iMax-iMin+1][jMax-jMin+1];  // space to store max log probabilities
 			myGen = new genData[iMax-iMin+1][jMax-jMin+1];      // space to store optimal generation history

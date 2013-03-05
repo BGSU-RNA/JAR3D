@@ -26,6 +26,7 @@ public class BasepairNode extends BasicNode {
     // this is the probability that this basePairNode does not generate anything
     double deleteProb;
     double deleteLogProb;
+    double notDeleteLogProb;
     
     double[][] maxProb;
     
@@ -49,9 +50,9 @@ public class BasepairNode extends BasicNode {
 		pairProb = rnaMath.normalize(pProb);
         
         pairLogProb = rnaMath.logd(pairProb);
-        
         deleteLogProb = Math.log(deleteProb);
-        
+		notDeleteLogProb = Math.log(1-deleteProb);            // probability of not being deleted
+
         lInsDist = new InsertionDistribution(lLenDist, lLetDist);
         rInsDist = new InsertionDistribution(rLenDist, rLetDist);
  	}
@@ -122,7 +123,7 @@ public class BasepairNode extends BasicNode {
   	  			{
   					prl = rInsDist.logLengthDist[b];
   					pri = priarray[b];
-					pnew = super.child.getMaxLogProb(i+a+1,j-b-1);
+					pnew = super.child.getMaxLogProb(i+a+1,j-b-1) + notDeleteLogProb;
 					pnew = pnew + pairLogProb[seq.code[i+a]][seq.code[j-b]];  // changed on 2013-03-04
 					pnew = pnew + pll + pli + prl + pri;
   	  				if (pnew > p) {
@@ -133,7 +134,8 @@ public class BasepairNode extends BasicNode {
   	  				} // end if
   	  			} // end for loop
   	  		} // end for loop
-  			maxLogProb[i-iMin][j-jMin] = p;
+
+			maxLogProb[i-iMin][j-jMin] = p;
   			
 			if ((p < -99999999) && (!Deleted))
 			{
@@ -281,11 +283,9 @@ public class BasepairNode extends BasicNode {
 			double pnew; // probability of current insertion possibility
 			int a; 		// number of insertions on the left
 			int b; 		// number of insertions on the right
-			
-			// consider the possibility that this node generates nothing at all
-			
-			p = deleteProb * super.child.getTotalProb(i,j);
 
+			p = 0;      // start with zero probability
+			
 			// consider the possibility of generating a pair and various numbers of insertions
 			
 			// for loop that sets maxLogProb[i-super.iMin][j-super.jMin]
@@ -317,7 +317,14 @@ public class BasepairNode extends BasicNode {
 					p += pnew;
   	  			} // end for loop
   	  		} // end for loop
-  			totalProb[i-iMin][j-jMin] = p;
+
+			p *= (1 - deleteProb);
+			
+			// consider the possibility that this node generates nothing at all
+			
+			p += deleteProb * super.child.getTotalProb(i,j);
+
+			totalProb[i-iMin][j-jMin] = p;
 
   		} // if loop
   	} // method declaration

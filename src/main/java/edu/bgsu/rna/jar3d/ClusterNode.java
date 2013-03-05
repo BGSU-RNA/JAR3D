@@ -17,6 +17,7 @@ public class ClusterNode extends BasicNode {
 	//	 this is the probability that this ClusterNode does not generate anything
     double deleteProb;
     double deleteLogProb;
+    double notDeleteLogProb;
    
 	/**
 	 * This is the constructor for ClusterNodes
@@ -32,7 +33,8 @@ public class ClusterNode extends BasicNode {
 		normalizationZ = nC;
 		deleteProb = dProb;                                   // deletion probability
 		deleteLogProb = Math.log(deleteProb);                 // log probability
-				
+		notDeleteLogProb = Math.log(1-deleteProb);            // probability of not being deleted
+		
 		insertions = new Vector<InsertionDistribution>(numLeftInt+numRightInt);
 		for (int i = 0; i<numLeftInt+numRightInt; i++)
 		{
@@ -272,7 +274,7 @@ public class ClusterNode extends BasicNode {
 				{
 					// pull out the numBases interacting base codes
 	
-					pnew = 0;
+					pnew = notDeleteLogProb;
 	
 					int k = i;                                       // first base of the subsequence being parsed
 					for(int m = 0; m < numLeftInt; m++)              // go through insertions on the left
@@ -298,18 +300,7 @@ public class ClusterNode extends BasicNode {
 						k = k - insLengths[m-1] - 1;                 // (-1)
 
 					}
-					
-
-					
-					for (int m = 0; m < numBases; m++)
-					{
-					}
-
-					for (int m = 0; m < numBases; m++)
-					{
-					}
-
-					
+										
 					for(int m = 0; m < interactions.size(); m++)
 					{
 						pnew += ((ClusterInteraction)interactions.get(m)).getLogSubstProb(intCodes);
@@ -546,9 +537,7 @@ public class ClusterNode extends BasicNode {
 			int[] intCodes = new int[numBases];            	// codes of interacting bases
 			int[] insLengths = new int[insertions.size()]; 	// one combination of insertion numbers 
 			
-			// consider the possibility that this node generates nothing at all
-			
-			p = deleteProb * super.child.getTotalProb(i,j); 
+			p = 0;      // start with zero probability
 			
 //			System.out.println("ClusterNode1: " + p);
 
@@ -640,6 +629,12 @@ public class ClusterNode extends BasicNode {
 
 			}
 			// for loop that sets maxLogProb[i-super.iMin][j-super.jMin]
+
+			p *= (1-deleteProb);
+			
+			// consider the possibility that this node generates nothing at all
+
+			p += deleteProb * super.child.getTotalProb(i,j); 
 
   			totalProb[i-iMin][j-jMin] = p;
 
