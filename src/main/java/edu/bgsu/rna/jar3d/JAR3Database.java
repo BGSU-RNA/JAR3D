@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
-import edu.bgsu.rna.jar3d.io.writers.DBLoader;
+import edu.bgsu.rna.jar3d.io.loaders.DBLoader;
 import edu.bgsu.rna.jar3d.io.writers.DBResultSaver;
 import edu.bgsu.rna.jar3d.loop.Loop;
 import edu.bgsu.rna.jar3d.query.Query;

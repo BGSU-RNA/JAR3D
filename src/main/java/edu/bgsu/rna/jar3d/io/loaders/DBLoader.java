@@ -1,4 +1,4 @@
-package edu.bgsu.rna.jar3d.io.writers;
+package edu.bgsu.rna.jar3d.io.loaders;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.bgsu.rna.jar3d.Sequence;
-import edu.bgsu.rna.jar3d.io.loaders.QueryLoader;
-import edu.bgsu.rna.jar3d.io.loaders.QueryLoadingFailed;
 import edu.bgsu.rna.jar3d.loop.BasicLoop;
 import edu.bgsu.rna.jar3d.loop.Loop;
 import edu.bgsu.rna.jar3d.query.ImmutableQuery;
