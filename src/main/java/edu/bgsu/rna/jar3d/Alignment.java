@@ -221,7 +221,7 @@ public class Alignment {
 		String letters="";
 		String second = "";
 		String first  = "";
-
+		
 		reverseSData.add(new Sequence("","")); // save space for header information to be added later as element 0 of this vector
 
 		for (int i=1; i < sequenceData.size(); i++)

@@ -89,9 +89,11 @@ public class JAR3Database {
 			String folder = base + File.separator + loop.getTypeString() + File.separator + "0.6";
 
 			for(String sequence: loop.getSequenceStrings()) {
-				fasta.append(">\n"); // TODO use generated FASTA header.
-				fasta.append(sequence);
-				fasta.append("\n");
+				if (!sequence.isEmpty()) {
+					fasta.append(">\n"); // TODO use generated FASTA header.
+					fasta.append(sequence);
+					fasta.append("\n");
+				}
 			}
 			String fastaString = fasta.toString();
 			List<LoopResult> results = MotifParse(loop.getId(), query, fastaString, folder, 
