@@ -97,7 +97,7 @@ public class JAR3Database {
 			}
 			String fastaString = fasta.toString();
 			List<LoopResult> results = MotifParse(loop.getId(), query, fastaString, folder, 
-					loop.getTypeString(), "bp", query.onlyStructured());
+					loop.getTypeString(), "bp", query.onlyStructured(), loop);
 			allResults.add(results);
 		}
 		return allResults;
@@ -109,7 +109,7 @@ public class JAR3Database {
 	//modelType indicates which models to use, for example "bp".  Should be the prefix before the first "_" in model folder
 	//structured is a boolean which indicates whether to use only structured models or all models
 	public static List<LoopResult> MotifParse(long loopID, Query query, String QueryTxt, String folder,
-			String loopType, String modelType, boolean structured) {
+			String loopType, String modelType, boolean structured, Loop loop) {
 		Vector<Sequence> sData;
 	    List<LoopResult> results;
 
@@ -120,7 +120,7 @@ public class JAR3Database {
 
 	    HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, modelType);
 	    if (loopType.equalsIgnoreCase("IL")) { 
-	    	results = Alignment.doILdbQuery((int)loopID, query, sData, modelNames, groupData, 20);
+	    	results = Alignment.doILdbQuery((int)loopID, query, sData, modelNames, groupData, 20, loop);
 
 	    } else { 
 	    	results = new ArrayList<LoopResult>();
