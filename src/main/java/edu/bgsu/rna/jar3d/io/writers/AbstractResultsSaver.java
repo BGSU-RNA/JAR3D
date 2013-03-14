@@ -17,6 +17,6 @@ public abstract class AbstractResultsSaver implements ResultSaver {
 		for(LoopResult result: results) {
 			save(result);
 		}
-		markAllDone(results.get(0).getQuery().getId());
+		markAllDone(results.get(0).getQueryID());
 	}
 }

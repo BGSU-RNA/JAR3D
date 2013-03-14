@@ -10,7 +10,7 @@ import java.util.List;
 import edu.bgsu.rna.jar3d.results.LoopResult;
 import edu.bgsu.rna.jar3d.results.SequenceResult;
 
-public class DBResultSaver implements ResultSaver {
+public class DBResultSaver extends AbstractResultsSaver {
 
 	private final Connection connection;
 	
@@ -38,7 +38,7 @@ public class DBResultSaver implements ResultSaver {
         updateLoopQuery = connection.prepareStatement(updateLoopSQL);
         updateSequenceQuery = connection.prepareStatement(updateSequenceSQL);
         markLoopFailure = connection.prepareStatement(failureSQL);
-      now = new Timestamp(System.currentTimeMillis());
+        now = new Timestamp(System.currentTimeMillis());
 	}
 	
 	public void markAllDone(String queryId) throws SaveFailed {
@@ -157,19 +157,6 @@ public class DBResultSaver implements ResultSaver {
 			return 1;
 		}
 		return 0;
-	}
-
-	/**
-	 * Save results for parsing a single model against a several loop. This will
-	 * save the aggregate and and individual information. 
-	 * 
-	 * @param results The results of parsing a whole loop.
-	 * @throws SaveFailed if any problem occurs. 
-	 */
-	public void save(List<LoopResult> results) throws SaveFailed {
-		for(LoopResult result: results) {
-			save(result);
-		}
 	}
 
 	/**
