@@ -38,8 +38,17 @@ public class DBResultSaver implements ResultSaver {
         updateLoopQuery = connection.prepareStatement(updateLoopSQL);
         updateSequenceQuery = connection.prepareStatement(updateSequenceSQL);
         markLoopFailure = connection.prepareStatement(failureSQL);
-//        now = new Time(new Date().getTime());
       now = new Timestamp(System.currentTimeMillis());
+	}
+	
+	public void markAllDone(String queryId) throws SaveFailed {
+		try {
+			updateLoopQuery.setTimestamp(1, now);
+			updateLoopQuery.setString(2, queryId);
+			updateLoopQuery.executeUpdate();
+		} catch (SQLException e) {
+			throw new SaveFailed("Could not mark query as done", e);
+		}
 	}
 	
 	/**
@@ -71,16 +80,13 @@ public class DBResultSaver implements ResultSaver {
 			insertLoopResult.setString(12, results.signature());
 			insertLoopResult.setInt(13, rotationInt(results.isRotated()));
 			insertLoopResult.setString(14, "Intentially left empty.");
-			updateLoopQuery.setTimestamp(1, now);
-			updateLoopQuery.setString(2, results.getLoop().getQuery().getId());
 		} catch (SQLException e) {
 			throw new SaveFailed("Could not generate loop sql.", e);
 		}
 		
 		try {
 			int count = insertLoopResult.executeUpdate();
-			updateLoopQuery.executeUpdate();
-			
+
 			if (count == 0) {
 				throw new SaveFailed("Update count wrong");
 			}

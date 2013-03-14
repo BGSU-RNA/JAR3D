@@ -18,4 +18,6 @@ public interface ResultSaver {
 	public void markFailure(String queryId) throws SaveFailed;
 
 	public void cleanUp() throws SaveFailed;
+	
+	public void markAllDone(String queryId) throws SaveFailed;
 }
