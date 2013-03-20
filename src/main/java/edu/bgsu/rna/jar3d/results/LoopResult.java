@@ -17,6 +17,13 @@ public interface LoopResult {
 	 * @return The query
 	 */
 	public Query getQuery();
+	
+	/**
+	 * Get the query ID this result belongs too.
+	 * 
+	 * @return The string.
+	 */
+	public String getQueryID();
 
 	/**
 	 * Get the loop that was scanned.

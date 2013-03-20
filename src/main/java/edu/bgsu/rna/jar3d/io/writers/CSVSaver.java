@@ -100,6 +100,10 @@ public class CSVSaver extends AbstractResultsSaver {
 			throw new SaveFailed(e);
 		}
 	}
+	
+	// Does nothing on purpose
+	public void markAllDone(String queryId) throws SaveFailed { }
+
 
 	public void writeHeader() throws SaveFailed {
 		String sequenceLine = join("filename", "sequenceId", "motifId",

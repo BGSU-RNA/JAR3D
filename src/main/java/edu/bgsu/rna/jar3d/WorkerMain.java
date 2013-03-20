@@ -2,9 +2,9 @@ package edu.bgsu.rna.jar3d;
 
 import java.sql.SQLException;
 
+import edu.bgsu.rna.jar3d.io.loaders.DBLoader;
 import edu.bgsu.rna.jar3d.io.loaders.QueryLoader;
 import edu.bgsu.rna.jar3d.io.loaders.QueryLoadingFailed;
-import edu.bgsu.rna.jar3d.io.writers.DBLoader;
 import edu.bgsu.rna.jar3d.io.writers.DBResultSaver;
 import edu.bgsu.rna.jar3d.io.writers.ResultSaver;
 import edu.bgsu.rna.jar3d.io.writers.SaveFailed;

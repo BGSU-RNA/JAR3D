@@ -150,6 +150,10 @@ public final class BasicLoopResult implements LoopResult {
 		return getLoop().getQuery();
 	}
 
+	public String getQueryID() {
+		return getQuery().getId();
+	}
+
 	public List<SequenceResult> sequenceResults() {
 		return sequenceResults;
 	}

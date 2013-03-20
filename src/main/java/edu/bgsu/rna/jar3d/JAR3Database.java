@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
-import edu.bgsu.rna.jar3d.io.writers.DBLoader;
+import edu.bgsu.rna.jar3d.io.loaders.DBLoader;
 import edu.bgsu.rna.jar3d.io.writers.DBResultSaver;
 import edu.bgsu.rna.jar3d.loop.Loop;
 import edu.bgsu.rna.jar3d.query.Query;
@@ -89,13 +89,15 @@ public class JAR3Database {
 			String folder = base + File.separator + loop.getTypeString() + File.separator + "0.6";
 
 			for(String sequence: loop.getSequenceStrings()) {
-				fasta.append(">\n"); // TODO use generated FASTA header.
-				fasta.append(sequence);
-				fasta.append("\n");
+				if (!sequence.isEmpty()) {
+					fasta.append(">\n"); // TODO use generated FASTA header.
+					fasta.append(sequence);
+					fasta.append("\n");
+				}
 			}
 			String fastaString = fasta.toString();
 			List<LoopResult> results = MotifParse(loop.getId(), query, fastaString, folder, 
-					loop.getTypeString(), "bp", query.onlyStructured());
+					loop.getTypeString(), "bp", query.onlyStructured(), loop);
 			allResults.add(results);
 		}
 		return allResults;
@@ -107,7 +109,7 @@ public class JAR3Database {
 	//modelType indicates which models to use, for example "bp".  Should be the prefix before the first "_" in model folder
 	//structured is a boolean which indicates whether to use only structured models or all models
 	public static List<LoopResult> MotifParse(long loopID, Query query, String QueryTxt, String folder,
-			String loopType, String modelType, boolean structured) {
+			String loopType, String modelType, boolean structured, Loop loop) {
 		Vector<Sequence> sData;
 	    List<LoopResult> results;
 
@@ -118,7 +120,7 @@ public class JAR3Database {
 
 	    HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, modelType);
 	    if (loopType.equalsIgnoreCase("IL")) { 
-	    	results = Alignment.doILdbQuery((int)loopID, query, sData, modelNames, groupData, 20);
+	    	results = Alignment.doILdbQuery((int)loopID, query, sData, modelNames, groupData, 20, loop);
 
 	    } else { 
 	    	results = new ArrayList<LoopResult>();

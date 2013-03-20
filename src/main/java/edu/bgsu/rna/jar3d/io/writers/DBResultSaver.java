@@ -10,7 +10,7 @@ import java.util.List;
 import edu.bgsu.rna.jar3d.results.LoopResult;
 import edu.bgsu.rna.jar3d.results.SequenceResult;
 
-public class DBResultSaver implements ResultSaver {
+public class DBResultSaver extends AbstractResultsSaver {
 
 	private final Connection connection;
 	
@@ -29,7 +29,7 @@ public class DBResultSaver implements ResultSaver {
 	public DBResultSaver(String username, String password, String db) throws SQLException {
         connection = DriverManager.getConnection(db, username, password);
         String loopResultSQL = "insert into jar3d_results_by_loop (query_id, loop_id, motif_id, meanscore, meanpercentile, meaninterioreditdist, meanfulleditdist, medianscore, medianpercentile, medianinterioreditdist, medianfulleditdist, signature, rotation, correspondences) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-        String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (query_id, seq_id, loop_id, score, percentile, interioreditdist, fulleditdistance, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (query_id, seq_id, loop_id, score, percentile, interioreditdist, fulleditdist, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?);";
         String updateLoopSQL = "UPDATE jar3d_query_info SET status=1, time_completed=? WHERE query_id = ?;";
         String updateSequenceSQL = "UPDATE jar3d_query_sequences SET status=1, time_completed=? WHERE query_id = ? and seq_id = ? and loop_id = ?;";
         String failureSQL = "UPDATE jar3d_query_info SET status=-1, time_completed = ? WHERE query_id = ?;";
@@ -38,8 +38,17 @@ public class DBResultSaver implements ResultSaver {
         updateLoopQuery = connection.prepareStatement(updateLoopSQL);
         updateSequenceQuery = connection.prepareStatement(updateSequenceSQL);
         markLoopFailure = connection.prepareStatement(failureSQL);
-//        now = new Time(new Date().getTime());
-      now = new Timestamp(System.currentTimeMillis());
+        now = new Timestamp(System.currentTimeMillis());
+	}
+	
+	public void markAllDone(String queryId) throws SaveFailed {
+		try {
+			updateLoopQuery.setTimestamp(1, now);
+			updateLoopQuery.setString(2, queryId);
+			updateLoopQuery.executeUpdate();
+		} catch (SQLException e) {
+			throw new SaveFailed("Could not mark query as done", e);
+		}
 	}
 	
 	/**
@@ -71,16 +80,13 @@ public class DBResultSaver implements ResultSaver {
 			insertLoopResult.setString(12, results.signature());
 			insertLoopResult.setInt(13, rotationInt(results.isRotated()));
 			insertLoopResult.setString(14, "Intentially left empty.");
-			updateLoopQuery.setTimestamp(1, now);
-			updateLoopQuery.setString(2, results.getLoop().getQuery().getId());
 		} catch (SQLException e) {
 			throw new SaveFailed("Could not generate loop sql.", e);
 		}
 		
 		try {
 			int count = insertLoopResult.executeUpdate();
-			updateLoopQuery.executeUpdate();
-			
+
 			if (count == 0) {
 				throw new SaveFailed("Update count wrong");
 			}
@@ -101,9 +107,13 @@ public class DBResultSaver implements ResultSaver {
 			if (result.isRotated()) {
 				rotated = 1;
 			}
+			String seq_id = "0";
+			if (!result.sequenceId().isEmpty()) {
+				seq_id = result.sequenceId();
+			}
 
 			insertSequenceResult.setString(1, result.queryId());
-			insertSequenceResult.setString(2, result.sequenceId());
+			insertSequenceResult.setString(2, seq_id);
 			insertSequenceResult.setInt(3, (int)result.loopId());
 			insertSequenceResult.setFloat(4, (float)result.score());
 			insertSequenceResult.setFloat(5, (float)result.percentile());
@@ -147,19 +157,6 @@ public class DBResultSaver implements ResultSaver {
 			return 1;
 		}
 		return 0;
-	}
-
-	/**
-	 * Save results for parsing a single model against a several loop. This will
-	 * save the aggregate and and individual information. 
-	 * 
-	 * @param results The results of parsing a whole loop.
-	 * @throws SaveFailed if any problem occurs. 
-	 */
-	public void save(List<LoopResult> results) throws SaveFailed {
-		for(LoopResult result: results) {
-			save(result);
-		}
 	}
 
 	/**

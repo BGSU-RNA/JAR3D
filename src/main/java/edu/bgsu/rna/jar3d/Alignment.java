@@ -221,7 +221,7 @@ public class Alignment {
 		String letters="";
 		String second = "";
 		String first  = "";
-
+		
 		reverseSData.add(new Sequence("","")); // save space for header information to be added later as element 0 of this vector
 
 		for (int i=1; i < sequenceData.size(); i++)
@@ -835,7 +835,7 @@ public class Alignment {
 
 		List<Sequence> sData = loop.getSequences();
 		Query query = loop.getQuery();
-		List<LoopResult> results = doILdbQuery((int)loop.getId(), query, sData, modNames, groupData, range);
+		List<LoopResult> results = doILdbQuery((int)loop.getId(), query, sData, modNames, groupData, range, loop);
 
 		for(LoopResult result: results) {
 			result.setLoop(loop);
@@ -846,7 +846,7 @@ public class Alignment {
 
 	//Takes a JAR3D query and submits results to MySQL database
 	public static List<LoopResult> doILdbQuery(int loopID, Query query, List<Sequence> sData, List<String> modNames,
-			HashMap<String, MotifGroup> groupData, int range) {
+			HashMap<String, MotifGroup> groupData, int range, Loop loop) {
 
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
@@ -965,6 +965,7 @@ public class Alignment {
 				}
 
 				LoopResult loopR = new BasicLoopResult(groupName, rev, sig, seqRes, "NA");
+				loopR.setLoop(loop);
 				loopRes.add(loopR);
 			}
 		}

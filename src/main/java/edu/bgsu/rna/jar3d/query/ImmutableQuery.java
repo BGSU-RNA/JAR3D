@@ -29,6 +29,10 @@ public class ImmutableQuery extends AbstractQuery {
 		this.ilSet = ilSet;
 		this.hlSet = hlSet;
 		this.modelType = modelType;
+		
+		for(Loop loop: loops) {
+			loop.setQuery(this);
+		}
 	}
 
 	public String modelType() {
