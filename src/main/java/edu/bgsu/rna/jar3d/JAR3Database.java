@@ -86,7 +86,7 @@ public class JAR3Database {
 		List<List<LoopResult>> allResults = new ArrayList<List<LoopResult>>();
 		for(Loop loop: query) {
 			StringBuilder fasta = new StringBuilder();
-			String folder = base + File.separator + loop.getTypeString() + File.separator + "0.6";
+			String folder = base + File.separator + loop.getTypeString() + File.separator + "1.0";
 
 			for(String sequence: loop.getSequenceStrings()) {
 				if (!sequence.isEmpty()) {
