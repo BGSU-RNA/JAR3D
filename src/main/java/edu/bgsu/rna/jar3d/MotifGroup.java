@@ -16,7 +16,7 @@ public class MotifGroup implements java.io.Serializable{
 	String Model;			//Model data in text format
 	String Distribution;    //Distribution file in text format
     String[] Signature;
-    int conserved;
+//    int conserved;
 
     //Constructor that takes string folder, the full path to the folder with model 
     //and sequence folders, and the name of the group to load
@@ -65,8 +65,8 @@ public class MotifGroup implements java.io.Serializable{
     		int breakpoint = Signatures.indexOf(" ");
     		Signature[0] = Signatures.substring(0,breakpoint);
     		Signature[1] = Signatures.substring(breakpoint);
-    		String conint = br.readLine();
-    		conserved = Integer.parseInt(conint);
+//    		String conint = br.readLine();
+//   		conserved = Integer.parseInt(conint);
     		in.close();
     		//Read distribution information
     		fstream = new FileInputStream(distFile);
