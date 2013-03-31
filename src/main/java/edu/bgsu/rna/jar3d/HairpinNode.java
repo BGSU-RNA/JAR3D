@@ -258,7 +258,7 @@ public class HairpinNode extends BasicNode {
 			 * loop through insertion combinations.
 			 * */
 			p = -1d/0d;               // start with negative infinity
-			p = -1000;                // start with a small probility
+			p = -1000;                // start with a small probability
 			
 			while(insLengths[0] <= maxLengths[0])
 			{
@@ -322,7 +322,7 @@ public class HairpinNode extends BasicNode {
   			maxLogProb[i-iMin][j-jMin] = p;
   			myGen[i-iMin][j-jMin] = new genData(optInsLengths);
 		} // end if loop
-	}// end method computMaxLogProb
+	}// end method computeMaxLogProb
 	
 	public void traceback(int i, int j)
   	{
@@ -381,19 +381,42 @@ public class HairpinNode extends BasicNode {
 	public String showCorrespondences(String letters)
   	{
 		int[] insert = optimalGen1.splitpoints;
-		int i = optimalGen1.i;
-				
-		String left = "SSS_Position_" + (i+1) + "_" + letters.charAt(i) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_1" + "\n";
-
-		for(int l = 0; l < numFixed-1; l++)
-			{
-				for (int k = i+1; k <= i+insert[l]; k++)
-					left += "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_" + (l+1) + "_" + (l+2) + "_Insertion" + "\n";
-				i += insert[l]+1;
-				left += "SSS_Position_" + (i+1) + "_" + letters.charAt(i) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_" + (l+1) + "\n";
-			}
+		int i = optimalGen1.i;            // starting index of the sequence for this hairpin
+		int j = optimalGen1.j;            // ending index of the sequence for this hairpin
 		
-			return left;
+		/**
+		System.out.println("Is this node deleted? "+optimalGen1.deleted);
+		System.out.println("Current sequence is 012345678901234567890");
+		System.out.println("Current sequence is " + letters);
+		System.out.println("Starting i value is " + i + " and ending j value is " + optimalGen1.j);
+		System.out.println("Number of fixed positions is " + numFixed);
+		System.out.print("Insertion lengths are ");
+		for (int m=0; m < insert.length; m++)
+			System.out.print(insert[m] + " ");
+		System.out.println();
+        **/
+		
+		String left = "SSS_Position_" + (i+1) + "_" + letters.charAt(i) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_1" + "\n";
+//		System.out.println(left);
+
+		if (numFixed <= optimalGen1.j - optimalGen1.i + 1)          // Enough characters for all fixed positions
+			for(int l = 0; l < numFixed-1; l++)
+				{
+					for (int k = i+1; k <= i+insert[l]; k++)
+					{
+						left += "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_" + (l+1) + "_" + (l+2) + "_Insertion" + "\n";
+					}
+					i += insert[l]+1;
+					left += "SSS_Position_" + (i+1) + "_" + letters.charAt(i) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_" + (l+2) + "\n";
+				}
+		else
+			for (int l = i+1; l <= j; l++)
+				left += "SSS_Position_" + (l+1) + "_" + letters.charAt(l) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_1\n";
+
+//		System.out.println(left);
+//		System.out.println();
+		
+		return left;
   	}
 
 	/**
