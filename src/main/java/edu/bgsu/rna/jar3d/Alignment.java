@@ -830,12 +830,12 @@ public class Alignment {
 		return scores;
 	}
 
-	public static List<LoopResult> doILdbQuery(Loop loop, List<String> modNames, HashMap<String, MotifGroup> groupData,
+	public static List<LoopResult> doLoopDBQuerey(Loop loop, List<String> modNames, HashMap<String, MotifGroup> groupData,
 			int range) {
 
 		List<Sequence> sData = loop.getSequences();
 		Query query = loop.getQuery();
-		List<LoopResult> results = doILdbQuery((int)loop.getId(), query, sData, modNames, groupData, range, loop);
+		List<LoopResult> results = doLoopDBQuerey((int)loop.getId(), query, sData, modNames, groupData, range, loop, null);
 
 		for(LoopResult result: results) {
 			result.setLoop(loop);
@@ -845,8 +845,8 @@ public class Alignment {
 	}
 
 	//Takes a JAR3D query and submits results to MySQL database
-	public static List<LoopResult> doILdbQuery(int loopID, Query query, List<Sequence> sData, List<String> modNames,
-			HashMap<String, MotifGroup> groupData, int range, Loop loop) {
+	public static List<LoopResult> doLoopDBQuerey(int loopID, Query query, List<Sequence> sData, List<String> modNames,
+			HashMap<String, MotifGroup> groupData, int range, Loop loop, String type) {
 
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
@@ -858,9 +858,12 @@ public class Alignment {
 		int[] reversed = new int[modNames.size()];             // is best model reversed?
 		double[] scores = new double[2*modNames.size()];
 		List<LoopResult> loopRes = new Vector<LoopResult>();
-
-		List<Sequence> rsData = Alignment.reverse(sData);  // reversed sequence data
-
+		List<Sequence> rsData = new Vector<Sequence>();
+		
+		if(type.equalsIgnoreCase("IL")){
+			rsData = Alignment.reverse(sData);  // reversed sequence data
+		}
+		
 	    shortModNames = new Vector<String>(modNames);
 	    Vector<String> tinyModNames = new Vector<String>(shortModNames);
 	    //Parse all sequences against all groups
@@ -869,40 +872,49 @@ public class Alignment {
 		{
 	    	group = groupData.get(modNames.get(k));
 			sData  = Alignment.doParse(sData, group.Model, range, true);
-			rsData = Alignment.doParse(rsData, group.Model, range, true);
+			if(type.equalsIgnoreCase("IL")){
+				rsData = Alignment.doParse(rsData, group.Model, range, true);
+			}
 		}
 
 	    //Add up model scores for each sequence, find mean score, compare regular and reversed scores
-		for(int m = 0; m < sData.size(); m++)
-		{
-			for(int x = 0; x < sData.get(m).getMaxLogProbabilitySize(); x++)
-			{
-				double tempo = sData.get(m).getMaxLogProbabilityOf(x, 0);
-				modelSums[x] += tempo;
-				modelScoreMat[x][m] = tempo;
+	    for(int m = 0; m < sData.size(); m++)
+	    {
+	    	for(int x = 0; x < sData.get(m).getMaxLogProbabilitySize(); x++)
+	    	{
+	    		double tempo = sData.get(m).getMaxLogProbabilityOf(x, 0);
+	    		modelSums[x] += tempo;
+	    		modelScoreMat[x][m] = tempo;
+	    		if(type.equalsIgnoreCase("IL")){
+	    			tempo = sData.get(m).getMaxLogProbabilityOf(x, 0);
+	    			rmodelSums[x] += tempo;
+	    			rmodelScoreMat[x][m] = tempo;
+	    		}
+	    	}
+	    }
+	    for(int g = 0; g < modelSums.length; g++)
+	    {
+	    	modelScores[g] = (modelSums[g]/(sData.size()-1));
+	    	scores[2*g]   = Math.max(modelScores[g],-9999);
+	    	if(type.equalsIgnoreCase("IL")){
+	    		rmodelScores[g] = (rmodelSums[g]/(sData.size()-1));
+	    		scores[2*g+1] = Math.max(rmodelScores[g],-9999);
+	    	}
+	    	if(type.equalsIgnoreCase("IL")){
+	    		if(rmodelScores[g] > modelScores[g])          // choose between forward and reversed for each model
+	    		{
+	    			modelScores[g] = rmodelScores[g];
+	    			shortModNames.set(g, shortModNames.get(g)+" reversed");
+	    			reversed[g] = 1;
+	    		}
+	    		else {
+	    			reversed[g] = 0;
+	    		}
+	    	}else{
+	    		reversed[g] = 0;
+	    	}
 
-				tempo = sData.get(m).getMaxLogProbabilityOf(x, 0);
-				rmodelSums[x] += tempo;
-				rmodelScoreMat[x][m] = tempo;
-			}
-		}
-		for(int g = 0; g < modelSums.length; g++)
-		{
-			modelScores[g] = (modelSums[g]/(sData.size()-1));
-			rmodelScores[g] = (rmodelSums[g]/(sData.size()-1));
-			scores[2*g]   = Math.max(modelScores[g],-9999);
-			scores[2*g+1] = Math.max(rmodelScores[g],-9999);
-
-			if(rmodelScores[g] > modelScores[g])          // choose between forward and reversed for each model
-			{
-				modelScores[g] = rmodelScores[g];
-				shortModNames.set(g, shortModNames.get(g)+" reversed");
-		        reversed[g] = 1;
-			}
-			else {
-				reversed[g] = 0;
-			}
-		}
+	    }
 
 		// re-sort models & their totals
 		// weird indexing array to keep track of the order things should be in

@@ -120,7 +120,7 @@ public class Application {
 		HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, modelType);
 
 		if (loop.getLoopType() == LoopType.INTERNAL) {
-			result = Alignment.doILdbQuery(loop, modelNames, groupData, rangeLimit);
+			result = Alignment.doLoopDBQuerey(loop, modelNames, groupData, rangeLimit);
 		} else {
 			result = new ArrayList<LoopResult>();
 		}
