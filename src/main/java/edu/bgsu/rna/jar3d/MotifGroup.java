@@ -61,10 +61,15 @@ public class MotifGroup implements java.io.Serializable{
     		br = new BufferedReader(new InputStreamReader(in));
     		String Signatures = br.readLine();
     		//TODO - fix to work with all loops, not just internal
-    		Signature = new String[2];
     		int breakpoint = Signatures.indexOf(" ");
-    		Signature[0] = Signatures.substring(0,breakpoint);
-    		Signature[1] = Signatures.substring(breakpoint);
+    		if(breakpoint != -1){   //Internal
+    			Signature = new String[2];
+    			Signature[0] = Signatures.substring(0,breakpoint);
+    			Signature[1] = Signatures.substring(breakpoint);
+    		}else {		//Hairpin
+    			Signature = new String[1];
+        		Signature[0] = Signatures;
+    		}
 //    		String conint = br.readLine();
 //   		conserved = Integer.parseInt(conint);
     		in.close();
