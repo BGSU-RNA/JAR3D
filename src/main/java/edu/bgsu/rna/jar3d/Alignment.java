@@ -968,8 +968,6 @@ public class Alignment {
 				InteriorEditDistances = SimpleAlign.calcHLEditDistances(sData, modsData);
 				FullEditDistances = SimpleAlign.calcHLEditDistances(sData,modsData,false,false);
 			}
-			int[][] InteriorEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rev);
-			int[][] FullEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rev,false,false);
 			int[] InteriorMinDist = new int[InteriorEditDistances.length];
 			int[] FullMinDist = new int[FullEditDistances.length];
 			for(int i = 0; i < InteriorEditDistances.length; i ++){
