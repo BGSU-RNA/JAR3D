@@ -959,6 +959,15 @@ public class Alignment {
 
 			//Calculate edit distances
 			Vector<Sequence> modsData = Alignment.parseFastaText(group.Sequences,0,0);
+			int[][] InteriorEditDistances;
+			int[][] FullEditDistances;
+			if(type.equalsIgnoreCase("IL")){
+				InteriorEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rev);
+				FullEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rev,false,false);
+			}else {
+				InteriorEditDistances = SimpleAlign.calcHLEditDistances(sData, modsData);
+				FullEditDistances = SimpleAlign.calcHLEditDistances(sData,modsData,false,false);
+			}
 			int[][] InteriorEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rev);
 			int[][] FullEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rev,false,false);
 			int[] InteriorMinDist = new int[InteriorEditDistances.length];
