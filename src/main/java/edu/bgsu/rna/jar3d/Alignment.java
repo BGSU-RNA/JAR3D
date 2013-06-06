@@ -886,7 +886,7 @@ public class Alignment {
 	    		modelSums[x] += tempo;
 	    		modelScoreMat[x][m] = tempo;
 	    		if(type.equalsIgnoreCase("IL")){
-	    			tempo = sData.get(m).getMaxLogProbabilityOf(x, 0);
+	    			tempo = rsData.get(m).getMaxLogProbabilityOf(x, 0);
 	    			rmodelSums[x] += tempo;
 	    			rmodelScoreMat[x][m] = tempo;
 	    		}
