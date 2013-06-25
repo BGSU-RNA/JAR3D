@@ -192,7 +192,9 @@ public class SimpleAlign {
 				EdDists[i][j]=leftDist+rightDist;
 				if(Verbose){
 					System.out.println(String.format("Finding minimum edit distance between %s and %s.", seqs1[i],seqs2[j]));
-					System.out.println(String.format("Or, without flanking pairs,%s*%s and %s*%s.", seqs1left[i],seqs1right[i],seqs1left[j],seqs1right[j]));
+					if(Interior == true){
+						System.out.println(String.format("Or, without flanking pairs,%s*%s and %s*%s.", seqs1left[i],seqs1right[i],seqs2left[j],seqs2right[j]));
+					}
 					System.out.println(String.format("Left Edit Distance: %d",leftDist));
 					System.out.println(String.format("Right Edit Distance: %d",rightDist));
 					System.out.println(String.format("Total Edit Distance: %d",leftDist+rightDist));
@@ -227,8 +229,15 @@ public class SimpleAlign {
 		for(int i = 0; i < n1; i ++){
 			for(int j = 0; j < n2; j ++){
 				if(Interior == true){
-					seq1mf = seqs1[i].substring(1, seqs1[i].length()-2);
-					seq2mf = seqs2[j].substring(1, seqs2[j].length()-2);
+					if(seqs1[i].length()>=2){
+						seq1mf = seqs1[i].substring(1, seqs1[i].length()-1);
+					}else{
+						seq1mf = "";
+					}if(seqs2[j].length()>=2){
+						seq2mf = seqs2[j].substring(1, seqs2[j].length()-1);
+					}else{
+						seq2mf = "";
+					}
 				}else{
 					seq1mf = seqs1[i];
 					seq2mf = seqs2[j];
@@ -236,7 +245,9 @@ public class SimpleAlign {
 				EdDists[i][j]=editDist(seq1mf,seq2mf);
 				if(Verbose){
 					System.out.println(String.format("Finding minimum edit distance between %s and %s.", seqs1[i],seqs2[j]));
-					System.out.println(String.format("Or, without flanking pairs,%s and %s.", seq1mf,seq2mf));
+					if(Interior == true){
+						System.out.println(String.format("Or, without flanking pairs,%s and %s.", seq1mf,seq2mf));
+					}
 					System.out.println(String.format("Total Edit Distance: %d",EdDists[i][j]));
 				}
 			}
