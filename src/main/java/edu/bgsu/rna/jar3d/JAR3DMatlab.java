@@ -24,7 +24,7 @@ public class JAR3DMatlab {
 		List<Sequence> sequenceData = Alignment.loadFasta(fastaFileName);
 		sequenceData = Alignment.doParse(sequenceData, modelFileName, 15);
 
-		Alignment.displayAlignmentFASTA(sequenceData);
+//		Alignment.displayAlignmentFASTA(sequenceData);
 		
 		String correspondences = "";
 
