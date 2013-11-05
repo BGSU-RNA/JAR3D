@@ -113,9 +113,10 @@ public class Application {
 	private List<LoopResult> motifParse(String base, Loop loop) {
 		List<LoopResult> result = new ArrayList<LoopResult>();
 
-		String folder = base + File.separator + loop.getTypeString() + File.separator + version;
+//		String folder = base + File.separator + loop.getTypeString() + File.separator + version;
+		String folder = base;    // 2013-11-05 CLZ user specifies complete path to model_list.txt
 
-		System.out.println("Looking for motifs in "+folder);
+		System.out.println("Looking for a list of motifs to use in "+folder+File.separatorChar+"model_list.txt");
 		
 		System.setProperty("user.dir", folder);
 

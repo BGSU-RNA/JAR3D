@@ -204,6 +204,10 @@ public class Sequence {
 		int nodeNumber = 1;
 		int lineNum = 0;
 
+		if (modelText == null) {
+			System.out.println("addNodeDataModelText:  modelText is null");
+		}
+		
 		String[] modelArray;
 		modelArray = modelText.split("\\n");
 
@@ -438,6 +442,8 @@ public class Sequence {
 	{
 		String modelText = "";
 		String nodeLine = "";
+		
+//		System.out.println("Sequence.addNodeData: "+modelFileName);
 
 		BufferedReader rdr;
 
@@ -445,11 +451,15 @@ public class Sequence {
 			if(!(modelFileName.contains("http")))
 			{
 				String curDir = System.getProperty("user.dir");
+				// TODO Figure out what the next line is for and find a better fix.
 		        curDir = curDir.replace(File.separator + "bin","");
 
 				try
 				{
-					File f2 = new File(curDir + File.separator + "Models" + File.separator + modelFileName);
+					
+//					File f2 = new File(curDir + File.separator + "Models" + File.separator + modelFileName);
+					// 2013-11-05 CLZ Assume that modelFileName is found in curDir
+					File f2 = new File(curDir + File.separator + modelFileName);
 					rdr = new BufferedReader(new FileReader(f2));
 				}
 				catch(FileNotFoundException e)
@@ -533,7 +543,9 @@ public class Sequence {
 					System.out.println("Sequence.addNodeData: Model file not found.");
 					System.exit(0);
 				}
-				File f2 = new File(curDir + File.separator + "models" + File.separator + modelFileName);
+
+				// 2013-11-05 CLZ Assume curDir is the correct directory to find modelFileName
+				File f2 = new File(curDir + File.separator + modelFileName);
 				rdr = new BufferedReader(new FileReader(f2));
 			}
 			else
@@ -913,6 +925,10 @@ public class Sequence {
 			listName = folder + fsep + modelType + "_models" + fsep + "all.txt";
 		}
 
+		// 2013-11-05 CLZ the user directly specifies a file that lists all models to run
+		listName = folder + fsep + "model_list.txt";
+		
+		
 	try {
 		String curDir = System.getProperty("user.dir");
         curDir = curDir.replace(File.separator + "bin","");
@@ -936,7 +952,7 @@ public class Sequence {
 		}
 	catch (Exception e) {
 		try{
-			System.out.println("Couldn't find model files locally, looking online.");
+			System.out.println("Could not find model files locally, looking online.");
 			URL dirurl = new URL("http://rna.bgsu.edu/JAR3D/models/"+listName);
 	        URLConnection dircon = dirurl.openConnection();
 	        BufferedReader rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));

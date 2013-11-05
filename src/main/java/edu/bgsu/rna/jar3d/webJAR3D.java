@@ -214,12 +214,14 @@ public class webJAR3D {
 	
 	public static HashMap<String,MotifGroup> loadMotifGroups(String folder, String modelType){
 		char fsep = File.separatorChar;
-		String modelFolder = folder + fsep + modelType + "_models";
+		// String modelFolder = folder + fsep + modelType + "_models";
+		// 2013-11-05 CLZ The user directly specifies the folder where the models will be found
+		String modelFolder = folder;
 		
 		HashMap<String,MotifGroup> Motifs = new HashMap<String,MotifGroup>();
 		
 		String listFile;
-		listFile = modelFolder + fsep + "all.txt";
+		listFile = modelFolder + fsep + "model_list.txt";
 		String hashFileName = modelFolder + fsep + "all.grps";
 		File hashFile = new File(hashFileName);
 		if(hashFile.exists()){

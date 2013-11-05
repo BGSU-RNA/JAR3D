@@ -837,6 +837,7 @@ public class Alignment {
 		Query query = loop.getQuery();
 		
 		// 2013-11-05 CLZ Last argument cannot be null, must be something like "IL"
+		// TODO allow the user to specify "IL" or "HL" or figure it out some other way
 		List<LoopResult> results = doLoopDBQuerey((int)loop.getId(), query, sData, modNames, groupData, range, loop, "IL");
 
 		for(LoopResult result: results) {
@@ -999,6 +1000,8 @@ public class Alignment {
 		Node current;
 		List<Double> mProbs = new Vector<Double>();
 		double mlp;
+		
+//		System.out.println("Alignment.doParse:" + nodeInfo);
 		
 		Sequence S = new Sequence("","");                    // blank sequence to use repeatedly
 		if(fullModelText){
