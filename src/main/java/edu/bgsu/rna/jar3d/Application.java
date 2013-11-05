@@ -145,7 +145,7 @@ public class Application {
 		}
 */
 		
-		result = Alignment.doLoopDBQuerey(loop, modelNames, groupData, rangeLimit);
+		result = Alignment.doLoopDBQuery(loop, modelNames, groupData, rangeLimit);
 
 		return result;
 	}

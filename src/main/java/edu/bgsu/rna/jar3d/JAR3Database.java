@@ -120,10 +120,10 @@ public class JAR3Database {
 
 	    HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, modelType);
 	    if (loopType.equalsIgnoreCase("IL")) { 
-	    	results = Alignment.doLoopDBQuerey((int)loopID, query, sData, modelNames, groupData, 20, loop, "IL");
+	    	results = Alignment.doLoopDBQuery((int)loopID, query, sData, modelNames, groupData, 20, loop, "IL");
 
 	    } else if (loopType.equalsIgnoreCase("HL")){
-	    	results = Alignment.doLoopDBQuerey((int)loopID, query, sData, modelNames, groupData, 20, loop, "HL");
+	    	results = Alignment.doLoopDBQuery((int)loopID, query, sData, modelNames, groupData, 20, loop, "HL");
 	    }else { 
 	    	
 	    	results = new ArrayList<LoopResult>();

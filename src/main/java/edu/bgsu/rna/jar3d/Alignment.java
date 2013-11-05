@@ -830,7 +830,7 @@ public class Alignment {
 		return scores;
 	}
 
-	public static List<LoopResult> doLoopDBQuerey(Loop loop, List<String> modNames, HashMap<String, MotifGroup> groupData,
+	public static List<LoopResult> doLoopDBQuery(Loop loop, List<String> modNames, HashMap<String, MotifGroup> groupData,
 			int range) {
 
 		List<Sequence> sData = loop.getSequences();
@@ -838,7 +838,7 @@ public class Alignment {
 		
 		// 2013-11-05 CLZ Last argument cannot be null, must be something like "IL"
 		// 2013-11-05 CLZ Last argument seems to be reliably obtained from loop
-		List<LoopResult> results = doLoopDBQuerey((int)loop.getId(), query, sData, modNames, groupData, range, loop, loop.getTypeString());
+		List<LoopResult> results = doLoopDBQuery((int)loop.getId(), query, sData, modNames, groupData, range, loop, loop.getTypeString());
 
 		for(LoopResult result: results) {
 			result.setLoop(loop);
@@ -848,7 +848,7 @@ public class Alignment {
 	}
 
 	//Takes a JAR3D query and submits results to MySQL database
-	public static List<LoopResult> doLoopDBQuerey(int loopID, Query query, List<Sequence> sData, List<String> modNames,
+	public static List<LoopResult> doLoopDBQuery(int loopID, Query query, List<Sequence> sData, List<String> modNames,
 			HashMap<String, MotifGroup> groupData, int range, Loop loop, String type) {
 
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
