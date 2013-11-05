@@ -7,8 +7,8 @@ import edu.bgsu.rna.jar3d.results.LoopResult;
 public abstract class AbstractResultsSaver implements ResultSaver {
 		
 	/**
-	 * Save results for parsing a single model against a several loops. This will
-	 * save the aggregate and and individual information. 
+	 * Save results for parsing a single model against several loops. This will
+	 * save the aggregate and individual information. 
 	 * 
 	 * @param results The results of parsing a whole loop.
 	 * @throws SaveFailed if any problem occurs. 

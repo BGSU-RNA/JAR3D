@@ -223,7 +223,7 @@ public class webJAR3D {
 		String hashFileName = modelFolder + fsep + "all.grps";
 		File hashFile = new File(hashFileName);
 		if(hashFile.exists()){
-			System.out.println("Reading exsisting java object file");
+			System.out.println("Reading existing java object file");
 			try{
 				FileInputStream fis = new FileInputStream(hashFileName);
 				ObjectInputStream in = new ObjectInputStream(fis);

@@ -835,7 +835,9 @@ public class Alignment {
 
 		List<Sequence> sData = loop.getSequences();
 		Query query = loop.getQuery();
-		List<LoopResult> results = doLoopDBQuerey((int)loop.getId(), query, sData, modNames, groupData, range, loop, null);
+		
+		// 2013-11-05 CLZ Last argument cannot be null, must be something like "IL"
+		List<LoopResult> results = doLoopDBQuerey((int)loop.getId(), query, sData, modNames, groupData, range, loop, "IL");
 
 		for(LoopResult result: results) {
 			result.setLoop(loop);

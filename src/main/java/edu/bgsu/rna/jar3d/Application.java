@@ -114,17 +114,26 @@ public class Application {
 		List<LoopResult> result = new ArrayList<LoopResult>();
 
 		String folder = base + File.separator + loop.getTypeString() + File.separator + version;
+
+		System.out.println("Looking for motifs in "+folder);
+		
 		System.setProperty("user.dir", folder);
 
-		Vector<String> modelNames = Sequence.getModelNames(folder, modelType, true);
+		// 2013-11-05 The third argument on the next line makes the choice between structured or all models 
+		
+		Vector<String> modelNames = Sequence.getModelNames(folder, modelType, false);		
 		HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, modelType);
 
+		if (modelNames.size() == 0) {
+			System.out.println("Found " + modelNames.size() + " model files");
+		}
+		
 		if (loop.getLoopType() == LoopType.INTERNAL) {
 			result = Alignment.doLoopDBQuerey(loop, modelNames, groupData, rangeLimit);
 		} else {
 			result = new ArrayList<LoopResult>();
 		}
-
+		
 		return result;
 	}
 
