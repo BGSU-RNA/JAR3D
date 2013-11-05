@@ -22,9 +22,9 @@ import edu.bgsu.rna.jar3d.results.LoopResult;
  */
 public class Application {
 
-	/** Default range limit */
+	/** Default range limit for how far to look left and right in the sequence, mostly for alignments */
 	// 2013-11-05 CLZ The user needs a way to override the default range limit
-	public static final int DEFAULT_RANGE_LIMIT = 9999999;
+	public static final int DEFAULT_RANGE_LIMIT = 100;
 
 	/** Default model type */
 	// 2013-11-05 CLZ This should no longer be used.  No default.
