@@ -14,8 +14,7 @@ public class Main {
 	public static void main(String[] args) {
 		
 		String input = args[0];          // full path to fasta-formatted sequence file
-		String models = args[1];         // *should* be a path to a set of model files, 
-		                                 // but 0.6/bp_models is hard-coded now
+		String models = args[1];         // path to a set of model files, 
 		String loopOutput = args[2];     // 
 		String sequenceOutput = args[3]; // 
 

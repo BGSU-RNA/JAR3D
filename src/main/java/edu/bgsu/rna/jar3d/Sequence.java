@@ -949,6 +949,8 @@ public class Sequence {
 			fileLine = rdr.readLine();
 		}
 
+		rdr.close();
+		
 		}
 	catch (Exception e) {
 		try{

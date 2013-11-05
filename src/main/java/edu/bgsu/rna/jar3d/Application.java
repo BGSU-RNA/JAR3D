@@ -23,12 +23,15 @@ import edu.bgsu.rna.jar3d.results.LoopResult;
 public class Application {
 
 	/** Default range limit */
-	public static final int DEFAULT_RANGE_LIMIT = 20;
+	// 2013-11-05 CLZ The user needs a way to override the default range limit
+	public static final int DEFAULT_RANGE_LIMIT = 9999999;
 
 	/** Default model type */
+	// 2013-11-05 CLZ This should no longer be used.  No default.
 	public static final String DEFAULT_MODEL_TYPE = "bp";
 
 	/** Default model version */
+	// 2013-11-05 CLZ This should no longer be used.  No default.
 	public static final String DEFAULT_VERSION = "0.6";
 
 	/** The query loader to use. */
@@ -113,14 +116,16 @@ public class Application {
 	private List<LoopResult> motifParse(String base, Loop loop) {
 		List<LoopResult> result = new ArrayList<LoopResult>();
 
-//		String folder = base + File.separator + loop.getTypeString() + File.separator + version;
-		String folder = base;    // 2013-11-05 CLZ user specifies complete path to model_list.txt
+		// String folder = base + File.separator + loop.getTypeString() + File.separator + version;
+		// 2013-11-05 CLZ user specifies complete path to model_list.txt
+		String folder = base;    
 
 		System.out.println("Looking for a list of motifs to use in "+folder+File.separatorChar+"model_list.txt");
 		
 		System.setProperty("user.dir", folder);
 
-		// 2013-11-05 The third argument on the next line makes the choice between structured or all models 
+		// 2013-11-05 CLZ The third argument on the next line makes the choice between structured or all models 
+		// 2013-11-05 CLZ But now that is ignored because the user specifies the path to the models
 		
 		Vector<String> modelNames = Sequence.getModelNames(folder, modelType, false);		
 		HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, modelType);
@@ -128,13 +133,20 @@ public class Application {
 		if (modelNames.size() == 0) {
 			System.out.println("Found " + modelNames.size() + " model files");
 		}
+
+		System.out.println("Application.motifParse: " +loop.getLoopType());
 		
+/**
+		// 2013-11-05 CLZ Old code only ran for internal loops.  Others returned empty results and saving crashed.
 		if (loop.getLoopType() == LoopType.INTERNAL) {
 			result = Alignment.doLoopDBQuerey(loop, modelNames, groupData, rangeLimit);
 		} else {
 			result = new ArrayList<LoopResult>();
 		}
+*/
 		
+		result = Alignment.doLoopDBQuerey(loop, modelNames, groupData, rangeLimit);
+
 		return result;
 	}
 

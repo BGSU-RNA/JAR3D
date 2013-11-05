@@ -837,8 +837,8 @@ public class Alignment {
 		Query query = loop.getQuery();
 		
 		// 2013-11-05 CLZ Last argument cannot be null, must be something like "IL"
-		// TODO allow the user to specify "IL" or "HL" or figure it out some other way
-		List<LoopResult> results = doLoopDBQuerey((int)loop.getId(), query, sData, modNames, groupData, range, loop, "IL");
+		// 2013-11-05 CLZ Last argument seems to be reliably obtained from loop
+		List<LoopResult> results = doLoopDBQuerey((int)loop.getId(), query, sData, modNames, groupData, range, loop, loop.getTypeString());
 
 		for(LoopResult result: results) {
 			result.setLoop(loop);
