@@ -108,10 +108,12 @@ public class CSVSaver extends AbstractResultsSaver {
 
 	public void writeHeader() throws SaveFailed {
 		String sequenceLine = join("filename", "sequenceId", "motifId",
-				"score", "percentile", "editDistance", "rotation");
+				"score", "percentile", "interiorEditDistance", "fullEditDistance", "rotation");
 		String loopLine = join("filename", "motifId", "meanScore", "medianScore",
-				"meanPercentile", "medianPercentile", "meanEditDistance", "medianEditDistance", "rotation");
-
+				"meanPercentile", "medianPercentile", "meanInteriorEditDistance", 
+				"medianInteriorEditDistance", "meanFullEditDistance", 
+				"medianFullEditDistance", "rotation");
+		
 		try {
 			sequenceWriter.write(sequenceLine);
 			sequenceWriter.newLine();
