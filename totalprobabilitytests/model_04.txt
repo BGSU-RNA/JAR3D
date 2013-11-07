@@ -1,4 +1,0 @@
-Character Definition | A,C,G,U,* // Define characters here
-InitialNode  | Left Length Distribution [0.8,0.1800000,0.02,0.01] | Left Letter Distribution [0.250000000,0.250000000,0.250000000,0.250000000,0.000000000] | Right Length Distribution [0.999900000,0.000100000] | Right Letter Distribution [0.250000000,0.250000000,0.250000000,0.250000000,0.000000000] | Left Index [1] | Right Index [6] // Initial node U10 - A9 from junction 
-HairpinNode  | Num Bases [1] | Left Index [4] | Right Index [4] | Norm Constant [1.000000000000000] // Hairpin node type *
-Interaction  | Interacting Bases [1,1] | Pair Probability [[0.000000000,0.000000000,0.000000000,0.000000000,0.000000000],[0.000000000,0.000000000,0.000000000,0.000000000,0.000000000],[0.000000000,0.000000000,0.000000000,0.000000000,0.000000000],[0.000000000,0.000000000,0.000000000,0.000000000,0.000000000],[0.000000000,0.000000000,0.000000000,0.000000000,1.000000000]] // Hairpin for truncation
