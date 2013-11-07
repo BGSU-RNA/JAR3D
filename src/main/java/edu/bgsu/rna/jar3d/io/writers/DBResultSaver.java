@@ -65,7 +65,6 @@ public class DBResultSaver extends AbstractResultsSaver {
 		}
 
 		try {
-
 			insertLoopResult.setString(1, results.getLoop().getQuery().getId());
 			insertLoopResult.setInt(2, (int)results.getLoop().getId());
 			insertLoopResult.setString(3, results.modelId());
@@ -78,7 +77,7 @@ public class DBResultSaver extends AbstractResultsSaver {
 			insertLoopResult.setFloat(10, (float)results.medianInteriorEditDistance());
 			insertLoopResult.setFloat(11, (float)results.medianFullEditDistance());
 			insertLoopResult.setString(12, results.signature());
-			insertLoopResult.setInt(13, rotationInt(results.isRotated()));
+			insertLoopResult.setInt(13, results.bestRotation());
 			insertLoopResult.setString(14, "Intentially left empty.");
 		} catch (SQLException e) {
 			throw new SaveFailed("Could not generate loop sql.", e);
@@ -103,10 +102,7 @@ public class DBResultSaver extends AbstractResultsSaver {
 	 */
 	private void saveSequenceResult(SequenceResult result) throws SaveFailed {
 		try {
-			int rotated = 0;
-			if (result.isRotated()) {
-				rotated = 1;
-			}
+			
 			String seq_id = "0";
 			if (!result.sequenceId().isEmpty()) {
 				seq_id = result.sequenceId();
@@ -119,7 +115,7 @@ public class DBResultSaver extends AbstractResultsSaver {
 			insertSequenceResult.setFloat(5, (float)result.percentile());
 			insertSequenceResult.setInt(6, result.InteriorEditDistance());
 			insertSequenceResult.setInt(7, result.FullEditDistance());
-			insertSequenceResult.setInt(8, rotated);
+			insertSequenceResult.setInt(8, result.bestRotation());
 			insertSequenceResult.setString(9, result.motifId());
 			updateSequenceQuery.setTimestamp(1, now);
 			updateSequenceQuery.setString(2, result.queryId());

@@ -851,6 +851,9 @@ public class Alignment {
 	public static List<LoopResult> doLoopDBQuery(int loopID, Query query, List<Sequence> sData, List<String> modNames,
 			HashMap<String, MotifGroup> groupData, int range, Loop loop, String type) {
 
+		// TODO 2013-11-07 CLZ generalize this so that it can apply to HL, IL, 3WJ, 4WJ, etc.
+		// Currently there is only space for rotations 0 and 1
+		
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
 		double[] modelScores = new double[modNames.size()];
@@ -931,25 +934,25 @@ public class Alignment {
 			indices[k] = k;
 		}
 
-		//Calculate extra information (quantiles, edit distances) and out put
+		//Calculate extra information (quantiles, edit distances) and output
 		int numInputSeqs = sData.size()-1;
 		for(int g = 0; g < modNames.size(); g++) {
 
 			int index = indices[g];
 			String groupName = tinyModNames.get(index);
 			String sig;
-			boolean rev;
+			int rotation;                 
 			double[] groupScores = new double[sData.size()];
 			group = groupData.get(groupName);
 			if (reversed[index] == 0) {  //not reversed
-				rev = Boolean.FALSE;
+				rotation = 0;
 				sig = group.Signature[0];
 				for(int col = 1; col < numInputSeqs+1; col++)
 				{
 					groupScores[col-1] = modelScoreMat[index][col];
 				}
 			} else {  //reversed
-				rev = Boolean.TRUE;
+				rotation = 1;
 				sig = group.Signature[1];
 
 				for(int col = 1; col < numInputSeqs+1; col++) {
@@ -965,8 +968,8 @@ public class Alignment {
 			int[][] InteriorEditDistances;
 			int[][] FullEditDistances;
 			if(type.equalsIgnoreCase("IL")){
-				InteriorEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rev);
-				FullEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rev,false,false);
+				InteriorEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rotation);
+				FullEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rotation,false,false);
 			}else {
 				InteriorEditDistances = SimpleAlign.calcHLEditDistances(sData, modsData);
 				FullEditDistances = SimpleAlign.calcHLEditDistances(sData,modsData,false,false);
@@ -982,11 +985,11 @@ public class Alignment {
 			if (true) {
 				List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
 				for(int m = 0; m < sData.size() - 1; m++) {
-					SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], quants[m], InteriorMinDist[m], FullMinDist[m],rev);
+					SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], quants[m], InteriorMinDist[m], FullMinDist[m],rotation);
 					seqRes.add(seqR);
 				}
 
-				LoopResult loopR = new BasicLoopResult(groupName, rev, sig, seqRes, "NA");
+				LoopResult loopR = new BasicLoopResult(groupName, rotation, sig, seqRes, "NA");
 				loopR.setLoop(loop);
 				loopRes.add(loopR);
 			}

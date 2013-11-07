@@ -110,11 +110,11 @@ public interface LoopResult {
 	public String signature();
 
 	/**
-	 * True if the scanned loop was rotated. As in was this loop run in the reverse direction against the model.
+	 * 0 for HL, 0 or 1 for IL, 0, 1, or 2 for 3WJ, etc. Tells which rotation scored best against the model.
 	 * 
 	 * @return True if rotated.
 	 */
-	public boolean isRotated();
+	public int bestRotation();
 
 	/**
 	 * Get the correspondences between the model and positions in this loop.

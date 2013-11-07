@@ -219,14 +219,16 @@ public class JAR3DMatlab {
 		}
 	}
 	public static int[][] DisplayEditDists(String UserDir, String seqFile1, String seqFile2, String loopType){
+
+		// TODO 2013-11-07 CLZ Below, the IL edit distances are called with rotation 0.  That might not be appropriate.
+		
 		System.setProperty("user.dir",UserDir);
 		
 		Vector<Sequence> seqData1 = Alignment.loadFasta(seqFile1);
 		Vector<Sequence> seqData2 = Alignment.loadFasta(seqFile1);
 		int[][] EditDistances;
 		if(loopType.equals("IL")){
-			boolean rev = false;
-			EditDistances = SimpleAlign.calcILEditDistances(seqData1,seqData2,rev,true);
+			EditDistances = SimpleAlign.calcILEditDistances(seqData1,seqData2,0,true);
 		}else{
 			EditDistances = SimpleAlign.calcHLEditDistances(seqData1,seqData2,true);
 		}

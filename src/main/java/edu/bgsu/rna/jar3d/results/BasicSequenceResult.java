@@ -22,8 +22,8 @@ public class BasicSequenceResult implements SequenceResult {
     /** Full edit distance of this result. */
 	private int FullEditDistance;
 
-    /** True if this was run in the rotated direction. */
-	private boolean rotation;
+    /** 0 for HL, 0 or 1 for IL, 0, 1, or 2 for 3WJ, etc. */
+	private int rotation;
 
     /** Loop result this belongs to. */
 	private LoopResult result;
@@ -41,7 +41,7 @@ public class BasicSequenceResult implements SequenceResult {
 	 * @param editDistance The edit distance.
 	 * @param rotation True if the sequence was rotated relative to the model.
 	 */
-	public BasicSequenceResult(LoopResult result, Sequence sequence, double score, double percentile, int InteriorEditDistance, int FullEditDistance, boolean rotation) {
+	public BasicSequenceResult(LoopResult result, Sequence sequence, double score, double percentile, int InteriorEditDistance, int FullEditDistance, int rotation) {
 		this.result = result;
         this.sequence = sequence;
 		this.score = score;
@@ -60,7 +60,7 @@ public class BasicSequenceResult implements SequenceResult {
 	 * @param editDistance The edit distance.
 	 * @param rotation True if the sequence was rotated relative to the model.
 	 */
-	public BasicSequenceResult(Sequence sequence, double score, double percentile, int InteriorEditDistance, int FullEditDistance, boolean rotation) {
+	public BasicSequenceResult(Sequence sequence, double score, double percentile, int InteriorEditDistance, int FullEditDistance, int rotation) {
 		this(null, sequence, score, percentile, InteriorEditDistance, FullEditDistance, rotation);
 	}
 
@@ -80,7 +80,7 @@ public class BasicSequenceResult implements SequenceResult {
 		return InteriorEditDistance;
 	}
 
-	public boolean isRotated() {
+	public int bestRotation() {
 		return rotation;
 	}
 

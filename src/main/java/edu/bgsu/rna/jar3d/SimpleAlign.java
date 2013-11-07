@@ -115,15 +115,15 @@ public class SimpleAlign {
 		return Scores[n1][n2];
 	}
 	
-	public static int[][] calcILEditDistances(List<Sequence> sD1,List<Sequence> sD2,boolean reverse){
-		return calcILEditDistances(sD1,sD2,reverse,false,true);
+	public static int[][] calcILEditDistances(List<Sequence> sD1,List<Sequence> sD2,int rotation){
+		return calcILEditDistances(sD1,sD2,rotation,false,true);
 	}
 
-	public static int[][] calcILEditDistances(List<Sequence> sD1,List<Sequence> sD2,boolean reverse, boolean Verbose){
-		return calcILEditDistances(sD1,sD2,reverse,Verbose,true);
+	public static int[][] calcILEditDistances(List<Sequence> sD1,List<Sequence> sD2,int rotation, boolean Verbose){
+		return calcILEditDistances(sD1,sD2,rotation,Verbose,true);
 	}
 	
-	public static int[][] calcILEditDistances(List<Sequence> sD1,List<Sequence> sD2,boolean reverse,boolean Verbose,boolean Interior){
+	public static int[][] calcILEditDistances(List<Sequence> sD1,List<Sequence> sD2,int rotation,boolean Verbose,boolean Interior){
 		//calculates the edit distance between every sequence in fasta file seqFile1
 		//and every sequence in faste file seqFile2.  the first dim of the returned
 		//2d array corresponds to the files in seqFile1, the second to seqFile2
@@ -131,7 +131,7 @@ public class SimpleAlign {
 		//and use a '*' character to denote the break in strands
 		
 		//reverse sequences in seqFile1 if reverse is true
-		if(reverse){
+		if (rotation == 1){
 			sD1 = Alignment.reverse(sD1);
 		}
 		

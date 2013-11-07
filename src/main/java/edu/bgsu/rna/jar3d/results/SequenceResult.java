@@ -90,11 +90,11 @@ public interface SequenceResult {
 	public int FullEditDistance();
 
     /**
-     * Return true if this sequence was run in a rotated orientation.
+     * Return 0 for HL, 0 or 1 for IL, 0, 1, or 2 for 3WJ, etc., depending on what rotation fits the model best
      *
      * @return true if rotated.
      */
-	public boolean isRotated();
+	public int bestRotation();
 
     /**
      * Set the loop result this belongs to.

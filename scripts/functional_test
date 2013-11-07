@@ -8,7 +8,7 @@ set -e
 VERSION=`grep version pom.xml | head -1 | cut -d '>' -f2 | cut -d '<' -f1`
 ARTIFACT="jar3d-$VERSION.jar"
 RESOURCES="src/test/resources"
-MODELS="$RESOURCES/models"
+MODELS="$RESOURCES/models/IL/0.6/bp_models/all.txt"
 
 function compare {
   computed=$1

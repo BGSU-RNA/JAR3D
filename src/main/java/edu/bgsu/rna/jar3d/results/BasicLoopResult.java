@@ -30,11 +30,11 @@ public final class BasicLoopResult implements LoopResult {
 
 	private double medianScore;
 
-	private boolean rotation;
+	private int rotation;
 
 	private final List<SequenceResult> sequenceResults;
 
-	private String correspondices;
+	private String correspondences;
 
     /**
      * Build a new BasicLoopResult. The given SequenceResults will have their
@@ -44,22 +44,22 @@ public final class BasicLoopResult implements LoopResult {
      * @param rotation True if the loop was run in a rotated direction.
      * @param signature The base pairing signature of the loop used.
      * @param sequenceResults The individual SequenceResults.
-     * @param correspondecies The correspondences between the model and
+     * @param correspondences The correspondences between the model and
      * sequences.
      */
-	public BasicLoopResult(String modelId, boolean rotation,
+	public BasicLoopResult(String modelId, int rotation,
 			String signature, List<SequenceResult> sequenceResults,
-			String correspondecies) {
+			String correspondences) {
 		this.sequenceResults = sequenceResults;
 		this.modelId = modelId;
 		this.rotation = rotation;
 		this.signature = signature;
-		this.correspondices = correspondecies;
+		this.correspondences = correspondences;
 		computeData();
 	}
 
     /**
-     * Compute the mean and median data. This goes through all Sequence results,
+     * Compute the mean and median data. This goes through all Sequence results
      * and computes the means and medians as well as setting the LoopResult of
      * each to this object.
      */
@@ -130,12 +130,12 @@ public final class BasicLoopResult implements LoopResult {
 		return signature;
 	}
 
-	public boolean isRotated() {
+	public int bestRotation() {
 		return rotation;
 	}
 
 	public String correspondences() {
-		return correspondices;
+		return correspondences;
 	}
 
 	public Loop getLoop() {
