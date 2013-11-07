@@ -914,20 +914,14 @@ public class Sequence {
 	}
 
 	//Overloaded getModelNames for the new file system
-	public static Vector<String> getModelNames(String folder, String modelType, boolean Structured)
+	public static Vector<String> getModelNames(String modelList, String modelType, boolean Structured)
 	{
 		Vector<String> modelNames = new Vector<String>();
 		char fsep = File.separatorChar;
 		String listName;
-		if(Structured){
-			listName = folder + fsep + modelType + "_models" + fsep + "structured.txt";
-		}else{
-			listName = folder + fsep + modelType + "_models" + fsep + "all.txt";
-		}
 
 		// 2013-11-05 CLZ the user directly specifies a file that lists all models to run
-		listName = folder + fsep + "model_list.txt";
-		
+		listName = modelList;
 		
 	try {
 		String curDir = System.getProperty("user.dir");

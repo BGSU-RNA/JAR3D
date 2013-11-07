@@ -110,26 +110,29 @@ public class Application {
 	 * Run a loop against a single loop and return the results. This will only score internal loops, all other loop
 	 * types will give empty results.
 	 * 
-	 * @param base The base path to the models.
+	 * @param modellist The path to a file telling what models to use
 	 * @param loop The loop.
 	 * @return Results of running the loop.
 	 */
-	private List<LoopResult> motifParse(String base, Loop loop) {
+	private List<LoopResult> motifParse(String modellist, Loop loop) {
 		List<LoopResult> result = new ArrayList<LoopResult>();
 
 		// String folder = base + File.separator + loop.getTypeString() + File.separator + version;
-		// 2013-11-05 CLZ user specifies complete path to model_list.txt
-		String folder = base;    
-
-		System.out.println("Looking for a list of motifs to use in "+folder+File.separatorChar+"model_list.txt");
+		// 2013-11-07 CLZ user specifies complete path to file telling what models to use
+		
+		File f = new File(modellist);
+		String folder = f.getParent();
+		
+		System.out.println("Looking for a list of motifs to use in "+modellist);
+		System.out.println("Looking for motifs in "+folder);
 		
 		System.setProperty("user.dir", folder);
 
 		// 2013-11-05 CLZ The third argument on the next line makes the choice between structured or all models 
 		// 2013-11-05 CLZ But now that is ignored because the user specifies the path to the models
 		
-		Vector<String> modelNames = Sequence.getModelNames(folder, modelType, false);		
-		HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(folder, modelType);
+		Vector<String> modelNames = Sequence.getModelNames(modellist, modelType, false);		
+		HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(modellist, modelType);
 
 		if (modelNames.size() == 0) {
 			System.out.println("Found " + modelNames.size() + " model files");

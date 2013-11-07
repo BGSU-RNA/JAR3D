@@ -212,16 +212,18 @@ public class webJAR3D {
 		return Signatures;
 	}
 	
-	public static HashMap<String,MotifGroup> loadMotifGroups(String folder, String modelType){
+	public static HashMap<String,MotifGroup> loadMotifGroups(String modelList, String modelType){
 		char fsep = File.separatorChar;
 		// String modelFolder = folder + fsep + modelType + "_models";
 		// 2013-11-05 CLZ The user directly specifies the folder where the models will be found
-		String modelFolder = folder;
+
+		File f = new File(modelList);
+		String modelFolder = f.getParent();
 		
 		HashMap<String,MotifGroup> Motifs = new HashMap<String,MotifGroup>();
 		
 		String listFile;
-		listFile = modelFolder + fsep + "model_list.txt";
+		listFile = modelList;
 		String hashFileName = modelFolder + fsep + "all.grps";
 		File hashFile = new File(hashFileName);
 		if(hashFile.exists()){
@@ -243,7 +245,7 @@ public class webJAR3D {
 				String lineS;
 				while((lineS = in.readLine()) != null){
 					lineS = lineS.substring(0, lineS.length()-10);
-					MotifGroup group = new MotifGroup(folder,modelType,lineS);
+					MotifGroup group = new MotifGroup(modelFolder,modelType,lineS);
 					Motifs.put(lineS, group);
 				}
 				in.close();

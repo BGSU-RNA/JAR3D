@@ -14,9 +14,9 @@ public class Main {
 	public static void main(String[] args) {
 		
 		String input = args[0];          // full path to fasta-formatted sequence file
-		String models = args[1];         // path to a set of model files, 
-		String loopOutput = args[2];     // 
-		String sequenceOutput = args[3]; // 
+		String models = args[1];         // path to a file telling which model files to use 
+		String loopOutput = args[2];     // path to the output file giving loop-level results
+		String sequenceOutput = args[3]; // path to the output file giving sequence-level results
 
 		Application application = null;
 		QueryLoader loader = null;
