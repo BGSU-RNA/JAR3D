@@ -1,4 +1,4 @@
-filename,sequenceId,motifId,score,percentile,editDistance,rotation
+filename,sequenceId,motifId,score,percentile,interiorEditDistance,fullEditDistance,rotation
 C:\Users\zirbel\Dropbox\Motifs\lib\IL\1.0\sequences\IL_24982.3.fasta, IL_24982.3 IL_3U5F_053 C  990 G 1014,IL_00998.1,-15.736,0.091900,3,4,1.0000
 C:\Users\zirbel\Dropbox\Motifs\lib\IL\1.0\sequences\IL_24982.3.fasta, IL_24982.3 IL_2XZM_049 C  968 G  992,IL_00998.1,-15.754,0.091800,3,4,1.0000
 C:\Users\zirbel\Dropbox\Motifs\lib\IL\1.0\sequences\IL_24982.3.fasta, IL_24982.3 IL_1FJG_033 C  779 G  803,IL_00998.1,-15.773,0.091600,3,4,1.0000
