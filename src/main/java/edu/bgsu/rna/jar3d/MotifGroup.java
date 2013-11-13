@@ -30,7 +30,7 @@ public class MotifGroup implements java.io.Serializable{
     		String modelFile = modFolder+fsep+name+"_model.txt";
     		String distFile = modFolder+fsep+name+"_distribution.txt";
     		String dataFile = modFolder+fsep+name+"_data.txt";
-    		String seqFile = folder+fsep+".."+fsep+"sequences"+fsep+name+".fasta";
+    		String seqFile = modFolder+fsep+name+".fasta";
     		//Read in model
     		FileInputStream fstream = new FileInputStream(modelFile);
     		DataInputStream in = new DataInputStream(fstream);

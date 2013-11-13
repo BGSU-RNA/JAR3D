@@ -138,7 +138,7 @@ public class Application {
 			System.out.println("Found " + modelNames.size() + " model files");
 		}
 
-		System.out.println("Application.motifParse: " +loop.getLoopType());
+//		System.out.println("Application.motifParse: " +loop.getLoopType());
 		
 /**
 		// 2013-11-05 CLZ Old code only ran for internal loops.  Others returned empty results and saving crashed.
