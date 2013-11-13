@@ -234,7 +234,7 @@ public class webJAR3D {
 				Motifs = (HashMap<String,MotifGroup>)in.readObject();
 				in.close();
 			}catch (Exception e1){
-				System.out.println("Error reading file " + hashFileName + "\n"+e1);
+				System.out.println("Error reading java object file " + hashFileName + "\n"+e1);
 			}
 			return Motifs;
 		}else{

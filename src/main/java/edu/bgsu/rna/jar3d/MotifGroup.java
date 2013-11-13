@@ -51,6 +51,7 @@ public class MotifGroup implements java.io.Serializable{
     		line = null;
     		stringBuilder = new StringBuilder();
     		ls = System.getProperty("line.separator");
+    		ls = "\n";                                   // needs to match how we tokenize later
     		while( ( line = br.readLine() ) != null ) {
     	        stringBuilder.append( line );
     	        stringBuilder.append( ls );

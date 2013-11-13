@@ -79,7 +79,8 @@ public class SimpleAlign {
 	public static int editDist(String seq1, String seq2){
 		//calculates the Levenshtein distance between seq1 and seq2
 		
-		
+//		System.out.println("==="+seq1+"==="+seq2+"===");
+
 		seq1 = seq1.toUpperCase().replaceAll("-", "");
 		seq2 = seq2.toUpperCase().replaceAll("-", "");
 		

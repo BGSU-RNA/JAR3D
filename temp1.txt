@@ -1,0 +1,2 @@
+filename,motifId,meanScore,medianScore,meanPercentile,medianPercentile,meanInteriorEditDistance,medianInteriorEditDistance,meanFullEditDistance,medianFullEditDistance,rotation
+c:\users\zirbel\documents\motifs\il\1.8\lib\IL_24982.5.fasta,IL_24982.5,-6.6682,-6.5077,99.206,99.450,0.0000,0.0000,0.0000,0.0000,0.0000
