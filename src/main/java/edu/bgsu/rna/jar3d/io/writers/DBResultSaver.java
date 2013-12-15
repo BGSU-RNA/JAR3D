@@ -26,8 +26,8 @@ public class DBResultSaver extends AbstractResultsSaver {
     
     private Timestamp now;
 	
-	public DBResultSaver(String username, String password, String db) throws SQLException {
-        connection = DriverManager.getConnection(db, username, password);
+	public DBResultSaver(String username, String password, String dbConnection) throws SQLException {
+        connection = DriverManager.getConnection(dbConnection, username, password);
         String loopResultSQL = "insert into jar3d_results_by_loop (query_id, loop_id, motif_id, meanscore, meanpercentile, meaninterioreditdist, meanfulleditdist, medianscore, medianpercentile, medianinterioreditdist, medianfulleditdist, signature, rotation, correspondences) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (query_id, seq_id, loop_id, score, percentile, interioreditdist, fulleditdist, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?);";
         String updateLoopSQL = "UPDATE jar3d_query_info SET status=1, time_completed=? WHERE query_id = ?;";
