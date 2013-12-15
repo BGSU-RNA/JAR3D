@@ -19,11 +19,12 @@ import edu.bgsu.rna.jar3d.results.LoopResult;
 public class JAR3Database {
 
 	public static void main(String[] args) {
-		String models = args[0];
-		String QueryID = args[1];
-		String usrName = args[2];
-		String pswd = args[3];
-		String dbName = args[4];
+		String ILmodels = args[0];
+		String HLmodels = args[1];
+		String QueryID = args[2];
+		String usrName = args[3];
+		String pswd = args[4];
+		String dbName = args[5];
 		String dbConnection = "jdbc:mysql://localhost:3306/" + dbName;
 		
 		Application application = null;
@@ -33,7 +34,7 @@ public class JAR3Database {
 			loader = new DBLoader(usrName,pswd,dbConnection);
 			saver = new DBResultSaver(usrName,pswd,dbConnection);
 			application = new Application(loader, saver);
-			application.runAndSave(QueryID, models);
+			application.runAndSave(QueryID, ILmodels);
 		} catch(Exception e) {
 			e.printStackTrace();
 			System.exit(1);

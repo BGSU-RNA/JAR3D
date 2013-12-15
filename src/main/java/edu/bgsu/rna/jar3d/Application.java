@@ -89,6 +89,21 @@ public class Application {
 		Query query = loader.load(queryId);
 		return runQuery(query, base);
 	}
+	
+	/**
+	 * Load then run a query and return the results.
+	 * 
+	 * @param queryId Query id to load.
+	 * @param ILbase Base path to the IL models.
+	 * @param HLbase Base path to the HL models.
+	 * @return The results.
+	 * @throws QueryLoadingFailed
+	 */
+	
+	public List<List<LoopResult>> runQuery(String queryId, String ILbase, String HLbase) throws QueryLoadingFailed {
+		Query query = loader.load(queryId);
+		return runQuery(query, ILbase, HLbase);
+	}
 
 	/**
 	 * Run a query and return the results.
@@ -101,6 +116,30 @@ public class Application {
 		List<List<LoopResult>> allResults = new ArrayList<List<LoopResult>>();
 		for(Loop loop: query) {
 			List<LoopResult> results = motifParse(base, loop); 
+			allResults.add(results);
+		}
+		return allResults;
+	}
+
+	/**
+	 * Run a query and return the results.
+	 * 
+	 * @param ILbase The base path to the IL models.
+	 * @param HLbase The base path to the HL models
+	 * @param query The query to run.
+	 * @return The results.
+	 */
+	
+	public List<List<LoopResult>> runQuery(Query query, String ILbase, String HLbase) {
+		List<List<LoopResult>> allResults = new ArrayList<List<LoopResult>>();
+		for(Loop loop: query) {
+			String type = loop.getLoopType().getShortName();
+			List<LoopResult> results;
+			if(type.equals("IL")){
+				results = motifParse(ILbase, loop); 
+			}else {
+				results = motifParse(HLbase, loop);
+			}
 			allResults.add(results);
 		}
 		return allResults;
@@ -177,6 +216,22 @@ public class Application {
 	 */
 	public void runAndSave(String queryId, String base) throws SaveFailed, QueryLoadingFailed {
 		List<List<LoopResult>> results = this.runQuery(queryId, base);
+		saver.writeHeader();
+		saveResults(results);
+	}
+	
+	/**
+	 * Load a query, run the query and then save the results.
+	 * 
+	 * @param queryId Query to load.
+	 * @param ILbase Base path to the IL models.
+	 * @param HLbase Base path to the HL models.
+	 * @throws SaveFailed
+	 * @throws QueryLoadingFailed
+	 */
+	
+	public void runAndSave(String queryId, String ILbase, String HLbase) throws SaveFailed, QueryLoadingFailed {
+		List<List<LoopResult>> results = this.runQuery(queryId, ILbase, HLbase);
 		saver.writeHeader();
 		saveResults(results);
 	}
