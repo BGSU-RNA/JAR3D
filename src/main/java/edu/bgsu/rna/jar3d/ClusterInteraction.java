@@ -43,8 +43,12 @@ public class ClusterInteraction {
 	 */
 	public double getLogSubstProb(int[] baseString)
 	{
+//		System.out.println(baseString[0]);
 		int code1 = baseString[base1];
+//		System.out.println("ClusterInteraction: "+code1);
 		int code2 = baseString[base2];
+//		System.out.println("ClusterInteraction: "+code2);
+
 		return logSubsProb[code1][code2];
 	}
 

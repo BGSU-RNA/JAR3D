@@ -36,9 +36,8 @@ public class JAR3DMatlab {
 		return correspondences;
 	}
 
-	public static List Align(String UserDir, String FastaFile, String ModelFile, int DNA, int range) 
+	public static List Align(String FastaFile, String ModelFile, int DNA, int range) 
 	{
-		System.setProperty("user.dir",UserDir);
 		List sequenceData = Alignment.loadFastaColumnsDNA(FastaFile,0,0,DNA); 
 
 		sequenceData = Alignment.doParse(sequenceData, ModelFile, range);

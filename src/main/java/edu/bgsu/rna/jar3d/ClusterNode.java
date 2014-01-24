@@ -303,6 +303,7 @@ public class ClusterNode extends BasicNode {
 										
 					for(int m = 0; m < interactions.size(); m++)
 					{
+//						System.out.println("ClusterNode:"+intCodes);
 						pnew += ((ClusterInteraction)interactions.get(m)).getLogSubstProb(intCodes);
 					}
 					
