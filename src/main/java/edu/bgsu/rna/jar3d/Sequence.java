@@ -39,7 +39,7 @@ public class Sequence {
 	 */
 	public Sequence(String org, String let) {
 		organism = org;
-		letters = let;
+		letters = let.toUpperCase();
 		maxLogProbs = new Vector<List<Double>>();
 	}
 
@@ -51,7 +51,7 @@ public class Sequence {
 	 */
 	public Sequence(String org, String let, Sequence firstSeq) {
 		organism = org;
-		letters = let;
+		letters = let.toUpperCase();;
 		setNucleotides();
 		setArrays();
 		maxLogProbs = new Vector<List<Double>>();

@@ -18,19 +18,19 @@ public class SequenceTest {
 
     @Before
     public void setUp() {
-        sequence = new Sequence("first", "aaa*ccc");
-        hairpin = new Sequence("hair", "aaa");
+        sequence = new Sequence("first", "AAA*CCC");
+        hairpin = new Sequence("hair", "AAA");
     }
 
     @Test
     public void testInternalReversalSequence() {
         Sequence reversed = sequence.reverse();
-        assertEquals(reversed.getSequence(), "ccc*aaa");
+        assertEquals(reversed.getSequence(), "CCC*AAA");
     }
 
     @Test
     public void testHairpinReveralSequence() {
         Sequence reversed  = hairpin.reverse();
-        assertEquals(reversed.getSequence(), "aaa");
+        assertEquals(reversed.getSequence(), "AAA");
     }
 }

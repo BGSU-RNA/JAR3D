@@ -91,7 +91,7 @@ public class BasicLoop implements Loop {
 	public List<String> getSequenceStrings() {
 		List<String> sequenceStrings = new ArrayList<String>();
 		for(Sequence sequence: sequences) {
-			sequenceStrings.add(sequence.getSequence());
+			sequenceStrings.add(sequence.getSequence().toUpperCase());
 		}
 		return sequenceStrings;
 	}

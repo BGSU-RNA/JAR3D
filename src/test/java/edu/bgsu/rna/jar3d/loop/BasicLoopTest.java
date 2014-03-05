@@ -20,21 +20,21 @@ public class BasicLoopTest {
     @Before
     public void setUp() {
         List<Sequence> sequences = new ArrayList<Sequence>();
-        sequences.add(new Sequence("first", "aaa*ccc"));
-        loop = new BasicLoop("a", 1L, sequences, LoopType.INTERNAL);
+        sequences.add(new Sequence("first", "AAA*CCC"));
+        loop = new BasicLoop("A", 1L, sequences, LoopType.INTERNAL);
     }
 
     @Test
     public void testLoopReversalSequences() {
         Loop reversed = loop.reverse();
         List<Sequence> sequences = reversed.getSequences();
-        assertEquals(sequences.get(1).getSequence(), "ccc*aaa");
+        assertEquals(sequences.get(1).getSequence(), "CCC*AAA");
     }
 
     @Test
     public void testLoopReversalName() {
         Loop reversed = loop.reverse();
-        assertEquals(reversed.getName(), "a");
+        assertEquals(reversed.getName(), "A");
     }
 
     @Test
