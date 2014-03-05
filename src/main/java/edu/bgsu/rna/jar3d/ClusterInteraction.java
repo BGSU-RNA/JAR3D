@@ -12,16 +12,21 @@ public class ClusterInteraction {
 	
 	/**
 	 * This is the ClusterInteraction constructor
-	 * @param a is the left side base
-	 * @param b is the right side base
+	 * @param a is the position of the left side base within the cluster
+	 * @param b is the position of the right side base within the cluster
 	 * @param subs is a matrix containing substitution probabilities
 	 */
 	public ClusterInteraction(int a, int b, double[][]subs)
 	{
-		base1 = a;
-		base2 = b;
-		subsProb = rnaMath.normalize(subs);
-		logSubsProb = rnaMath.logd(subsProb);
+		if (a >= 0 & b >= 0)
+		{
+			base1 = a;
+			base2 = b;
+			subsProb = rnaMath.normalize(subs);
+			logSubsProb = rnaMath.logd(subsProb);
+		}
+		else
+			System.out.println("ClusterInteraction: Base position is negative" + a + " " + b);
 	}
 	
 	/**
