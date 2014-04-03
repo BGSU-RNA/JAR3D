@@ -7,7 +7,7 @@ import java.util.*;
  * @author meg pirrung
  *
  */
-public class JAR3DMoleculeAligner {
+public class JAR3DAlignmentTester {
 	public static void main(String[] args) {
 
 		int numSequences = 10;
