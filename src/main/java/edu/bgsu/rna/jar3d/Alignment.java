@@ -980,12 +980,19 @@ public class Alignment {
 				InteriorMinDist[i] = ArrayMath.min(InteriorEditDistances[i]);
 				FullMinDist[i] = ArrayMath.min(FullEditDistances[i]);
 			}
-
-			//put goodness of fit checks here later?
+			boolean[] cutoffs = new boolean[numInputSeqs];
+			for(int i = 0; i < numInputSeqs; i++){
+				if(groupScores[i]>=group.Cutoffs[0] && InteriorMinDist[i]<=group.Cutoffs[1]
+						&& group.Cutoffs[2]*InteriorMinDist[i]-group.Cutoffs[3]*groupScores[i]<=group.Cutoffs[4]){
+					cutoffs[i] = Boolean.TRUE;
+				}else{
+					cutoffs[i] = Boolean.FALSE;
+				}
+			}
 			if (true) {
 				List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
 				for(int m = 0; m < sData.size() - 1; m++) {
-					SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], quants[m], InteriorMinDist[m], FullMinDist[m],rotation);
+					SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], quants[m], InteriorMinDist[m], FullMinDist[m],rotation,cutoffs[m]);
 					seqRes.add(seqR);
 				}
 

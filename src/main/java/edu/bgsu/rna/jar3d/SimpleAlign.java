@@ -228,8 +228,8 @@ public class SimpleAlign {
 		for(int i = 0; i < n1; i ++){
 			for(int j = 0; j < n2; j ++){
 				if(Interior == true){
-					seq1mf = seqs1[i].substring(1, seqs1[i].length()-2);
-					seq2mf = seqs2[j].substring(1, seqs2[j].length()-2);
+					seq1mf = seqs1[i].substring(1, seqs1[i].length()-1);
+					seq2mf = seqs2[j].substring(1, seqs2[j].length()-1);
 				}else{
 					seq1mf = seqs1[i];
 					seq2mf = seqs2[j];

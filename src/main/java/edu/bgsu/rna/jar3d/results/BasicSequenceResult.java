@@ -28,8 +28,12 @@ public class BasicSequenceResult implements SequenceResult {
     /** Loop result this belongs to. */
 	private LoopResult result;
 
+    /** Indicator if sequence meets cutoff requirements */
+    private boolean cutoff;
+	
     /** The sequence scored. */
     private final Sequence sequence;
+    
 
 	/**
 	 * Create a new MutableSequenceResults. This contains the information for
@@ -41,7 +45,7 @@ public class BasicSequenceResult implements SequenceResult {
 	 * @param editDistance The edit distance.
 	 * @param rotation True if the sequence was rotated relative to the model.
 	 */
-	public BasicSequenceResult(LoopResult result, Sequence sequence, double score, double percentile, int InteriorEditDistance, int FullEditDistance, int rotation) {
+	public BasicSequenceResult(LoopResult result, Sequence sequence, double score, double percentile, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff) {
 		this.result = result;
         this.sequence = sequence;
 		this.score = score;
@@ -49,6 +53,7 @@ public class BasicSequenceResult implements SequenceResult {
 		this.InteriorEditDistance = InteriorEditDistance;
 		this.FullEditDistance = FullEditDistance;
 		this.rotation = rotation;
+		this.cutoff = cutoff;
 	}
 
 	/**
@@ -60,8 +65,8 @@ public class BasicSequenceResult implements SequenceResult {
 	 * @param editDistance The edit distance.
 	 * @param rotation True if the sequence was rotated relative to the model.
 	 */
-	public BasicSequenceResult(Sequence sequence, double score, double percentile, int InteriorEditDistance, int FullEditDistance, int rotation) {
-		this(null, sequence, score, percentile, InteriorEditDistance, FullEditDistance, rotation);
+	public BasicSequenceResult(Sequence sequence, double score, double percentile, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff) {
+		this(null, sequence, score, percentile, InteriorEditDistance, FullEditDistance, rotation, cutoff);
 	}
 
 	public double score() {
@@ -143,4 +148,9 @@ public class BasicSequenceResult implements SequenceResult {
     public Sequence sequence() {
         return sequence;
     }
+
+	public boolean cutoff() {
+		// TODO Auto-generated method stub
+		return cutoff;
+	}
 }

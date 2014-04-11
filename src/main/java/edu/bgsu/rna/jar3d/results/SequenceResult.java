@@ -109,4 +109,11 @@ public interface SequenceResult {
      * @return The loop result.
      */
 	public LoopResult getLoopResult();
+	
+	/**
+     * Get a boolean indicating if this passes the cutoff.
+     *
+     * @return The loop result.
+     */
+	public boolean cutoff();
 }
