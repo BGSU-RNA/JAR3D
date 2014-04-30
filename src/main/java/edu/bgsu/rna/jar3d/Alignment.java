@@ -985,6 +985,8 @@ public class Alignment {
 				if(groupScores[i]>=group.Cutoffs[0] && InteriorMinDist[i]<=group.Cutoffs[1]
 						&& group.Cutoffs[2]*InteriorMinDist[i]-group.Cutoffs[3]*groupScores[i]<=group.Cutoffs[4]){
 					cutoffs[i] = Boolean.TRUE;
+				}else if(InteriorMinDist[i]==0){
+					cutoffs[i] = Boolean.TRUE;
 				}else{
 					cutoffs[i] = Boolean.FALSE;
 				}

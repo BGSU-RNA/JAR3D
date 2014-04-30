@@ -39,8 +39,9 @@ public class CSVSaver extends AbstractResultsSaver {
 		String meanFullEditDistance = format(results.meanFullEditDistance());
 		String medianFullEditDistance = format(results.medianFullEditDistance());
 		String rotation = format(results.bestRotation());
+		String meanCutoff = format(results.meanCutoff());
 		
-		String line = join(loopId, motifId, meanScore, medianScore,
+		String line = join(loopId, motifId, meanCutoff, meanScore, medianScore,
 				meanPercentile, medianPercentile, meanInteriorEditDistance, medianInteriorEditDistance, meanFullEditDistance, medianFullEditDistance, rotation);
 
 		try {
@@ -110,7 +111,7 @@ public class CSVSaver extends AbstractResultsSaver {
 	public void writeHeader() throws SaveFailed {
 		String sequenceLine = join("filename", "sequenceId", "motifId", "passedCutoff", 
 				"score", "percentile", "interiorEditDistance", "fullEditDistance", "rotation");
-		String loopLine = join("filename", "motifId", "meanScore", "medianScore",
+		String loopLine = join("filename", "motifId", "%passedCutoff", "meanScore", "medianScore",
 				"meanPercentile", "medianPercentile", "meanInteriorEditDistance", 
 				"medianInteriorEditDistance", "meanFullEditDistance", 
 				"medianFullEditDistance", "rotation");

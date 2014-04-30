@@ -129,4 +129,11 @@ public interface LoopResult {
 	 * @return A list of sequence level results.
 	 */
 	public List<SequenceResult> sequenceResults();
+	
+	/**
+	 * The percent of sequences that pass the cutoff. These are the results for each sequence in loop against the model used here.
+	 * 
+	 * @return A the percent of sequences that pass cutoff.
+	 */
+	public double meanCutoff();
 }

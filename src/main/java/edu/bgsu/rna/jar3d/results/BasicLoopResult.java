@@ -29,6 +29,8 @@ public final class BasicLoopResult implements LoopResult {
 	private double medianPercentile;
 
 	private double medianScore;
+	
+	private double meanCutoff;
 
 	private int rotation;
 
@@ -69,6 +71,7 @@ public final class BasicLoopResult implements LoopResult {
 		double[] percentiles = new double[numSeqs];
 		int[] fullEdDists = new int[numSeqs];
 		int[] interiorEdDists = new int[numSeqs];
+		boolean[] cutoffs = new boolean[numSeqs];
 
 		
 		for(int i = 0; i < numSeqs; i++){
@@ -78,6 +81,7 @@ public final class BasicLoopResult implements LoopResult {
 			percentiles[i] = seqR.percentile();
 			interiorEdDists[i] = seqR.InteriorEditDistance();
 			fullEdDists[i] = seqR.FullEditDistance();
+			cutoffs[i] = seqR.cutoff();
 		}
 
 		this.medianScore = ArrayMath.median(scores);
@@ -88,6 +92,7 @@ public final class BasicLoopResult implements LoopResult {
 		this.medianInteriorEditDistance = ArrayMath.median(interiorEdDists);
 		this.meanFullEditDistance = ArrayMath.mean(fullEdDists);
 		this.medianFullEditDistance = ArrayMath.median(fullEdDists);
+		this.meanCutoff = ArrayMath.mean(cutoffs);
 	}
 
 	public String modelId() {
@@ -156,5 +161,9 @@ public final class BasicLoopResult implements LoopResult {
 
 	public List<SequenceResult> sequenceResults() {
 		return sequenceResults;
+	}
+	
+	public double meanCutoff(){
+		return meanCutoff;
 	}
 }

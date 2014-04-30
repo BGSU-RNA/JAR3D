@@ -86,4 +86,14 @@ public class ArrayMath {
 	       return (arr[(int)middle] + arr[(int)(middle)-1]) / 2.0;
 	    }
 	}
+	public static double mean(boolean[] cutoffs) {
+		int numSeqs = cutoffs.length;
+		double runSum = 0;
+		for(int i = 0; i < numSeqs; i++){
+			if(cutoffs[i]==Boolean.TRUE){
+				runSum++;
+			}
+		}
+		return 100*runSum/numSeqs;
+	}
 }
