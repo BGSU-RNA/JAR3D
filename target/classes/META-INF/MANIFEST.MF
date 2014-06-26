@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Build-Jdk: 1.7.0_45
+Built-By: zirbel
+Created-By: Maven Integration for Eclipse
+Main-Class: edu.bgsu.rna.jar3d.cli.Main
+
