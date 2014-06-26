@@ -88,14 +88,14 @@ clear SD
 SDCounter = 0;
 FPCounter = 0;
 
-Match = zeros(100,2,2);
-FullMatch = zeros(100,2);
-FullEditOne = zeros(100,2);
-CoreEditOne = zeros(100,2);
-CoreEditZero = zeros(100,2);
-CoreMatch = zeros(100,2);
-GoodMatch = zeros(100,2);
-TotalSequences = zeros(100,2);
+Match = zeros(200,2,2);
+FullMatch = zeros(200,2);
+FullEditOne = zeros(200,2);
+CoreEditOne = zeros(200,2);
+CoreEditZero = zeros(200,2);
+CoreMatch = zeros(200,2);
+GoodMatch = zeros(200,2);
+TotalSequences = zeros(200,2);
 
 FPModelCounter = zeros(500,1);
 SequenceCounter = 0;
@@ -401,7 +401,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
 
     end
 
-    if Skip == 0,
+    if Skip == 0 && Mode > 1,
 
       % --------------------- Evaluate whether each sequence meets the cutoff for each model
 

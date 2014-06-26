@@ -52,18 +52,19 @@ case ['HL' filesep '1.14']
 case ['IL' filesep '1.15']
 	MotifLibraryPath = [MotifLibraryLocation filesep 'IL_20140619_1135\mat'];
 case ['HL' filesep '1.15']
-	MotifLibraryPath = [MotifLibraryLocation filesep '\mat'];
+	MotifLibraryPath = [MotifLibraryLocation filesep 'HL_20140614_2131\mat'];
 end
+
+OutputBase = pwd;                                                      % start Matlab in the directory containing IL and HL
+JAR3Dpath = 'C:\Users\zirbel\Documents\GitHub\JAR3D\target\classes';   % location of class files for Java programs; needed for scoring sequences
+javaaddpath(JAR3Dpath)
+
 
 % -------------------------------------------------------------------- % run JAR3D on the selected motif group
 
 if isempty(MotifLibraryPath),
 	fprintf('No motif files found for %s\n',Release);
 else
-	OutputBase = pwd;                                                      % start Matlab in the directory containing IL and HL
-	JAR3Dpath = 'C:\Users\zirbel\Documents\GitHub\JAR3D\target\classes';   % location of class files for Java programs; needed for scoring sequences
-	javaaddpath(JAR3Dpath)
-
 	pMakeSCFGModels(MotifLibraryPath,OutputBase,Release,1)
 
 	pJAR3DDiagnostics(OutputBase,Release,Release,1)
