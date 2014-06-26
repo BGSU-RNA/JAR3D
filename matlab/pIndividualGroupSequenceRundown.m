@@ -275,7 +275,7 @@ for gg = 1:length(grouporder),                 % run through sequence groups
         Text{seqnum} = [Text{seqnum} num2str(numbetter) char(9)];
 
         if numbetter > 0,
-          fprintf(' scores better against %3d models: ', numbetter);
+          fprintf(' scores better against %3d groups: ', numbetter);
           for b = 1:min(NumBetterModelsToShow,numbetter),
             bmn = bettermodel(b);
             [thismlps,thisr] = max(Score(n,bmn,:));
@@ -297,7 +297,7 @@ for gg = 1:length(grouporder),                 % run through sequence groups
           end
           bestmodels(k) = bettermodel(1);
         elseif OwnCutoffMet,
-          fprintf(' matches the correct model, %s', GroupData(mn).Signature{1});
+          fprintf(' matches the original group, %s', GroupData(mn).Signature{1});
           bestmodels(k) = mn;
           Text{seqnum} = [Text{seqnum} 'OK'];
         else

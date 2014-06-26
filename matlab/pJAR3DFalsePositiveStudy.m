@@ -1,7 +1,7 @@
 % pJAR3DFalsePositiveStudy loops through sequence files corresponding to
 % a given motif, runs it against all models, and does diagnostics
 
-% First generate sequences with pGenerateRandomMotifSequences, then run this.
+% This program accumulates a large amount of data that is useful for exploring the behavior of randomly-generated sequences
 
 function [void] = pJAR3DFalsePositiveStudy(OutputBase,Release,Mode)
 
@@ -21,7 +21,8 @@ case 1                            % parse and calculate edit distance, which is 
   CalculateEditDistance = 0;
   PlotPercentileVersusDeficit = 0;
   AccumulateSequenceData = 0;
-  AccumulateFalsePositiveData = 0;
+  AccumulateRandomSequenceData = 0;       % data on sequences for each model
+  AccumulateFPData = 0;                   % detailed data about each sequence
   MinimumCutoffScore = -Inf;
 
   SequenceBySequence = 1;
@@ -38,12 +39,13 @@ case 2                            % accumulate false positive data, which is fas
   Params.CoreEditCutoff   = 5;            % generic cutoffs
   Params.PercentileCutoff = 0.0;          % generic cutoffs; do not impose a percentile cutoff
 
-  SequenceBySequence = 1;
+  SequenceBySequence = 0;
   CalculateAlignments = 0;
   CalculateEditDistance = 0;
   PlotPercentileVersusDeficit = 0;
   AccumulateSequenceData = 0;
-  AccumulateFalsePositiveData = 1;
+  AccumulateRandomSequenceData = 1;       % data on sequences for each model
+  AccumulateFPData = 0;                   % detailed data about each sequence
   MinimumCutoffScore = -Inf;
 
   SequenceBySequence = 1;
@@ -65,7 +67,8 @@ case 3                                    % run the diagnostic using model-speci
   SequenceBySequence = 1;
   PlotPercentileVersusDeficit = 0;
   AccumulateSequenceData = 0;
-  AccumulateFalsePositiveData = 0;
+  AccumulateRandomSequenceData = 0;       % data on sequences for each model
+  AccumulateFPData = 0;                   % detailed data about each sequence
   Depth = Inf;
   MinimumCutoffScore = 40;
 
@@ -118,7 +121,7 @@ fs = 14;                                 % font size for figures
 tfs = 13;                                % font size for text
 MaxSeqLength = 30;                       % maximum total length to send to JAR3D
 
-if Mode > 1,
+if Mode > 2,
   figure(1)
   clf
   figure(2)
@@ -132,112 +135,116 @@ case 'IL'
   numfiles = 20;
 end
 
+% --------------------------------- Determine number of rotations
+
+switch loopType,
+case 'JL'
+  Rotations = 3;                      % three rotations, for 3-way junctions
+case 'IL'
+  Rotations = 2;                      % two rotations are computed
+case 'HL'
+  Rotations = 1;                      % only one "rotation"
+end
+
+ModelPath = [pwd filesep Release filesep 'lib'];
+InteractionPath = ModelPath;
+
+% ---------------------------------------- Read data from models
+
+GroupData = pGetModelData(OutputPath,loopType);
+
+if Mode == 2,
+  for g = 1:length(GroupData),
+    GroupData(g).DeficitEditData = [];     % remove any existing data to make room for new
+  end
+end
+
+if ~isfield(GroupData,'MinScore') && Params.CutoffType == 3,
+  Params.CutoffType = 2;
+  fprintf('Using generic cutoffs because model-specific cutoffs are not yet defined\n');
+end
+
+for i = 1:length(GroupData),
+  GroupMaxScore(1,i) = max(GroupData(i).OwnScore);
+end
+
+Depth = min(Depth,length(GroupData));
+
+% ---------------------------------------- Tally sequence data
+
+for m = 1:length(GroupData),
+  SeqNames{m} = [GroupData(m).MotifID '.fasta'];
+end
+
+[FASTA, OwnMotif] = pConcatenateFASTASequences(ModelPath, SeqNames);
+
+clear seqlengths
+clear nummodelsbylengths
+
+switch loopType,
+case 'HL'
+  for s = 1:length(FASTA),
+    seqlengths(s,1) = length(FASTA(s).Sequence);
+  end
+  [uniqueseqlengths,i,j] = unique(seqlengths,'rows');
+
+  maxlengths = max(seqlengths);
+  nummodelsbylengths(maxlengths(1)+3,1) = 0;    % make enough space
+
+  for k = 1:length(i),
+    a = uniqueseqlengths(k,1);
+    nummodelsbylengths(a,1) = length(unique(OwnMotif(find(j==k))));
+  end
+
+  newlengths = [];
+
+  for k = 1:length(uniqueseqlengths(:,1)),
+    newlengths(end+1,:) = uniqueseqlengths(k,:) + 1;
+  end
+
+  [uniqueseqlengths,i,j] = unique([uniqueseqlengths; newlengths],'rows');
+
+  T = [seqlengths OwnMotif];
+  T = sortrows(T,[1 2]);
+case 'IL'
+  for s = 1:length(FASTA),
+    i = strfind(FASTA(s).Sequence,'*');
+    j = length(FASTA(s).Sequence) - i;
+    seqlengths(s,1) = min(i-1,j);
+    seqlengths(s,2) = max(i-1,j);
+  end
+  [uniqueseqlengths,i,j] = unique(seqlengths,'rows');
+
+  maxlengths = max(seqlengths);
+  nummodelsbylengths(maxlengths(1)+3,maxlengths(2)+3) = 0;    % make enough space
+
+  for k = 1:length(i),
+    a = uniqueseqlengths(k,1);
+    b = uniqueseqlengths(k,2);
+    nummodelsbylengths(a,b) = length(unique(OwnMotif(find(j==k))));
+  end
+
+  newlengths = [];
+
+  for k = 1:length(uniqueseqlengths(:,1)),
+    if uniqueseqlengths(k,1) < uniqueseqlengths(k,2),
+      newlengths(end+1,:) = uniqueseqlengths(k,:) + [1 0];
+    end
+    newlengths(end+1,:) = uniqueseqlengths(k,:) + [0 1];
+    newlengths(end+1,:) = uniqueseqlengths(k,:) + [1 1];
+  end
+
+  [uniqueseqlengths,i,j] = unique([uniqueseqlengths; newlengths],'rows');
+
+  T = [seqlengths OwnMotif];
+  T = sortrows(T,[1 2 3]);
+end
+
 for seqfilenumber = 1:numfiles,                           % loop through files of random sequences
 
   SVN = [loopType '_FalsePositiveRateTest_' num2str(seqfilenumber) '.fasta'];   % randomly-generated sequences
   SVN = [loopType '_RandomMotifSequences_' num2str(seqfilenumber) '.fasta'];   % randomly-generated sequences
   SVN = [loopType '_RandomMotifSequencesNonCan_50_' num2str(seqfilenumber) '.fasta'];   % randomly-generated sequences
-
-  % --------------------------------- Determine number of rotations
-
-  loopType = SVN(1:2);
-
-  switch loopType,
-  case 'JL'
-    Rotations = 3;                      % three rotations, for 3-way junctions
-  case 'IL'
-    Rotations = 2;                      % two rotations are computed
-  case 'HL'
-    Rotations = 1;                      % only one "rotation"
-  end
-
-  ModelPath = [pwd filesep Release filesep 'lib'];
-  InteractionPath = ModelPath;
-
-  % ---------------------------------------- Read data from models
-
-  GroupData = pGetModelData(OutputPath,loopType);
-
-  if ~isfield(GroupData,'MinScore') && Params.CutoffType == 3,
-    Params.CutoffType = 2;
-    fprintf('Using generic cutoffs because model-specific cutoffs are not yet defined\n');
-  end
-
-  for i = 1:length(GroupData),
-    GroupMaxScore(1,i) = max(GroupData(i).OwnScore);
-  end
-
-  Depth = min(Depth,length(GroupData));
-
-  % ---------------------------------------- Tally sequence data
-
-  for m = 1:length(GroupData),
-    SeqNames{m} = [GroupData(m).MotifID '.fasta'];
-  end
-
-  [FASTA, OwnMotif] = pConcatenateFASTASequences(ModelPath, SeqNames);
-
-	clear seqlengths
-	clear nummodelsbylengths
-
-	switch loopType,
-	case 'HL'
-		for s = 1:length(FASTA),
-			seqlengths(s,1) = length(FASTA(s).Sequence);
-		end
-	  [uniqueseqlengths,i,j] = unique(seqlengths,'rows');
-
-    maxlengths = max(seqlengths);
-    nummodelsbylengths(maxlengths(1)+3,1) = 0;    % make enough space
-
-		for k = 1:length(i),
-			a = uniqueseqlengths(k,1);
-			nummodelsbylengths(a,1) = length(unique(OwnMotif(find(j==k))));
-		end
-
-    newlengths = [];
-
-    for k = 1:length(uniqueseqlengths(:,1)),
-      newlengths(end+1,:) = uniqueseqlengths(k,:) + 1;
-    end
-
-    [uniqueseqlengths,i,j] = unique([uniqueseqlengths; newlengths],'rows');
-
-		T = [seqlengths OwnMotif];
-		T = sortrows(T,[1 2]);
-	case 'IL'
-		for s = 1:length(FASTA),
-			i = strfind(FASTA(s).Sequence,'*');
-			j = length(FASTA(s).Sequence) - i;
-			seqlengths(s,1) = min(i-1,j);
-			seqlengths(s,2) = max(i-1,j);
-		end
-	  [uniqueseqlengths,i,j] = unique(seqlengths,'rows');
-
-    maxlengths = max(seqlengths);
-    nummodelsbylengths(maxlengths(1)+3,maxlengths(2)+3) = 0;    % make enough space
-
-    for k = 1:length(i),
-      a = uniqueseqlengths(k,1);
-      b = uniqueseqlengths(k,2);
-      nummodelsbylengths(a,b) = length(unique(OwnMotif(find(j==k))));
-    end
-
-    newlengths = [];
-
-    for k = 1:length(uniqueseqlengths(:,1)),
-      if uniqueseqlengths(k,1) < uniqueseqlengths(k,2),
-        newlengths(end+1,:) = uniqueseqlengths(k,:) + [1 0];
-      end
-      newlengths(end+1,:) = uniqueseqlengths(k,:) + [0 1];
-      newlengths(end+1,:) = uniqueseqlengths(k,:) + [1 1];
-    end
-
-    [uniqueseqlengths,i,j] = unique([uniqueseqlengths; newlengths],'rows');
-
-		T = [seqlengths OwnMotif];
-		T = sortrows(T,[1 2 3]);
-	end
 
   % ---------------------------------------------------------------------
 
@@ -260,43 +267,44 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
 	  diary(LogFile);
 	end
 
-  FASTA = zReadFASTA([ModelPath filesep SVN]);
-  fprintf('Read random sequence variant file %s\n', SVN);
+  DataFile = [DiagnosticPath filesep CF '.mat'];
+  StatusFile = [DiagnosticPath filesep CF '_being_analyzed.txt'];
+  Skip = 0;
 
-  if length(FASTA) > 0,
-    for n = 1:length(FASTA),
-      FASTA(n).MotifGroup = 'Randomly-generated';
-      FASTA(n).Locus = '';
-      FASTA(n).Multiplicity = 1;
-    end
-
-    NumSequences = length(FASTA);
-
-    SeqGroup = ones(NumSequences,1) * 0;
-    OwnMotif = ones(NumSequences,1) * 0;
-
-    DataFile = [DiagnosticPath filesep CF '.mat'];
-    StatusFile = [DiagnosticPath filesep CF '_being_analyzed.txt'];
-    Skip = 0;
-
-    if exist(DataFile,'file'),
-      if Mode > 1,
-        load(DataFile);
-        fprintf('Loaded data file %s\n',DataFile);
-        FirstTime = 0;
-      else
-        Skip = 1;
-      end
-    elseif exist(StatusFile,'file') && Mode == 1,   % parsing random sequences, which is slow
-      Skip = 1;
+  if exist(DataFile,'file'),
+    if Mode > 1,
+      load(DataFile);
+      fprintf('Loaded data file %s\n',DataFile);
+      FirstTime = 0;
     else
-      FirstTime = 1;
-      fid = fopen(StatusFile,'w');
-      fprintf(fid,'Currently being analyzed\n');
-      fclose(fid);
+      Skip = 1;
     end
+  elseif exist(StatusFile,'file') && Mode == 1,   % parsing random sequences, which is slow
+    Skip = 1;
+  else
+    FirstTime = 1;
+    fid = fopen(StatusFile,'w');
+    fprintf(fid,'Currently being analyzed\n');
+    fclose(fid);
+  end
 
-    if Skip == 0 && (CalculateEditDistance > 0 || FirstTime > 0),
+  if Skip == 0 && (CalculateEditDistance > 0 || FirstTime > 0),
+
+    FASTA = zReadFASTA([ModelPath filesep SVN]);
+    fprintf('Read random sequence variant file %s\n', SVN);
+
+    if length(FASTA) > 0,
+      for n = 1:length(FASTA),
+        FASTA(n).MotifGroup = 'Randomly-generated';
+        FASTA(n).Locus = '';
+        FASTA(n).Multiplicity = 1;
+      end
+
+      NumSequences = length(FASTA);
+
+      SeqGroup = ones(NumSequences,1) * 0;
+      OwnMotif = ones(NumSequences,1) * 0;
+
       % ----------------------- Calculate edit distance between FASTA and 3D instances
       clear CoreEditDistance
       clear FullEditDistance
@@ -317,24 +325,28 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
         end
       end
 
-      fprintf('\nFinding full edit distance of %4d sequences against %4d models\n', NumSequences, length(GroupData));
-      for m = 1:length(GroupData),
-        ModelFASTA = zReadFASTA([ModelPath filesep GroupData(m).MotifID '.fasta']);
+      if FindFullEditDistance > 0,
+        fprintf('\nFinding full edit distance of %4d sequences against %4d models\n', NumSequences, length(GroupData));
+        for m = 1:length(GroupData),
+          ModelFASTA = zReadFASTA([ModelPath filesep GroupData(m).MotifID '.fasta']);
 
-        [D1,D2,D3] = pEditDistance(FASTA,ModelFASTA,loopType,'full');
+          [D1,D2,D3] = pEditDistance(FASTA,ModelFASTA,loopType,'full');
 
-        FullEditDistance(:,m,1) = min(D2,[],2);     % best match of full seq
-        if strcmp(loopType,'IL'),
-          FullEditDistance(:,m,2) = min(D3,[],2);     % best match of full rev'd
+          FullEditDistance(:,m,1) = min(D2,[],2);     % best match of full seq
+          if strcmp(loopType,'IL'),
+            FullEditDistance(:,m,2) = min(D3,[],2);     % best match of full rev'd
+          end
+
+          if mod(m,50) == 0,
+            fprintf('Checked edit distance for %4d models so far\n', m);
+          end
         end
-
-        if mod(m,50) == 0,
-          fprintf('Checked edit distance for %4d models so far\n', m);
-        end
+      else
+        FullEditDistance = 99 * ones(size(CoreEditDistance));
       end
     end
 
-		if Skip == 0 && (CalculateAlignments > 0 || FirstTime > 0),
+		if Skip == 0 && (CalculateAlignments > 0 || FirstTime > 0) && length(FASTA) > 0,
       % OwnMotif maps from sequence to MotifName index
       % SeqGroup maps from sequence to 1:L, where L is the number of sequence groups
       %   Each different sequence group gets a different number
@@ -362,13 +374,10 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
         for r = 1:Rotations,
           MN = [ModelPath filesep GroupData(m).MotifID '_model.txt'];
           S = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifParseSingle(pwd,AllSequencesFile{r},MN);
-%          T = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifTotalProbSingle(pwd,AllSequencesFile{r},MN);
-
-          MixedScore = -(GroupData(m).DeficitCoeff * (max(GroupData(m).OwnScore) - S) + GroupData(m).CoreEditCoeff * CoreEditDistance(:,m,r));
-
-%          Q = edu.bgsu.rna.jar3d.JAR3DMatlab.getQuantilesFromFile(MixedScore,quantileFile);
-
           MLPS(:,m,r) = S;          % max log probability score for each sequence
+%          T = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifTotalProbSingle(pwd,AllSequencesFile{r},MN);
+%          MixedScore = -(GroupData(m).DeficitCoeff * (max(GroupData(m).OwnScore) - S) + GroupData(m).CoreEditCoeff * CoreEditDistance(:,m,r));
+%          Q = edu.bgsu.rna.jar3d.JAR3DMatlab.getQuantilesFromFile(MixedScore,quantileFile);
 %          TotalProb(:,m,r) = T;     % total probability score for each sequence
 %          Percentile(:,m,r) = Q;    % percentile of this score
           TotalProb(:,m,r) = zeros(size(S));     % total probability score for each sequence
@@ -400,7 +409,11 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
       end
 
     end
+  end
 
+  NumSequences = length(FASTA);
+
+  if length(FASTA) > 0,  
     if Skip == 0 && Mode > 1,
 
       % --------------------- Evaluate whether each sequence meets the cutoff for each model
@@ -413,7 +426,29 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
           [CutoffMet(:,mm,r) CutoffScore(:,mm,r)] = pModelSpecificCutoff(GroupData(mm),Features,Params);
         end
       end
+    end
 
+    if Skip == 0 && Mode == 2 && AccumulateRandomSequenceData > 0,
+      MaxScore = zeros(size(MLPS));
+      for g = 1:length(GroupData),
+        MaxScore(:,g,:) = max(GroupData(g).OwnScore);
+      end
+
+      Deficit = max(0,MaxScore - MLPS);          % some might be negative; better score than own model, a strange occurrence
+
+      MixedScore = Deficit + 3*CoreEditDistance;
+
+      for g = 1:length(GroupData),
+        [y,br] = min(MixedScore(:,g,:),[],3);      % find the rotation which minimizes the mixed score; this is the best rotation
+        for r = 1:Rotations,
+          i = find((br == r) .* (Deficit(:,g,r) <= Params.DeficitCutoff) .* (CoreEditDistance(:,g,r) <= Params.CoreEditCutoff));
+          GroupData(g).DeficitEditData = [GroupData(g).DeficitEditData; [Deficit(i,g,r) CoreEditDistance(i,g,r)]];
+        end
+      end
+    end
+
+
+    if Skip == 0 && Mode > 2,
       % --------------------- Evaluate whether each sequence meets the cutoff for each model
 
       GenericCutoffMet = zeros(size(MLPS));
@@ -684,14 +719,12 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
 
             if cut > 0,
               mm = [mm cmn];
-  %            [zz,r] = max(MLPS(n,cmn,:));
               [cut,r] = max(CutoffScore(n,cmn,:));                         % find rotation that maximizes the score
               rm = [rm r];
             end
 
             if cut > MinimumCutoffScore,
               gmm = [gmm cmn];
-  %            [zz,r] = max(MLPS(n,cmn,:));
               [cut,r] = max(CutoffScore(n,cmn,:));                         % find rotation that maximizes the score
               grm = [grm r];
             end
@@ -719,7 +752,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
   			        FPModelCounter(mm) = FPModelCounter(mm) + 1;
   			      end
 
-  		        if AccumulateFalsePositiveData > 0,
+  		        if AccumulateFPData > 0,
   			        SD.Percentile   = Percentile(n,mm,rm);
   			        SD.Deficit      = max(GroupData(mm).OwnScore)-MLPS(n,mm,rm);
   			        SD.CoreEdit     = CoreEditDistance(n,mm,rm);
@@ -735,7 +768,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
   			        SD.MotifID      = GroupData(mm).MotifID;
 
   			        if mod(FPCounter,1000) == 0,
-  			          FPData(FPCounter + 1000) = SD;
+  			          SD(FPCounter + 1000) = SD;
   			        end
 
   			        FPCounter = FPCounter + 1;
@@ -861,7 +894,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
 	  end
 	end
 
-  if AccumulateFalsePositiveData > 0,
+  if AccumulateFPData > 0,
     FPData = FPData(1:FPCounter);
   % [DiagnosticPath filesep loopType '_Random_Sequence_Data.mat'],'SequenceData');
     save([OutputPath filesep loopType '_Random_Sequence_Data_FP_Only.mat'],'FPData');
@@ -870,15 +903,15 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
 
 %  FPModelIDs = cat(1,FPData.MotifID);
 
-  if Mode > 1,
+  if Mode > 2,
     FPModelCounter = FPModelCounter(1:length(GroupData));
     [y,i] = sort(FPModelCounter,1,'ascend');
     for k = 1:length(i),
       GD = GroupData(i(k));
       if isfield(GroupData,'TruePositiveRate')
-    		fprintf('Model %-11s gave a false positive %3d times, TP %6.2f%%, TN %6.2f%%, %3d instances, signature %s, sequence %s\n', GD.MotifID,FPModelCounter(i(k)),100*GD.TruePositiveRate,100*GD.TrueNegativeRate,GD.NumInstances,GD.Signature{1},GD.OwnSequence{1});
+    		fprintf('Model %-11s matched a sequence %3d times, TP %6.2f%%, TN %6.2f%%, %3d instances, signature %s, sequence %s\n', GD.MotifID,FPModelCounter(i(k)),100*GD.TruePositiveRate,100*GD.TrueNegativeRate,GD.NumInstances,GD.Signature{1},GD.OwnSequence{1});
       else
-        fprintf('Model %-11s gave a false positive %3d times, TP        , TN        , %3d instances, signature %s, sequence %s\n', GD.MotifID,FPModelCounter(i(k)),GD.NumInstances,GD.Signature{1},GD.OwnSequence{1});
+        fprintf('Model %-11s matched a sequence %3d times, TP        , TN        , %3d instances, signature %s, sequence %s\n', GD.MotifID,FPModelCounter(i(k)),GD.NumInstances,GD.Signature{1},GD.OwnSequence{1});
     	end
     end
     fprintf('Overall false positive rate is %0.4f%%\n', 100*sum(Match(:,1,1))/SequenceCounter);
@@ -894,6 +927,11 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
     xlabel('Number of false positives');
     ylabel('Number of models');
   end
+end
+
+if Mode == 2 && AccumulateRandomSequenceData > 0,
+  save([OutputPath filesep loopType '_GroupData.mat'],'GroupData');
+  fprintf('Saved group data\n');
 end
 
 if 0 > 1,

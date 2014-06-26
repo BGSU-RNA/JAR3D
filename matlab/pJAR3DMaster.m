@@ -1,6 +1,6 @@
 % pJAR3DMaster runs JAR3D to make SCFG models, produce diagnostics
 
-Release = ['IL' filesep '1.15'];
+Release = ['IL' filesep '1.13'];
 MotifLibraryLocation = 'C:\Users\zirbel\Documents\Motifs\';
 MotifLibraryPath = '';
 

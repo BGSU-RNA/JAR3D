@@ -1,4 +1,5 @@
-% pSetModelSpecificCutoffs sets model-specific cutoffs using data from alignments and randomly-generated data
+% pSetModelSpecificCutoffsSimple sets model-specific cutoffs using data from alignments and randomly-generated data
+% The "Simple" version of this program uses deficit and edit distance data stored in GroupData and does not do so many diagnostics
 
 % Each sequence is represented by a structured variable whose fields are:
 % .Deficit
@@ -15,13 +16,7 @@
 % .NumFixed
 % .Basepairs
 
-function [void] = pSetModelSpecificCutoffs(OutputBase,Release,UseAlignmentSequences)
-
-if nargin < 3,
-	UseAlignmentSequences = 2;               % use alignment sequences to set cutoffs and show them too
-	UseAlignmentSequences = 1;               % show alignment sequences but don't use them to set cutoffs
-	UseAlignmentSequences = 0;               % don't use or show alignment sequences
-end
+function [void] = pSetModelSpecificCutoffs(OutputBase,Release)
 
 Params.DeficitCutoff    = 20;
 Params.CoreEditCutoff   = 5;
@@ -29,15 +24,7 @@ Params.CoreEditCutoff   = 5;
 Grayscale = 1;                              % plot in grayscale for the paper or in color for talks
 tfs = 13;
 
-if UseAlignmentSequences == 2,
-	NumAlignmentSequencesNeeded = 20;           % number for cutoffs based on alignment and random sequences
-else
-	NumAlignmentSequencesNeeded = Inf;          % for cutoffs based only on random sequences
-end
-
 Show2dPlots = 0;
-Show3dPlots = 0;
-Save3DPlots = 0;
 SaveDeficitCoreEditPlot = 1;
 SaveGroupData = 1;
 ListSequences = 0;
@@ -46,10 +33,6 @@ CoreEditCutoff = 5;
 MaxNumFP = [200 200 400 500 600 800 1000];  % maximum number of false positives according to number of conserved basepairs
 MaxNumFP = [MaxNumFP Inf * ones(1,200)];
 Params.CutoffType = 2;
-
-if Save3DPlots > 0,
-	Show3dPlots = 1;
-end
 
 Release = strrep(Release,'/',filesep);
 Release = strrep(Release,'\',filesep);
@@ -76,26 +59,6 @@ if ~(exist(MSCOutputPath) == 7),        % if directory doesn't yet exist
   mkdir(MSCOutputPath);
 end
 
-if UseAlignmentSequences > 0 && ~exist('AlignmentData'),
-	load([OutputPath filesep loopType '_Alignment_Sequence_Data.mat']);
-	AlignmentData = SequenceData;
-	clear SequenceData
-
-	if isfield(AlignmentData,'Percentile'),
-		AlignmentData = rmfield(AlignmentData,'Percentile');
-	end
-
-	AlignmentDataMotifIDs = cell(1,length(AlignmentData));
-	for i = 1:length(AlignmentData),
-		AlignmentDataMotifIDs{i} = AlignmentData(i).MotifID;
-	end
-
-	fprintf('Loaded data from %d sequences from alignments\n',length(AlignmentData));
-else
-	AlignmentData = [];
-	AlignmentDataMotifIDs = {};
-end
-
 [y,motiforder] = sort(cat(1,GroupData.NumNT),1,'ascend');
 
 motiforder = 1:length(GroupData);
@@ -113,58 +76,24 @@ for iii = 1:length(GroupData),
 	
 	CurrentMotif = GroupData(motifnum).MotifID;
 
-	% -------------------------- filter out poor alignment data
 
-	k = find(ismember(AlignmentDataMotifIDs,CurrentMotif));
-  SequenceData = AlignmentData(k);
 
-  if length(SequenceData) > 0,
-		ce = cat(1,SequenceData.CoreEdit);
-		k = find(ce <= CoreEditCutoff);
-		SequenceData = SequenceData(k);
+	% ---------------------------- record data from 3D instances
 
-		def = cat(1,SequenceData.Deficit);
-		k = find(def <= Params.DeficitCutoff);
-		SequenceData = SequenceData(k);
-	  fprintf('Removed based on deficit, %d sequences remaining\n',length(SequenceData));
-		fprintf('%10d sequences from alignments with deficits between %d %d\n', length(SequenceData), 0, Params.DeficitCutoff);
-
-		[y,k] = sort(rand(1,length(SequenceData)));         % randomize order
-		SequenceData = SequenceData(k);
-	end
-
-	% ---------------------------- record data from motif group
-
+  co = 1;
 	clear NSD
-	for co = 1:GroupData(motifnum).NumInstances,
-		NSD(co).Deficit      = max(GroupData(motifnum).OwnScore) - GroupData(motifnum).OwnScore(co);
-		NSD(co).CoreEdit     = 0;
-		NSD(co).FullEdit     = 0;
-		NSD(co).Conserved    = GroupData(motifnum).NumNT;
-		NSD(co).NumInstances = GroupData(motifnum).NumInstances;
-		NSD(co).MLPS         = GroupData(motifnum).OwnScore(co);
-		NSD(co).Length       = length(GroupData(motifnum).OwnSequence{co}) - length(strfind(GroupData(motifnum).OwnSequence{co},'*'));
-		NSD(co).Source       = 0;                                    % from 3D structures
-		NSD(co).Basepairs    = GroupData(motifnum).NumBasepairs;
-		NSD(co).NumFixed     = GroupData(motifnum).NumFixed;
-		NSD(co).MotifID      = GroupData(motifnum).MotifID;
-		NSD(co).Sequence     = GroupData(motifnum).OwnSequence{1};
+	for q = 1:GroupData(motifnum).NumInstances,
+		NSD(q,1) = max(GroupData(motifnum).OwnScore) - GroupData(motifnum).OwnScore(q);  % deficit
+		NSD(q,2) = 0;                                                                    % core edit distance
 	end
 
-	fprintf('%d sequences from 3D structures\n',length(NSD));
+	fprintf('%3d sequences from 3D structures\n', GroupData(motifnum).NumInstances);
 
-	% ---------------------------- record data from random sequences
+	AllSD = [NSD; GroupData(motifnum).DeficitEditData];             % put sequences from 3D first
 
-	AllSD = [NSD SequenceData];      % put sequences from 3D first
+	if length(AllSD) > 0,
 
-	RSNum = length(GroupData(motifnum).DeficitEditData(:,1));
-
-	fprintf('Using %d random sequences, %d from an alignment, and %d from 3D structures\n', RSNum, length(SequenceData), length(NSD));
-
-	if RSNum + length(AllSD) > 0,
-
-		clear SequenceData
-
+		% ----------------------------------- put all sequences in random order to avoid visual effects
 		Keep = ones(1,length(AllSD));
 		for i = 1:length(AllSD),
 			if isempty(AllSD(i).CoreEdit),
@@ -172,6 +101,7 @@ for iii = 1:length(GroupData),
 			end
 		end
 		AllSD = AllSD(find(Keep));
+		LL = length(AllSD);
 
 		Source = cat(1,AllSD.Source);
 
@@ -185,22 +115,6 @@ for iii = 1:length(GroupData),
 		SD(:,7) = cat(1,AllSD.MLPS);
 		SD(:,10) = cat(1,AllSD.NumFixed);
 		SD(:,11) = cat(1,AllSD.Basepairs);
-
-		clear RSD
-		RSD(:,1) = cat(1,GroupData(motifnum).DeficitEditData(:,1));
-		RSD(:,2) = cat(1,GroupData(motifnum).DeficitEditData(:,2));
-		RSD(:,3) = 99 * ones(RSNum,1);                                % just pretend
-		RSD(:,4) = zeros(RSNum,1);                                    % just pretend
-		RSD(:,5) = GroupData(motifnum).NumNT * ones(RSNum,1);
-		RSD(:,6) = RSD(:,3) - RSD(:,2);
-		RSD(:,7) = max(GroupData(motifnum).OwnScore) - RSD(:,1);
-		RSD(:,10) = GroupData(motifnum).NumFixed * ones(RSNum,1);
-		RSD(:,11) = GroupData(motifnum).NumBasepairs * ones(RSNum,1);
-
-		SD = [SD; RSD];              % append randomly-generated sequences
-		Source = [Source; 2*ones(RSNum,1)];
-
-		LL = length(Source);
 
 		clear SDR
 		SDR(:,1) = SD(:,1);
@@ -285,7 +199,6 @@ for iii = 1:length(GroupData),
 		end
 
 		DeficitCoeff = GroupData(motifnum).DeficitCoeff;
-		GroupData(motifnum).CoreEditCoeff = 3;               % insist on this being 3
 		CoreEditCoeff = GroupData(motifnum).CoreEditCoeff;
 		Coeff = [DeficitCoeff CoreEditCoeff];
 
@@ -611,7 +524,7 @@ if isfield(GroupData,'ScoreEditCutoff'),
 		TP(m) = GroupData(m).TruePositiveRate;
 		TN(m) = GroupData(m).TrueNegativeRate;
 		fprintf('Group %3d, %-11s has acceptance rules %8.4f - AlignmentScore <= %8.4f, CoreEdit <= %d, and %8.4f * (%8.4f - AlignmentScore) + %8.4f * CoreEdit <= %8.4f, method %2d,',m, GD.MotifID, max(GD.OwnScore), GD.DeficitCutoff, GD.CoreEditCutoff, GD.DeficitCoeff, max(GD.OwnScore), GD.CoreEditCoeff, GD.DeficitEditCutoff, GD.CutoffMethod);
-		fprintf('TP %8.2f%%, TN %8.2f%%, min %8.2f%%, %3d 3D sequences, %5d alignment sequences, %5d random sequences, %4d random matches, %2d NTs, %s\n',100*GD.TruePositiveRate, 100*GD.TrueNegativeRate, 100*min(GD.TruePositiveRate,GD.TrueNegativeRate), GD.NumInstances, GD.NumberOfAlignmentSequences, GD.NumberOfRandomSequences, GD.NumberOfFalsePositives, GD.NumNT, GD.Signature{1});
+		fprintf('TP %8.2f%%, TN %8.2f%%, min %8.2f%%, %3d 3D sequences, %5d alignment sequences, %4d random sequences, %4d random matches, %2d NTs, %s\n',100*GD.TruePositiveRate, 100*GD.TrueNegativeRate, 100*min(GD.TruePositiveRate,GD.TrueNegativeRate), GD.NumInstances, GD.NumberOfAlignmentSequences, GD.NumberOfRandomSequences, GD.NumberOfFalsePositives, GD.NumNT, GD.Signature{1});
 	end
 
 	if 0 > 1,
