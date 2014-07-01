@@ -62,7 +62,7 @@ NBS = NumBetterScore;
 
 % fprintf('%d comparisons were made\n', length(NBS));
 
-figure(17)
+figure(1)
 clf
 maxrank = 10;
 n = hist(min(NBS(NBS >= 0),maxrank),0:maxrank);

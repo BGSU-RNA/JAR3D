@@ -358,7 +358,7 @@ end
 
 % --------------------- Histogram Cutoff Score against own model
 
-figure(8)
+figure(1)
 clf
 hist(OwnCutoffScore,30)
 h = findobj(gca,'Type','patch');
@@ -374,83 +374,6 @@ for m = 1:length(q),
 end
 print(gcf,'-dpng',[DiagnosticPath filesep 'Own_CutoffScore_Histogram' DM{DiagnosticMode} '.png']);
 
-% ------------------------------- Scatterplot of own percentile and own deficit
-
-figure(9)
-scatter(OwnDeficit,100*OwnPercentile,4,min(6,abs(ExcessSeqLength)),'filled');
-xlabel('Alignment score deficit; colored by excess sequence length, max 6');
-ylabel('Percentile against own model');
-title(['Scores of ' loopType ' sequences from 3D against their own models'])
-colorbar('eastoutside')
-axis([0 15 0 100]);
-
-% ------------------------------- Scatterplot of own percentile and own deficit
-
-figure(10)
-scatter(OwnDeficit,100*OwnPercentile,4,min(10,cat(1,GroupData(OwnMotif).NumNT)),'filled');
-hold on
-xlabel('Alignment score deficit; colored by number of conserved nucleotides, max 10');
-ylabel('Percentile against own model');
-title(['Scores of ' loopType ' sequences from 3D against their own models'])
-colorbar('eastoutside')
-axis([0 15 0 100]);
-print(gcf,'-dpng',[DiagnosticPath filesep 'Percentile_Deficit.png'])
-print(gcf,'-dpdf',[DiagnosticPath filesep 'Percentile_Deficit.pdf'])
-
-% ------------------------------- Histogram percentile against own model
-
-figure(11)
-clf
-hist(OwnPercentile,30);
-h = findobj(gca,'Type','patch');
-set(h,'facecolor',[0.4 0.4 0.4]);
-title('Percentile of MixedScore of each sequence from 3D against its group','fontsize',fs);
-xlabel('Percentile of MixedScore');
-ax = axis;
-q = [0.999 0.99 0.98 0.97 0.96 0.95 0.9];
-for m = 1:length(q),
-  text(ax(1)+0.1*(ax(2)-ax(1)), (0.9-0.08*m)*ax(4), sprintf('%5.2f%% score higher than %7.3f', 100*sum(OwnPercentile > q(m))/NumSequences, q(m)));
-end
-set(gca,'fontsize',fs)
-print(gcf,'-dpng',[DiagnosticPath filesep 'Own_Percentile_Histogram' DM{DiagnosticMode} '.png']);
-
-% ------------------------------- Min, median, and max own percentile
-
-figure(12)
-clf
-gmed = zeros(1,NumSeqGroups);        % group median percentile
-gmax = zeros(1,NumSeqGroups);        % group maximum percentile
-gmin = zeros(1,NumSeqGroups);        % group minimum percentile
-
-for g = 1:NumSeqGroups,
-  n = find(SeqGroup == g);        % sequences from sequence group g
-  if ~isempty(n),
-    OP = [];
-    for j = 1:length(n),
-      s = n(j);                            % current sequence
-      OP = [OP; ones(FASTA(s).Multiplicity,1)*OwnPercentile(s)];
-    end
-    gmed(g) = median(OP);
-    gmin(g) = min(OP);
-    gmax(g) = max(OP);
-  end
-end
-
-[y,i] = sort(gmin);
-gmin = gmin(i);
-gmed = gmed(i);
-gmax = gmax(i);
-
-plot(1:NumSeqGroups, gmin, 'r.');
-hold on
-plot(1:NumSeqGroups, gmed, 'b.');
-plot(1:NumSeqGroups, gmax, 'g.');
-title('Min, median, max of percentiles of sequences against their own group model','fontsize',fs);
-xlabel('Groups sorted by minimum percentile','fontsize',fs)
-ylabel('Min (red) median (blue) max (green)','fontsize',fs);
-set(gca,'fontsize',fs)
-print(gcf,'-dpng',[DiagnosticPath filesep 'Own_Percentile_Min_Max_Med_By_Group' DM{DiagnosticMode} '.png']);
-
 % ------------------------------- Group-group diagnostic, all groups
 % ------------------------------- Count models with better MLPS and Percentiles
 
@@ -458,7 +381,7 @@ OnlyStructured = 0;
 
 NBS = pGroupGroupDiagnostic(NumSeqGroups,GroupData,OnlyStructured,FASTA,MLPS,OwnMotif,SeqGroup);
 
-figure(13)
+figure(1)
 clf
 T = ['MLP group-group diagnostic, ' num2str(NumSeqGroups) ' sequence groups against ' num2str(length(GroupData)) ' models'];
 pHistogramNumBetterScore(NBS,T,fs);
@@ -472,7 +395,7 @@ OnlyStructured = 1;
 
 NBS = pGroupGroupDiagnostic(NumSeqGroups,GroupData,OnlyStructured,FASTA,MLPS,OwnMotif,SeqGroup);
 
-figure(14)
+figure(1)
 clf
 
 NumStructured = sum(cat(1,GroupData.Structured)==1);
@@ -487,7 +410,7 @@ OnlyStructured = 0;
 
 NBS = pIndividualGroupDiagnostic(GroupData,OnlyStructured,OwnMotif,MLPS);
 
-figure(15)
+figure(1)
 T = ['MLP individual-group diagnostic, ' num2str(NumSequences) ' sequences against ' num2str(length(GroupData)) ' models'];
 
 pHistogramNumBetterScoreIndividual(NBS,abs(ExcessSeqLength),T,fs);
@@ -496,7 +419,7 @@ ylabel('Colored by difference in sequence length','fontsize',fs);
 print(gcf,'-dpng',[DiagnosticPath filesep 'Individual_Group' DM{DiagnosticMode} '.png']);
 
 
-figure(24)
+figure(2)
 clf
 T = ['MLP individual-group diagnostic, ' num2str(NumSequences) ' sequences against ' num2str(length(GroupData)) ' models'];
 cc = ceil(1 + 10*(cat(1,GroupData.NumBasepairs)-2)./cat(1,GroupData.NumNT));
@@ -525,101 +448,6 @@ fclose(fid);
 
 diary off
 
-% ------------------------------- Group-group diagnostic, all groups
-% ------------------------------- Count models with better TotalProb and Percentiles
-
-OnlyStructured = 0;
-
-NBS = pGroupGroupDiagnostic(NumSeqGroups,GroupData,OnlyStructured,FASTA,TotalProb,OwnMotif,SeqGroup);
-
-figure(20)
-clf
-T = ['Total prob group-group diagnostic, ' num2str(NumSeqGroups) ' sequence groups against ' num2str(length(GroupData)) ' models'];
-pHistogramNumBetterScore(NBS,T,14);
-
-print(gcf,'-dpng',[DiagnosticPath filesep 'Group_Group_Total_Prob' DM{DiagnosticMode} '.png']);
-
-% ------------------------------- Structured Group-group diagnostic
-% ------------------------------- Count models with better MLPS and Percentiles
-
-OnlyStructured = 1;
-
-NBS = pGroupGroupDiagnostic(NumSeqGroups,GroupData,OnlyStructured,FASTA,TotalProb,OwnMotif,SeqGroup);
-
-figure(21)
-clf
-
-T = ['Total prob structured group-group diagnostic, ' num2str(sum(cat(GroupData.Structured))) ' sequence groups against ' num2str(sum(cat(GroupData.Structured))) ' models'];
-pHistogramNumBetterScore(NBS,T,14);
-
-print(gcf,'-dpng',[DiagnosticPath filesep 'Group_Group_Total_Prob_Structured' DM{DiagnosticMode} '.png']);
-
-% ------------------------------- Individual-group diagnostic, total probability
-
-OnlyStructured = 0;
-
-NBS = pIndividualGroupDiagnostic(GroupData,OnlyStructured,OwnMotif,TotalProb);
-
-figure(22)
-T = ['Total prob individual-group diagnostic, ' num2str(NumSequences) ' sequences against ' num2str(length(GroupData)) ' models'];
-
-pHistogramNumBetterScoreIndividual(NBS,abs(ExcessSeqLength),T,14);
-ylabel('Colored by difference in sequence length','fontsize',fs);
-
-print(gcf,'-dpng',[DiagnosticPath filesep 'Individual_Group_Total_Prob' DM{DiagnosticMode} '.png']);
-
-% -------------------------------- Individual-group, structured only
-
-OnlyStructured = 1;
-
-NBS = pIndividualGroupDiagnostic(GroupData,OnlyStructured,OwnMotif,TotalProb);
-
-figure(23)
-clf
-
-T = ['Total prob structured individual-group diagnostic, ' num2str(sum(cat(GroupData(OwnMotif).Structured))) ' sequences against ' num2str(sum(cat(GroupData.Structured))) ' models'];
-
-pHistogramNumBetterScoreIndividual(NBS,abs(ExcessSeqLength),T,14);
-ylabel('Colored by difference in sequence length','fontsize',fs);
-
-print(gcf,'-dpng',[DiagnosticPath filesep 'Individual_Group_Total_Prob_Structured' DM{DiagnosticMode} '.png']);
-
-% -------------------------------- Individual-group, structured only
-
-OnlyStructured = 1;
-
-NBS = pIndividualGroupDiagnostic(GroupData,OnlyStructured,OwnMotif,TotalProb);
-
-figure(16)
-clf
-
-T = ['Structured individual-group diagnostic, ' num2str(sum(cat(GroupData(OwnMotif).Structured))) ' sequences against ' num2str(sum(cat(GroupData.Structured))) ' models'];
-
-pHistogramNumBetterScoreIndividual(NBS,abs(ExcessSeqLength),T,fs);
-ylabel('Colored by difference in sequence length','fontsize',fs);
-
-print(gcf,'-dpng',[DiagnosticPath filesep 'Individual_Group_Structured' DM{DiagnosticMode} '.png']);
-
-% ------------------------------- Individual-group edit distance diagnostic
-% ------------------------------- This is hard to do, because you should exclude edit distances of 0
-% ------------------------------- between a sequence and its own group, *before* calculating the
-% ------------------------------- minimum core edit distance to the group.
-% ------------------------------- But don't worry, edit distance doesn't work all that well anyway.
-
-if 0 > 1,
-  OnlyStructured = 0;
-
-  NBS = pIndividualGroupEditDistanceDiagnostic(GroupData,OnlyStructured,OwnMotif,CoreEditDistance);
-
-  figure(17)
-  T = ['Individual-group edit distance diagnostic, ' num2str(sum(NBS > -1)) ' sequences against ' num2str(length(GroupData)) ' models'];
-
-  pHistogramNumBetterScoreIndividual(NBS,abs(ExcessSeqLength),T,fs);
-  ylabel('Colored by difference in sequence length','fontsize',fs);
-
-  print(gcf,'-dpng',[DiagnosticPath filesep 'Individual_Group_Edit_Distance' DM{DiagnosticMode} '.png']);
-end
-
 % ------------------------------- Use multiple sequences from each group
 
 pMultipleGroupDiagnostic
@@ -632,14 +460,14 @@ for g = 1:NumSeqGroups,
   GroupSize(g) = length(find(SeqGroup == g));
 end
 
-figure(18)
+figure(1)
 clf
 hist(GroupSize,30);
 title('Number of instances in each group','fontsize',fs);
 set(gca,'fontsize',fs)
 print(gcf,'-dpng',[DiagnosticPath filesep 'Num_Instances' DM{DiagnosticMode} '.png']);
 
-figure(19)
+figure(1)
 clf
 semilogy(1:NumSeqGroups,GroupSize,'.');
 title('Number of instances versus group number','fontsize',fs);
@@ -656,24 +484,3 @@ fprintf('%6d %s motif groups\n',length(GroupData),loopType);
 fprintf('%6d loop instances\n',length(FASTA));
 fprintf('%6d singleton groups\n',NumSingleton);
 fprintf('%6d with basepairs or BR or BPh in addition to the flanking cWW pair(s)\n',NumStructured);
-
-% ------------------------------- Compare MLP and TotalProb
-
-if 0 > 1,
-  figure(50)
-  clf
-
-  subplot(2,1,1)
-  s = size(MLPS);
-  MLPSVector = reshape(MLPS,prod(s),1);
-  TotalProbVector = reshape(log(TotalProb),prod(s),1);
-  i = find(MLPSVector > -500);
-  hist(TotalProbVector(i) - MLPSVector(i),30);
-  title('log(Total Prob) - max log prob, all models','fontsize',14);
-
-  subplot(2,1,2)
-  hist(min(0.1,log(OwnTotalProb) - OwnMLP),30)
-  title('log(Total Prob) - max log prob, using correct model','fontsize',14);
-end
-
-

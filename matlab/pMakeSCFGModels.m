@@ -157,7 +157,7 @@ if ~(exist(ModelPath) == 7),
   mkdir(ModelPath);
 end
 
-if ~(exist(ModelDataPath) == 7),
+if ~(exist(ModelDataPath) == 7) && MakeEmpiricalDistribution > 0,
   mkdir(ModelDataPath);
 end
 

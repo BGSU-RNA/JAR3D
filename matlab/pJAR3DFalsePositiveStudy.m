@@ -24,12 +24,13 @@ case 1                            % parse and calculate edit distance, which is 
   AccumulateRandomSequenceData = 0;       % data on sequences for each model
   AccumulateFPData = 0;                   % detailed data about each sequence
   MinimumCutoffScore = -Inf;
+  FindFullEditDistance = 0;
 
   SequenceBySequence = 1;
   Params.CutoffType = 2;                 % use generic cutoffs
   Depth = Inf;                           % accumulate *all* sequences that meet cutoffs, not just the best ones!
 
-case 2                            % accumulate false positive data, which is fast but uses lots of RAM
+case 2                            % accumulate false positive data
   CoreDistSL = 0;                         % minimum sequence length to allow core edit distance matching
 
   Params.Verbose = 0;
@@ -47,6 +48,7 @@ case 2                            % accumulate false positive data, which is fas
   AccumulateRandomSequenceData = 1;       % data on sequences for each model
   AccumulateFPData = 0;                   % detailed data about each sequence
   MinimumCutoffScore = -Inf;
+  FindFullEditDistance = 0;
 
   SequenceBySequence = 1;
   Params.CutoffType = 2;                 % use generic cutoffs
@@ -71,6 +73,7 @@ case 3                                    % run the diagnostic using model-speci
   AccumulateFPData = 0;                   % detailed data about each sequence
   Depth = Inf;
   MinimumCutoffScore = 40;
+  FindFullEditDistance = 0;
 
 end
 
@@ -827,7 +830,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
 
   	        subplot(2,1,1);
   	      case 2
-  	        range = 0:min(25,length(LengthPairs(:,1)));
+  	        range = 0:min(6,length(LengthPairs(:,1)));
   	        index = range + 1;
   	      end
 
@@ -932,6 +935,7 @@ end
 if Mode == 2 && AccumulateRandomSequenceData > 0,
   save([OutputPath filesep loopType '_GroupData.mat'],'GroupData');
   fprintf('Saved group data\n');
+  GroupData
 end
 
 if 0 > 1,

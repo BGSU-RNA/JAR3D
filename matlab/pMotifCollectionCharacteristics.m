@@ -12,7 +12,7 @@ Names{4} = 'NumBPh';
 Names{5} = 'NumBR';
 Names{6} = 'NumInstances';
 
-figure(41)
+figure(1)
 clf
 for v = 1:6,
   subplot(2,3,v)
@@ -24,7 +24,7 @@ for v = 1:6,
 end
 subplot(2,3,1)
 
-figure(42)
+figure(2)
 clf
 c = 0;
 for v = 1:5,
