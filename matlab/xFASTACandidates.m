@@ -9,7 +9,7 @@
 
 % Also returns alignment text in AText
 
-function [Text,AText,BText,CText,FASTA] = xFASTACandidates(File,Search,Direction,ModelName)
+function [Text,AText,BText,CText,FASTA,DText] = xFASTACandidates(File,Search,Direction,ModelName)
 
 if nargin < 4,
   MN = Search.Query.Name;
@@ -88,6 +88,8 @@ for c = 1:L,                                      % loop through candidates
 
   k = 1;                                          % column counter
 
+  DText{c} = [sprintf('%s_Instance_%d has_name %s_%s_%s%s_%s%s', MN, c, MN, File(f).Filename, File(f).NT(Cand(c,1)).Base, File(f).NT(Cand(c,1)).Number, File(f).NT(Cand(c,end)).Base, File(f).NT(Cand(c,end)).Number)];
+
   for n = 1:N,                                    % print alignment for cand
 
     % ------------------------------------- add bases at conserved positions
@@ -103,7 +105,8 @@ for c = 1:L,                                      % loop through candidates
     end
     r = r + 1;
     AText{r} = sprintf('%s_Instance_%d_Position_%d_%s corresponds_to_sequence %s_Sequence_%d_Position_%d_%s', ModelName, c, n, NT.Base, ModelName, c, length(Text{t}), NT.Base);
-    BText{r} = sprintf('%s_Instance_%d_Position_%d_%s corresponds_to_PDB %s_%d_%s_%s_%s', ModelName, c, n, NT.Base, FN, MNum, NT.Chain, NT.Number, NT.Base);
+    % Note:  The nucleotide IDs in the following line might not be formed correctly, especially for nucleotides from symmtery operations
+    BText{r} = sprintf('%s_Instance_%d_Position_%d_%s corresponds_to_PDB %s|%d|%s|%s|%s', ModelName, c, n, NT.Base, FN, MNum, NT.Chain, NT.Number, NT.Base);
     CText{r} = sprintf('%s_Instance_%d_Position_%d_%s corresponds_to_group %s_Position_%d', ModelName, c, n, NT.Base, ModelName, n);
 
     % ----------------------- add inserted bases between conserved positions

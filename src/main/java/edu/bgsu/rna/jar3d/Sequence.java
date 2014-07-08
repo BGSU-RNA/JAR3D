@@ -1024,7 +1024,7 @@ public class Sequence {
 
     /**
      * Reverse this sequence. This will return a new sequence with the same id,
-     * but the strands will be in the reversed order. Strands are seperated by
+     * but the strands will be in the reversed order. Strands are separated by
      * '*'.
      *
      * @return A reversed Sequence.
