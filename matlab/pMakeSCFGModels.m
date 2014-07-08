@@ -22,11 +22,7 @@ MakeEmpiricalDistribution = 0; % no longer making percentile scores
 
 switch Mode,
 case 1                      % normal mode to make models.  do not edit
-  SampleSize = 250000; % number of samples for empirical distn
-  %SampleSize = 50000; % number of samples for empirical distn
   SampleSize = 20000; % number of samples for empirical distn
-  SampleSize = 1000; % number of samples for empirical distn
-
   JAR3DSampleSize = 10000;  % maximum number of sequences to pass to JAR3D at a time
 
   GenerateNewSequences = 0;
@@ -37,10 +33,7 @@ case 1                      % normal mode to make models.  do not edit
 
   WriteOwnScores = 1;
 case 2                      % debugging mode, feel free to edit
-  SampleSize = 250000; % number of samples for empirical distn
-  %SampleSize = 50000; % number of samples for empirical distn
-  %SampleSize = 1000; % number of samples for empirical distn
-
+  SampleSize = 20000; % number of samples for empirical distn
   JAR3DSampleSize = 10000;  % maximum number of sequences to pass to JAR3D at a time
 
   GenerateNewSequences = 0;
@@ -292,7 +285,7 @@ for m = 1:length(Filenames),
 
     % ---------- extract sequences of instances into .fasta file
 
-    [Text,T3,T4,T5,ModelFASTA] = xFASTACandidates(Search.File,Search,0,MotifName);
+    [Text,T3,T4,T5,ModelFASTA,T7] = xFASTACandidates(Search.File,Search,0,MotifName);
 
     fid = fopen(FastaFile,'w');
     for t = 1:length(Text),
@@ -618,7 +611,13 @@ for m = 1:length(Filenames),
 
     T6 = pColumnsForModel(Node,MotifName);
 
-    T = [T2 T3 T4 T5 T6];
+    clear T8
+    for i = 1:length(GroupData(m).OwnScore),
+%      T8{i} = sprintf('%s_Instance_%d has_score %0.16f', MotifName, i, GroupData(m).OwnScore(i));
+      T8{i} = sprintf('%s_Instance_%d has_score .', MotifName, i, GroupData(m).OwnScore(i));  % more accurate to leave this blank, because the score we have is how the sequence is aligned to the model, which is not right for all sequences!
+    end
+
+    T = [T2 T3 T4 T5 T6 T7 T8];
 
     fid = fopen(CorrespondenceFile,'w');
     for r = 1:length(T),
@@ -629,7 +628,7 @@ for m = 1:length(Filenames),
     % ---------- write out correspondences for alignment diagnostics
 
     if WriteCorrespondences > 0,
-      corresp = edu.bgsu.rna.jar3d.JAR3DMatlab.ModelCorrespondences(FastaFile,ModelFile);
+      corresp = edu.bgsu.rna.jar3d.JAR3DMatlab.ModelCorrespondences(FastaFile,ModelFile,MotifName,0);
       % ----------- The following lines prevent the program from being stopped
       % ----------- by a crazy Matlab bug.  It is intermittent, but after a call
       % ----------- to JAR3D, it is hell bent on saying
@@ -640,15 +639,25 @@ for m = 1:length(Filenames),
       catch ME
         Temp.B = 9876;
       end
-      T = [T cell(corresp)];
+
+      corresp = char(corresp);
+      correspcell = zStringSplit(corresp,char(10));
+      for i = 1:length(correspcell),
+        if length(correspcell{i}) > 5,
+          correspcell{i} = [GroupData(m).MotifID '_' correspcell{i}];          % prefix with motif ID for this particular diagnostic
+        end
+      end
+
+      T = [T correspcell];
 
       fid = fopen(DiagnosticFile,'w');
-        for r = 1:length(T),
-          fprintf(fid,'%s\n',T{r});
-        end
-        fclose(fid);
+      for r = 1:length(T),
+        fprintf(fid,'%s\n',T{r});
       end
-   end                        % if isempty(Node)
+      fclose(fid);
+
+    end
+  end                        % if isempty(Node)
 end                           % loop over filenames
 
 % ------------------------------------------------------- write lists of model files
