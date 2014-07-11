@@ -19,8 +19,10 @@ public class JAR3DMatlab {
 	 * @return
 	 */
 	
-	public static String ModelCorrespondences(String fastaFileName, String modelFileName, String modelName, int rotation)
+	public static String ModelCorrespondences(String fastaFileName, String modelPath, String modelName, int rotation)
 	{
+		String modelFileName = modelPath + "\\" + modelName + "_model.txt";
+		
 		List<Sequence> sequenceData = Alignment.loadFasta(fastaFileName);
 		
 		if (rotation > 0)

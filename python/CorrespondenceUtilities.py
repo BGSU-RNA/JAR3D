@@ -102,42 +102,53 @@ def alignmentrowshtml(DisplayColor,aligdata,HasName,HasScore):
   t = ""
 
   for a in sorted(aligdata.iterkeys(),key = keyforsortbynumber):
-    if float(HasScore[a]) > -1000:
+    if HasScore[a] == ".":
+      Score = 0
+      DisplayScore = ""
+    else:
+      Score = float(HasScore[a])
+      DisplayScore = "%0.4f" % Score
+
+    if Score > -1000:                                   # an arbitrary minimum score
       t = t + '<tr><td><font color = "' + DisplayColor[a]+ '">'+a+' '+HasName[a]+'</td>'
-      for i in range(0,len(aligdata[a])-1):
+      for i in range(0,len(aligdata[a])):
         t = t + '<td><font color = "' + DisplayColor[a] + '">'+aligdata[a][i]+'</td>'
-      t = t + '<td>' + HasScore[a] + '</td>'
+      t = t + '<td>' + DisplayScore + '</td>'
       t = t + '</tr>\n'
     else:
       t = t + '<tr><td><font color = "' + DisplayColor[a]+ '">'+a+' '+HasName[a]+'</td>\n'
-      for i in range(0,len(aligdata[a])-1):
+      for i in range(0,len(aligdata[a])):
         t = t + '<td>:</td>'
-      t = t + '<td>' + HasScore[a] + '</td>'
+      t = t + '<td>' + DisplayScore + '</td>'
       t = t + '</tr>\n'
 
   return t
 
-def alignmentheaderhtml(ModelToColumn):
+def alignmentheaderhtml(ModelToColumn,GroupToModel):
 
   ColumnHeader = [''] * len(ModelToColumn)
   for a in ModelToColumn.iterkeys():
     ColumnHeader[int(ModelToColumn[a])-1] = a
 
-  t = '<tr valign=top><th></th>'
+  PositionNumber = [''] * (len(ModelToColumn)+1)
+  for a in GroupToModel.iterkeys():
+    colnum = ModelToColumn[GroupToModel[a]]
+    m = re.search("Position_([0-9]+)$",a)
+    if m is not None:
+      PositionNumber[int(colnum)] = m.group(1)
+
+  t = '<tr valign=top><th align="left">Column number:<br>Node in JAR3D model:<br>Insertion positions indicated by I:<br>Position in motif group:</th>'
   for i in range(0,len(ModelToColumn)):
     t = t + '<th>'
-    t = t + 'C<br>'
     t = t + str(i+1) + '<br>'
     m = re.search("Node_([0-9]+)",ColumnHeader[i])
     a = m.group(1)
-    t = t + 'N<br>'
     t = t + a + '<br>'
-#    for j in range(0,len(a)):
-#      t = t + a[j] + '<br>'
     if re.search("Insertion",ColumnHeader[i]):
-      t = t + 'I<br>'
+      t = t + 'I'
+    t = t + '<br>' + PositionNumber[i+1] + '<br>'
     t = t + '</th>'
-  t = t + '<th>Score</th>'
+  t = t + '<th><br><br>Alignment<br>score</th>'
   t = t + '</tr>'
 
   return t

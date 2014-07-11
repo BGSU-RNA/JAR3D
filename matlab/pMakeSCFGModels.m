@@ -614,13 +614,16 @@ for m = 1:length(Filenames),
     clear T8
     for i = 1:length(GroupData(m).OwnScore),
 %      T8{i} = sprintf('%s_Instance_%d has_score %0.16f', MotifName, i, GroupData(m).OwnScore(i));
-      T8{i} = sprintf('%s_Instance_%d has_score .', MotifName, i, GroupData(m).OwnScore(i));  % more accurate to leave this blank, because the score we have is how the sequence is aligned to the model, which is not right for all sequences!
+      T8{i} = sprintf('%s_Instance_%d has_score .', MotifName, i);  % more accurate to leave this blank, because the score we have is how the sequence is aligned to the model, which is not right for all sequences!
     end
 
     T = [T2 T3 T4 T5 T6 T7 T8];
 
     fid = fopen(CorrespondenceFile,'w');
     for r = 1:length(T),
+      T{r} = strrep(T{r},'___','_');
+      T{r} = strrep(T{r},'__','_');
+      T{r} = strrep(T{r},'has_name _','has_name ');
       fprintf(fid,'%s\n',T{r});
     end
     fclose(fid);
@@ -645,6 +648,9 @@ for m = 1:length(Filenames),
       for i = 1:length(correspcell),
         if length(correspcell{i}) > 5,
           correspcell{i} = [GroupData(m).MotifID '_' correspcell{i}];          % prefix with motif ID for this particular diagnostic
+          correspcell{i} = strrep(correspcell{i},'___','');
+          correspcell{i} = strrep(correspcell{i},'__','');
+          correspcell{i} = strrep(correspcell{i},'has_name _','has_name ');
         end
       end
 

@@ -12,11 +12,11 @@ from CorrespondenceUtilities import alignmentheaderhtml
 from CorrespondenceUtilities import keyforsortbynumber
 from CorrespondenceUtilities import positionkeyforsortbynumber
 
-def fastatomodelalignment(motifID,libDirectory,fastafile,outputfile):
+def fastatomodelalignment(libDirectory,motifID,alignmentfile,outputfile):
   # read correspondences from the fasta file to the model
-  InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModel, HasName, HasScore = readcorrespondencesfromfile(fastafile)
+  InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModel, HasName, HasScore = readcorrespondencesfromfile(alignmentfile)
 
-  print "Read alignment to model from " + fastafile
+  print "Read alignment to model from " + alignmentfile
 
   FN = libDirectory + "\\" + motifID + "_correspondences.txt"
 
@@ -26,8 +26,6 @@ def fastatomodelalignment(motifID,libDirectory,fastafile,outputfile):
   HasName.update(ModelHasName)
   HasScore.update(ModelHasScore)
 
-  print HasScore
-  
   print "Read model correspondences from " + FN
               
   # Loop through instances from 3D and from the sequence alignment and put in an alignment to display
@@ -60,17 +58,26 @@ def fastatomodelalignment(motifID,libDirectory,fastafile,outputfile):
       
   f = open(outputfile,"w")
   f.write("<html><title>Alignment to "+motifID+"</title>\n")    
-  f.write("<h1>Alignment of " + fastafile +" to "+motifID+"</h1>\n")    
-  f.write("The sequences of instances from 3D structures are listed first and in blue<br>")
-  f.write("<a href=\"http://rna.bgsu.edu/rna3dhub/motif/view/" + motifID + "\">Motif atlas entry for " + motifID + "</a>  ")
+  f.write("<h1>Alignment of " + alignmentfile +" to "+motifID+"</h1>\n")    
+  f.write("<a href=\"http://rna.bgsu.edu/rna3dhub/motif/view/" + motifID + "\" target=\"_blank\">Motif atlas entry for " + motifID + "</a><br>")
+  f.write("The correspondence between sequences from 3D structures and the motif group is shown in blue, JAR3D alignments of sequences to the motif group are shown in black, and sequences which are too long or too short to be aligned are indicated by : characters.")
   f.write("<table>")    
-  f.write(alignmentheaderhtml(ModelToColumn)+'\n')
+  f.write(alignmentheaderhtml(ModelToColumn,GroupToModel)+'\n')
   f.write(alignmentrowshtml(DisplayColor,aligdata,HasName,HasScore))
   f.write("</table>")
  
-  f.write('<br>SCFG/MRF modelf for ' + motifID)
+  InteractionsFile = libDirectory + "\\" + motifID + "_interactions.txt"
+  
+  f.write('<br><b>Conserved interactions between motif group positions in ' + motifID + ':</b>')
   f.write('<pre>')
+  with open(InteractionsFile,"r") as mf:
+      for line in mf.readlines():
+        f.write(line)
+  f.write("</pre>")
+
   ModelFile = libDirectory + "\\" + motifID + "_model.txt"
+  f.write('<b>JAR3D SCFG/MRF model for ' + motifID + ':</b>')
+  f.write('<pre>')
   with open(ModelFile,"r") as mf:
       for line in mf.readlines():
         f.write(line)

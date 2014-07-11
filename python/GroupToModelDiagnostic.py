@@ -29,7 +29,7 @@ def onemodeldiagnostic(motifID,libDirectory,diagDirectory,prevHTML,nextHTML):
     # loop through instances from the motif group and set the color that it will be displayed
     for i in InstanceToPDB.iterkeys():
       a = re.search("(.+Instance_[0-9]+)",i)
-      DisplayColor[a.group(1)] = 'black'            # default display color
+      DisplayColor[a.group(1)] = 'blue'            # default display color
       
     # loop through sequences from the motif group and set the default display color in a dictionary
     for i in SequenceToModel.iterkeys():
@@ -46,8 +46,8 @@ def onemodeldiagnostic(motifID,libDirectory,diagDirectory,prevHTML,nextHTML):
       if GroupToModel[InstanceToGroup[nt]] != SequenceToModel[InstanceToSequence[nt]]:
         print nt + ' belongs to ' + GroupToModel[InstanceToGroup[nt]] + ' but was aligned to ' + SequenceToModel[InstanceToSequence[nt]]
         MisAlign += 0.5
-        a = re.search("(.+Instance_[0-9]+)",nt)
-        DisplayColor[a.group(1)] = 'red'
+#        a = re.search("(.+Instance_[0-9]+)",nt)
+#        DisplayColor[a.group(1)] = 'red'
         a = re.search("(.+Sequence_[0-9]+)",InstanceToSequence[nt])
         DisplayColor[a.group(1)] = 'red'
                 
@@ -88,15 +88,25 @@ def onemodeldiagnostic(motifID,libDirectory,diagDirectory,prevHTML,nextHTML):
     f.write("<a href=\"" + prevHTML + "\">Previous group</a> | ")
     f.write("<a href=\"" + nextHTML + "\">Next group</a> | ")
     f.write("<a href=\"GroupToModelDiagnostic.html\">List of all groups</a> | ")
-    f.write("<a href=\"http://rna.bgsu.edu/rna3dhub/motif/view/" + motifID + "\">Motif atlas entry</a>  ")
+    f.write("<a href=\"http://rna.bgsu.edu/rna3dhub/motif/view/" + motifID + "\" target=\"_blank\">Motif atlas entry for " + motifID + "</a>  ")
+    f.write("<br>The correspondence between sequences from 3D structures and the motif group is shown in blue and the JAR3D alignment of the sequences to the motif group is shown in black.  Occasionally the two disagree, in which case the JAR3D alignment is shown in red.")
     f.write("<table>")    
-    f.write(alignmentheaderhtml(ModelToColumn)+'\n')
+    f.write(alignmentheaderhtml(ModelToColumn,GroupToModel)+'\n')
     f.write(alignmentrowshtml(DisplayColor,aligdata,HasName,HasScore))
     f.write("</table>")
    
+    InteractionsFile = libDirectory + "\\" + motifID + "_interactions.txt"
+    
+    f.write('<br><b>Conserved interactions between motif group positions in ' + motifID + ':</b>')
+    f.write('<pre>')
+    with open(InteractionsFile,"r") as mf:
+        for line in mf.readlines():
+          f.write(line)
+    f.write("</pre>")
+
     ModelFile = libDirectory + "\\" + motifID + "_model.txt"
     
-    f.write('SCFG/MRF modelf for ' + motifID)
+    f.write('<b>JAR3D SCFG/MRF model for ' + motifID + ':</b>')
     f.write('<pre>')
     with open(ModelFile,"r") as mf:
         for line in mf.readlines():
@@ -105,7 +115,7 @@ def onemodeldiagnostic(motifID,libDirectory,diagDirectory,prevHTML,nextHTML):
 
     FASTAFile = libDirectory + "\\" + motifID + ".fasta"
     
-    f.write('Sequences of instances from ' + motifID)
+    f.write('<b>Sequences of instances from ' + motifID + ':<b>')
     f.write('<pre>')
     with open(FASTAFile,"r") as mf:
         for line in mf.readlines():
