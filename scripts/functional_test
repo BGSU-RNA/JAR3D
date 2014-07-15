@@ -1,0 +1,84 @@
+#!/bin/sh
+
+# This is a script to compile, run and test JAR3D. This should serve as both an
+# example of how to run JAR3D as well as a functional test of the system.
+
+set -e
+
+VERSION=`grep version pom.xml | head -1 | cut -d '>' -f2 | cut -d '<' -f1`
+ARTIFACT="jar3d-$VERSION.jar"
+RESOURCES="src/test/resources"
+MODELS="$RESOURCES/models/IL/0.6/bp_models/all.txt"
+
+function compare {
+  computed=$1
+  correct=$2
+  type=$3
+  tmp=`mktemp /tmp/jar3d-XXXXXX`
+
+  # Check that the answer file exists.
+  if [[ ! -e "$correct" ]]; then
+    echo "Can't find $correct to compare to"
+    exit 1
+  fi
+
+  # Set +e so we display an error message when diff fails.
+  set +e
+  diff "$computed" "$correct" > "$tmp"
+
+  # Copy the diff, show a message and die.
+  if [[ $? -ne 0 ]]; then
+    diffs=target/diff.txt
+    cp "$tmp" "$diffs"
+    echo "TEST FAILURE. Expected and computed $type results do not match"
+    echo "  See: $diffs"
+    exit 1
+  fi
+
+  # Clean up
+  rm $tmp
+  set -e
+}
+
+function run {
+  sequences=$1
+  loop_answers=$2
+  sequence_answers=$3
+  loop_results=target/loop-output.csv
+  sequence_results=target/sequence-output.csv
+
+  # This line executes the JAR3D executable. -Xmx500m is used to raise the
+  # memory limit of the JVM. In some cases it needs more memory than the
+  # default limit.
+  cmd="java -Xmx500m -jar target/$ARTIFACT $sequences $MODELS $loop_results $sequence_results"
+  echo "Command: '$cmd'"
+  $cmd
+
+  # Check that the results are correct for loops and sequences
+  compare $loop_results $loop_answers "loop"
+  compare $sequence_results $sequence_answers "sequence"
+
+  # Clean up
+  rm $loop_results $sequence_results
+}
+
+# Include a mktemp for thoses systems that lack one.
+source "scripts/mktemp"
+
+# Compile JAR3D using Maven
+cmd='mvn clean package'
+echo "Building JAR3D: '$cmd'"
+$cmd > /dev/null
+
+# Run JAR3D on test data
+test_files="$RESOURCES/test-data"
+for sequences in "$test_files/*.fasta"; do
+
+  base=`basename $sequences .fasta`
+  loop_answer=$test_files/$base-loops.csv
+  sequence_answer=$test_files/$base-sequences.csv
+
+  echo "Testing with: $sequences"
+  run $sequences $loop_answer $sequence_answer
+  echo "Test passed"
+done
