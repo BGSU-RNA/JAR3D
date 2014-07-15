@@ -1,4 +1,4 @@
-#JAR3D is Java-based Alignment of RNA using 3D structures
+#JAR3D is Java-based Alignment of RNA using 3D structure information
 
 ##Motivation
 Correctly predicting RNA 3D structures starting from sequence is a major, unsolved challenge in bioinformatics. An important sub-goal is the inference of the 3D structures of recurrent hairpin and internal RNA 3D motifs that appear as unpaired “loops” on secondary structure diagrams. Recurrent 3D motif functions include:
