@@ -13,9 +13,6 @@ public class BasicSequenceResult implements SequenceResult {
     /** Score of this result. */
 	private double score;
 
-    /** Percentile of this result. */
-	private double percentile;
-
     /** Interior edit distance of this result. */
 	private int InteriorEditDistance;
 	
@@ -30,6 +27,9 @@ public class BasicSequenceResult implements SequenceResult {
 
     /** Indicator if sequence meets cutoff requirements */
     private boolean cutoff;
+    
+    /** Score based on cutoff values */
+    private double cutoffscore;
 	
     /** The sequence scored. */
     private final Sequence sequence;
@@ -45,15 +45,15 @@ public class BasicSequenceResult implements SequenceResult {
 	 * @param editDistance The edit distance.
 	 * @param rotation True if the sequence was rotated relative to the model.
 	 */
-	public BasicSequenceResult(LoopResult result, Sequence sequence, double score, double percentile, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff) {
+	public BasicSequenceResult(LoopResult result, Sequence sequence, double score, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff, double cutoffscore) {
 		this.result = result;
         this.sequence = sequence;
 		this.score = score;
-		this.percentile = percentile;
 		this.InteriorEditDistance = InteriorEditDistance;
 		this.FullEditDistance = FullEditDistance;
 		this.rotation = rotation;
 		this.cutoff = cutoff;
+		this.cutoffscore = cutoffscore;
 	}
 
 	/**
@@ -65,16 +65,12 @@ public class BasicSequenceResult implements SequenceResult {
 	 * @param editDistance The edit distance.
 	 * @param rotation True if the sequence was rotated relative to the model.
 	 */
-	public BasicSequenceResult(Sequence sequence, double score, double percentile, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff) {
-		this(null, sequence, score, percentile, InteriorEditDistance, FullEditDistance, rotation, cutoff);
+	public BasicSequenceResult(Sequence sequence, double score, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff, double cutoffscore) {
+		this(null, sequence, score, InteriorEditDistance, FullEditDistance, rotation, cutoff,cutoffscore);
 	}
 
 	public double score() {
 		return score;
-	}
-
-	public double percentile() {
-		return percentile;
 	}
 
 	public int FullEditDistance() {
@@ -150,7 +146,10 @@ public class BasicSequenceResult implements SequenceResult {
     }
 
 	public boolean cutoff() {
-		// TODO Auto-generated method stub
 		return cutoff;
+	}
+	
+	public double cutoffscore() {
+		return cutoffscore;
 	}
 }

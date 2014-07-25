@@ -43,7 +43,7 @@ public class DBLoader implements QueryLoader {
     	ResultSet results = sqlForLoops.executeQuery();
     	long id = -1;
     	
-    	String type = null;
+    	String type = "";
     	List<Sequence> sequences = new ArrayList<Sequence>();
     	while (results.next()) {
     		String sequence = results.getString("loop_sequence");
@@ -72,7 +72,8 @@ public class DBLoader implements QueryLoader {
         result.close();
         
         for (int i = 0; i < loopCount; i++) {
-        	loops.add(loadLoop(queryId, i));
+        	Loop loop = loadLoop(queryId, i); 
+        	if(loop.getId()!=-1) {loops.add(loop);}
         }
         
         return loops;

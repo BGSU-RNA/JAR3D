@@ -5,7 +5,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.List;
 
 import edu.bgsu.rna.jar3d.results.LoopResult;
 import edu.bgsu.rna.jar3d.results.SequenceResult;
@@ -28,8 +27,8 @@ public class DBResultSaver extends AbstractResultsSaver {
 	
 	public DBResultSaver(String username, String password, String dbConnection) throws SQLException {
         connection = DriverManager.getConnection(dbConnection, username, password);
-        String loopResultSQL = "insert into jar3d_results_by_loop (query_id, loop_id, motif_id, meanscore, meanpercentile, meaninterioreditdist, meanfulleditdist, medianscore, medianpercentile, medianinterioreditdist, medianfulleditdist, signature, rotation, correspondences) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-        String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (query_id, seq_id, loop_id, score, percentile, interioreditdist, fulleditdist, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String loopResultSQL = "insert into jar3d_results_by_loop (query_id, loop_id, motif_id, cutoff_percent, meanscore, meaninterioreditdist, meanfulleditdist, medianscore, medianinterioreditdist, medianfulleditdist, signature, rotation, correspondences) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (query_id, seq_id, loop_id, cutoff, score, interioreditdist, fulleditdist, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         String updateLoopSQL = "UPDATE jar3d_query_info SET status=1, time_completed=? WHERE query_id = ?;";
         String updateSequenceSQL = "UPDATE jar3d_query_sequences SET status=1, time_completed=? WHERE query_id = ? and seq_id = ? and loop_id = ?;";
         String failureSQL = "UPDATE jar3d_query_info SET status=-1, time_completed = ? WHERE query_id = ?;";
@@ -68,17 +67,16 @@ public class DBResultSaver extends AbstractResultsSaver {
 			insertLoopResult.setString(1, results.getLoop().getQuery().getId());
 			insertLoopResult.setInt(2, (int)results.getLoop().getId());
 			insertLoopResult.setString(3, results.modelId());
-			insertLoopResult.setFloat(4, (float)Math.max(Math.min(results.meanScore(),9999),-9999));
-			insertLoopResult.setFloat(5, (float)Math.max(Math.min(results.meanPercentile(),9999),-9999));
+			insertLoopResult.setFloat(4, (float)Math.max(Math.min(results.meanCutoff(),9999),-9999));
+			insertLoopResult.setFloat(5, (float)Math.max(Math.min(results.meanScore(),9999),-9999));
 			insertLoopResult.setFloat(6, (float)Math.max(Math.min(results.meanInteriorEditDistance(),9999),-9999));
 			insertLoopResult.setFloat(7, (float)Math.max(Math.min(results.meanFullEditDistance(),9999),-9999));
 			insertLoopResult.setFloat(8, (float)Math.max(Math.min(results.medianScore(),9999),-9999));
-			insertLoopResult.setFloat(9, (float)Math.max(Math.min(results.medianPercentile(),9999),-9999));
-			insertLoopResult.setFloat(10, (float)Math.max(Math.min(results.medianInteriorEditDistance(),9999),-9999));
-			insertLoopResult.setFloat(11, (float)Math.max(Math.min(results.medianFullEditDistance(),9999),-9999));
-			insertLoopResult.setString(12, results.signature());
-			insertLoopResult.setInt(13, results.bestRotation());
-			insertLoopResult.setString(14, "Intentially left empty.");
+			insertLoopResult.setFloat(9, (float)Math.max(Math.min(results.medianInteriorEditDistance(),9999),-9999));
+			insertLoopResult.setFloat(10, (float)Math.max(Math.min(results.medianFullEditDistance(),9999),-9999));
+			insertLoopResult.setString(11, results.signature());
+			insertLoopResult.setInt(12, results.bestRotation());
+			insertLoopResult.setString(13, "Intentially left empty.");
 		} catch (SQLException e) {
 			throw new SaveFailed("Could not generate loop sql.", e);
 		}
@@ -101,6 +99,10 @@ public class DBResultSaver extends AbstractResultsSaver {
 	 * @throws SaveFailed If any problem occurs. s
 	 */
 	private void saveSequenceResult(SequenceResult result) throws SaveFailed {
+		int cutoff=0;
+		if(result.cutoff()){
+			cutoff=1;
+		}
 		try {
 			
 			String seq_id = "0";
@@ -111,8 +113,8 @@ public class DBResultSaver extends AbstractResultsSaver {
 			insertSequenceResult.setString(1, result.queryId());
 			insertSequenceResult.setString(2, seq_id);
 			insertSequenceResult.setInt(3, (int)result.loopId());
-			insertSequenceResult.setFloat(4, (float)Math.max(Math.min(result.score(), 9999),-9999));
-			insertSequenceResult.setFloat(5, (float)Math.max(Math.min(result.percentile(), 9999),-9999));
+			insertSequenceResult.setInt(4, cutoff);
+			insertSequenceResult.setFloat(5, (float)Math.max(Math.min(result.score(), 9999),-9999));
 			insertSequenceResult.setInt(6, Math.max(Math.min(result.InteriorEditDistance(),9999),-9999));
 			insertSequenceResult.setInt(7, result.FullEditDistance());
 			insertSequenceResult.setInt(8, result.bestRotation());

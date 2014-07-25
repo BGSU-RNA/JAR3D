@@ -69,13 +69,6 @@ public interface SequenceResult {
 	public double score();
 
     /**
-     * Get the percentile of this result.
-     *
-     * @return The percentile.
-     */
-	public double percentile();
-
-    /**
      * Get the edit interior distance of this result.
      *
      * @return The edit distance.
@@ -116,4 +109,11 @@ public interface SequenceResult {
      * @return The loop result.
      */
 	public boolean cutoff();
+	
+	/**
+     * Get a double indicating if the cutoff score.
+     *
+     * @return The loop result.
+     */
+	public double cutoffscore();
 }

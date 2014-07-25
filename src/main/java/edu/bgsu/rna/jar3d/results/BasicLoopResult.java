@@ -20,17 +20,15 @@ public final class BasicLoopResult implements LoopResult {
 	
 	private double meanScore;
 
-	private double meanPercentile;
-
 	private double meanFullEditDistance;
 	
 	private double medianFullEditDistance;
 
-	private double medianPercentile;
-
 	private double medianScore;
 	
 	private double meanCutoff;
+	
+	private double meanCutoffScore;
 
 	private int rotation;
 
@@ -68,7 +66,7 @@ public final class BasicLoopResult implements LoopResult {
 	private void computeData() {
 		int numSeqs = sequenceResults.size();
 		double[] scores = new double[numSeqs];
-		double[] percentiles = new double[numSeqs];
+		double[] cutoffscores = new double[numSeqs];
 		int[] fullEdDists = new int[numSeqs];
 		int[] interiorEdDists = new int[numSeqs];
 		boolean[] cutoffs = new boolean[numSeqs];
@@ -78,21 +76,20 @@ public final class BasicLoopResult implements LoopResult {
 			SequenceResult seqR = sequenceResults.get(i);
 			seqR.setLoopResult(this);
 			scores[i] = seqR.score();
-			percentiles[i] = seqR.percentile();
 			interiorEdDists[i] = seqR.InteriorEditDistance();
 			fullEdDists[i] = seqR.FullEditDistance();
 			cutoffs[i] = seqR.cutoff();
+			cutoffscores[i] = seqR.cutoffscore();
 		}
 
 		this.medianScore = ArrayMath.median(scores);
 		this.meanScore = ArrayMath.mean(scores);
-		this.meanPercentile = 100*ArrayMath.mean(percentiles);
-		this.medianPercentile = 100*ArrayMath.median(percentiles);
 		this.meanInteriorEditDistance = ArrayMath.mean(interiorEdDists);
 		this.medianInteriorEditDistance = ArrayMath.median(interiorEdDists);
 		this.meanFullEditDistance = ArrayMath.mean(fullEdDists);
 		this.medianFullEditDistance = ArrayMath.median(fullEdDists);
 		this.meanCutoff = ArrayMath.mean(cutoffs);
+		this.meanCutoffScore = ArrayMath.mean(cutoffscores);
 	}
 
 	public String modelId() {
@@ -111,16 +108,8 @@ public final class BasicLoopResult implements LoopResult {
 		return meanScore;
 	}
 
-	public double meanPercentile() {
-		return meanPercentile;
-	}
-
 	public double medianScore() {
 		return medianScore;
-	}
-
-	public double medianPercentile() {
-		return medianPercentile;
 	}
 
 	public double medianInteriorEditDistance() {
@@ -165,5 +154,9 @@ public final class BasicLoopResult implements LoopResult {
 	
 	public double meanCutoff(){
 		return meanCutoff;
+	}
+	
+	public double meanCutoffScore(){
+		return meanCutoffScore;
 	}
 }

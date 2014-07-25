@@ -14,7 +14,6 @@ public class MotifGroup implements java.io.Serializable{
 	String loopType;
 	String Sequences;		//Sequences seen in 3d structure - fasta format
 	String Model;			//Model data in text format
-	String Distribution;    //Distribution file in text format
     String[] Signature;
     Double[] Cutoffs;
 //    int conserved;
@@ -29,7 +28,6 @@ public class MotifGroup implements java.io.Serializable{
     	String modFolder = folder;
     	try{
     		String modelFile = modFolder+fsep+name+"_model.txt";
-    		String distFile = modFolder+fsep+name+"_distribution.txt";
     		String dataFile = modFolder+fsep+name+"_data.txt";
     		String seqFile = modFolder+fsep+name+".fasta";
     		String cutoffFile = modFolder+fsep+name+"_cutoffs.txt";
@@ -77,19 +75,6 @@ public class MotifGroup implements java.io.Serializable{
 //    		String conint = br.readLine();
 //   		conserved = Integer.parseInt(conint);
     		in.close();
-    		//Read distribution information
-    		fstream = new FileInputStream(distFile);
-    		in = new DataInputStream(fstream);
-    		br = new BufferedReader(new InputStreamReader(in));
-    		line = null;
-    		stringBuilder = new StringBuilder();
-    		ls = System.getProperty("line.separator");
-			while((line = br.readLine()) != null){
-				stringBuilder.append( line );
-    	        stringBuilder.append( ls );
-			}
-			Distribution = stringBuilder.toString();
-			in.close();
 			//Read in cutoff values
 			fstream = new FileInputStream(cutoffFile);
     		in = new DataInputStream(fstream);

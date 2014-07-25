@@ -35,6 +35,8 @@ public class JAR3Database {
 			saver = new DBResultSaver(usrName,pswd,dbConnection);
 			application = new Application(loader, saver);
 			application.runAndSave(QueryID, ILmodels, HLmodels);
+			loader.cleanUp();
+			saver.cleanUp();
 		} catch(Exception e) {
 			e.printStackTrace();
 			System.exit(1);

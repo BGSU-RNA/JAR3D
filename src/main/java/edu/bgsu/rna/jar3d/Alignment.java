@@ -934,7 +934,7 @@ public class Alignment {
 			indices[k] = k;
 		}
 
-		//Calculate extra information (quantiles, edit distances) and output
+		//Calculate extra information (edit distances, cutoffs) and output
 		int numInputSeqs = sData.size()-1;
 		for(int g = 0; g < modNames.size(); g++) {
 
@@ -960,9 +960,6 @@ public class Alignment {
 				}
 			}
 
-			//Calculate quantiles
-			double[] quants = webJAR3D.getQuantilesA(groupScores, group);
-
 			//Calculate edit distances
 			Vector<Sequence> modsData = Alignment.parseFastaText(group.Sequences,0,0);
 			int[][] InteriorEditDistances;
@@ -981,6 +978,7 @@ public class Alignment {
 				FullMinDist[i] = ArrayMath.min(FullEditDistances[i]);
 			}
 			boolean[] cutoffs = new boolean[numInputSeqs];
+			double[] cutoffscores = new double[numInputSeqs];
 			for(int i = 0; i < numInputSeqs; i++){
 				if(groupScores[i]>=group.Cutoffs[0] && InteriorMinDist[i]<=group.Cutoffs[1]
 						&& group.Cutoffs[2]*InteriorMinDist[i]-group.Cutoffs[3]*groupScores[i]<=group.Cutoffs[4]){
@@ -990,11 +988,15 @@ public class Alignment {
 				}else{
 					cutoffs[i] = Boolean.FALSE;
 				}
+				cutoffscores[i] = 100 * (group.Cutoffs[2] * InteriorMinDist[i] - group.Cutoffs[3] * groupScores[i] - group.Cutoffs[4]) / -group.Cutoffs[5];
+				if(cutoffscores[i] > 0 && (groupScores[i] < group.Cutoffs[0] || InteriorMinDist[i] > group.Cutoffs[1])){
+					cutoffscores[i] = 0;
+				}
 			}
 			if (true) {
 				List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
 				for(int m = 0; m < sData.size() - 1; m++) {
-					SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], quants[m], InteriorMinDist[m], FullMinDist[m],rotation,cutoffs[m]);
+					SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], InteriorMinDist[m], FullMinDist[m],rotation,cutoffs[m],cutoffscores[m]);
 					seqRes.add(seqR);
 				}
 
