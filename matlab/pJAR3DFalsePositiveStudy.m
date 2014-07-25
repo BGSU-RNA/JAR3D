@@ -890,6 +890,45 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
   	        print(gcf,'-dpng',[DiagnosticPath filesep CF '_RandomSequenceMatchRate_edit_distance.png']);
   	        print(gcf,'-dpdf',[DiagnosticPath filesep CF '_RandomSequenceMatchRate_edit_distance.pdf']);
   	      end
+
+          figure(v+2)
+          clf
+          for a = 1:length(LengthToPosition(:,1)),
+            for b = 1:length(LengthToPosition(:,2)),
+              sl = LengthToPosition(a,b);
+              MatchRate(a,b) = 0;
+              if sl > 0,
+                fprintf('%d %d %d %6.2f\n',a,b,sl,CoreEditZeroperc(sl));
+                CEZRate(a,b) = CoreEditZeroperc(sl);
+                GMRate(a,b) = GoodMatchperc(sl);
+                MRate(a,b) = Matchperc(sl);
+              end
+            end
+          end
+MRate
+
+          colormap(gray)
+          map = colormap;
+          map = 1-map;
+
+          subplot(2,2,1)
+          pcolor(CEZRate);
+          shading flat
+          colormap(map);
+          colorbar('eastoutside')
+          subplot(2,2,2)
+          pcolor(GMRate);
+          shading flat
+          colormap(map);
+          subplot(2,2,3)
+          pcolor(MRate);
+          shading flat
+          colormap(map);
+
+
+pause
+
+
   	    end
 
   	    fprintf('\n\n\n\n\n');
