@@ -257,8 +257,8 @@ public class HairpinNode extends BasicNode {
 			/*
 			 * loop through insertion combinations.
 			 * */
-			p = -1d/0d;               // start with negative infinity
-			p = -1000;                // start with a small probability
+			p = -1d/0d;         // start with negative infinity
+			p = -1000;          // start with a small probability, to avoid infinities when no match is found, 
 			
 			while(insLengths[0] <= maxLengths[0])
 			{
@@ -384,17 +384,19 @@ public class HairpinNode extends BasicNode {
 		int i = optimalGen1.i;            // starting index of the sequence for this hairpin
 		int j = optimalGen1.j;            // ending index of the sequence for this hairpin
 		
-		/**
-		System.out.println("Is this node deleted? "+optimalGen1.deleted);
-		System.out.println("Current sequence is 012345678901234567890");
-		System.out.println("Current sequence is " + letters);
-		System.out.println("Starting i value is " + i + " and ending j value is " + optimalGen1.j);
-		System.out.println("Number of fixed positions is " + numFixed);
-		System.out.print("Insertion lengths are ");
-		for (int m=0; m < insert.length; m++)
-			System.out.print(insert[m] + " ");
-		System.out.println();
-        **/
+		
+		if (0>1) {
+			System.out.println("Max log prob is " + optimalMaxLogProb);
+			System.out.println("Is this node deleted? "+optimalGen1.deleted);
+			System.out.println("Current sequence is 012345678901234567890");
+			System.out.println("Current sequence is " + letters);
+			System.out.println("Starting i value is " + i + " and ending j value is " + optimalGen1.j);
+			System.out.println("Number of fixed positions is " + numFixed);
+			System.out.print("Insertion lengths are ");
+			for (int m=0; m < insert.length; m++)
+				System.out.print(insert[m] + " ");
+			System.out.println();
+		}
 		
 		String left = "SSS_Position_" + (i+1) + "_" + letters.charAt(i) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_1" + "\n";
 //		System.out.println(left);

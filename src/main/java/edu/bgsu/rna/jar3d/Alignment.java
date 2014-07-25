@@ -1068,13 +1068,20 @@ public class Alignment {
 
 			correspondences = correspondences.replace("JAR3D_aligns_to", "aligns_to_JAR3D");
 
-			String SF = "Sequence_"+i+"_"+S.organism;
-			SF = SF.replace(" ","_");
+			String SF = "Sequence_"+i;
 			correspondences = correspondences.replace("SSS",SF);
 
-			String NF = "MMM";                           // model name goes here
-			correspondences = correspondences.replace("MMM", NF);
 			sData.get(i).correspondences = correspondences;
+		}
+		
+		for (int i = 1; i < sData.size(); i++)
+		{
+			sData.get(i).correspondences += "Sequence_"+i+" has_name "+sData.get(i).organism.replace(" ","_")+"\n";
+		}
+
+		for (int i = 1; i < sData.size(); i++)
+		{
+			sData.get(i).correspondences += "Sequence_"+i+" has_score "+sData.get(i).getMaxLogProbability(0)+"\n";
 		}
 		return sData;
 	}

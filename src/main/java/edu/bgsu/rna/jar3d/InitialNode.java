@@ -52,7 +52,7 @@ public class InitialNode extends BasicNode {
 			double pnew; // probability of current insertion possibility
 			int a; 		// number of insertions on the left
 			int b; 		// number of insertions on the right
-			int aa = 0, bb = 0;
+			int aa = 0, bb = 0; // default values for optimal number of insertions on right and left
 
 			
 			p = -1d/0d;               // start with negative infinity
@@ -159,7 +159,7 @@ public class InitialNode extends BasicNode {
   			
   			String right = "";
   			for(int k = j-b+1; k <= j; k++)
-  				right = "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_2_Insertion" + "\n" + right;
+  				right += "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_2_Insertion" + "\n";
  			
   			return left + super.child.showCorrespondences(letters) + right;
   	}
