@@ -12,6 +12,9 @@ public class JAR3DMotifAlignTest {
 
 		String fastaFileName = "C:\\Users\\zirbel\\Documents\\Motifs\\Variants_from_alignments\\IL\\IL_16330.1 IL_3U5H_057 Silva_LSU_eukaryal.fasta";
 		String correspondenceFile = "C:\\Users\\zirbel\\Documents\\Motifs\\IL\\1.13\\AlignmentDiagnostics\\IL_16330.1_IL_3U5H_057_Silva_LSU_eukaryal_correspondences.txt";
+		String modelName = "IL_85647.3";
+		String modelFileName = "IL_85647.3";
+		
 		int rotation = 0;
 		
 		List<Sequence> sequenceData = Alignment.loadFasta(fastaFileName);
