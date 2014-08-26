@@ -340,6 +340,7 @@ public class Sequence {
 						isHairpin = false;
 						break;
 					case 'A':
+						System.out.println("Processing alternative node");
 						int numAlternatives = (int)((double[])numDatas.get(0))[0];
 						double[] priorProb = new double[numAlternatives];
 						for(int i = 0; i < numAlternatives; i++)

@@ -239,8 +239,12 @@ case 'IL'
 
   [uniqueseqlengths,i,j] = unique([uniqueseqlengths; newlengths],'rows');
 
-  T = [seqlengths OwnMotif];
+  T = [seqlengths OwnMotif sum(seqlengths,2)];
   T = sortrows(T,[1 2 3]);
+
+% sort by total length???
+%  T = sortrows(T,[4 1 2 3]);
+%  T = T(:,1:3);
 end
 
 for seqfilenumber = 1:numfiles,                           % loop through files of random sequences
@@ -639,7 +643,10 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
   		if SequenceBySequence > 0,
   	    [b,i,j] = unique(StrandLengths,'rows');
   	    [y,k] = sortrows(b,[1 2]);
-  	    [y,k] = sortrows(b,[2 3]);
+  	    [y,k] = sortrows(b,[2 3]);                        % sort by shorter strand length, then longer
+        [s,t] = size(b);
+        [y,k] = sortrows([b sum(b,2)],[t+1 1]);           % sort by decreasing total length
+
   	    for w = 1:length(k),
   	      LengthToPosition(y(w,2),y(w,3)) = w;
   	    end
@@ -905,29 +912,39 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
               end
             end
           end
-MRate
 
           colormap(gray)
           map = colormap;
           map = 1-map;
 
-          subplot(2,2,1)
-          pcolor(CEZRate);
-          shading flat
-          colormap(map);
-          colorbar('eastoutside')
-          subplot(2,2,2)
-          pcolor(GMRate);
-          shading flat
-          colormap(map);
-          subplot(2,2,3)
-          pcolor(MRate);
-          shading flat
-          colormap(map);
-
-
-pause
-
+          if v == 1,
+            subplot(2,2,1)
+            pcolor(CEZRate);
+            shading flat
+            colormap(map);
+            colorbar('eastoutside')
+            title('Percentage with interior edit distance 0')
+            subplot(2,2,2)
+            pcolor(GMRate);
+            shading flat
+            colormap(map);
+            colorbar('eastoutside')
+            title('Percentage with cutoff score 40 or over')
+            subplot(2,2,3)
+            pcolor(MRate);
+            shading flat
+            colormap(map);
+            colorbar('eastoutside')
+            title('Percentage accepted by at least one motif group')
+            subplot(2,2,4)
+            [s,t] = size(MRate);
+            pcolor(nummodelsbylengths(1:s,1:t));
+            shading flat
+            colormap(map);
+            colorbar('eastoutside')
+            title('Number of motif groups with instance of the given size')
+            print(gcf,'-dpng',[DiagnosticPath filesep loopType '_FP_heatmap.png']);
+          end
 
   	    end
 

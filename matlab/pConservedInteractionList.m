@@ -62,3 +62,27 @@ for s = 1:length(b),                       % loop through conserved interactions
         end
     end
 end
+
+if SubsProb == 0,
+
+    [i,j,k] = find(Search.BPh);        % use consensus interactions
+
+    for s = 1:length(i),                       % loop through conserved interactions
+        aa = i(s);
+        bb = j(s);
+        Text{r} = sprintf('%d %d %s', i(s), j(s), strrep(zBasePhosphateText(k(s)),' ',''));
+        Text{r} = [Text{r} sp];
+        r = r + 1;
+    end
+
+    [i,j,k] = find(Search.BR);        % use consensus interactions
+
+    for s = 1:length(i),                       % loop through conserved interactions
+        aa = i(s);
+        bb = j(s);
+        Text{r} = sprintf('%d %d %s', i(s), j(s), strrep(zBaseRiboseText(k(s)),' ',''));
+        Text{r} = [Text{r} sp];
+        r = r + 1;
+    end
+
+end

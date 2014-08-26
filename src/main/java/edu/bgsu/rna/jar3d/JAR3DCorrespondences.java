@@ -10,10 +10,13 @@ public class JAR3DCorrespondences {
 		String fastaFileName = args[0]; 
 		String modelFileName = args[1];
 		String modelName = args[2];
+		String modelPath = "";                         // clearly wrong!
 		int rotation = Integer.parseInt(args[3]);
 		String outputFileName = args[4];
+
+		System.out.println("JAR3DCorrespondences has some issues that need to be resolved");
 		
-		String corrs = JAR3DMatlab.ModelCorrespondences(fastaFileName, modelFileName);
+		String corrs = JAR3DMatlab.ModelCorrespondences(fastaFileName, modelPath, modelFileName, rotation);
 		
 		try {
 			FileWriter write = new FileWriter(outputFileName,false);
