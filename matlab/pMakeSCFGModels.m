@@ -631,7 +631,7 @@ for m = 1:length(Filenames),
     % ---------- write out correspondences for alignment diagnostics
 
     if WriteCorrespondences > 0,
-      corresp = edu.bgsu.rna.jar3d.JAR3DMatlab.ModelCorrespondences(FastaFile,ModelFile,MotifName,0);
+      corresp = edu.bgsu.rna.jar3d.JAR3DMatlab.ModelCorrespondences(FastaFile,ModelPath,MotifName,0);
       % ----------- The following lines prevent the program from being stopped
       % ----------- by a crazy Matlab bug.  It is intermittent, but after a call
       % ----------- to JAR3D, it is hell bent on saying

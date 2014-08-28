@@ -336,20 +336,20 @@ end
 
                 for fi = FixedIndices,
                     [s,t] = size(Node(n).IBases);
-                    newinter = s + 1;                               % place to add new "interaction"
+                    newinter = s + 1;                                % place to add new "interaction"
                     dist = Prior;
-                    for j = 1:L                                  % loop through instances
+                    for j = 1:L                                      % loop through instances
                         f = Search.Candidates(UseCandidate(j),end);  % file number
                         k = Search.Candidates(UseCandidate(j),fi);   % nucleotide index in file
                         baseCode = Search.File(f).NT(k).Code;
                         dist(baseCode) = dist(baseCode) + 1;
                     end
-                    dist = dist / sum(dist);                     % normalize
-                    p = find(Indices == fi);                     % position within node
-                    Node(n).IBases(newinter,:) = [p p];             % numbering internal to the node
-                    Node(n).InterIndices(newinter,:) = [fi fi];     % index of this nucleotide in the motif
+                    dist = dist / sum(dist);                         % normalize
+                    p = find(Indices == fi);                         % position within node
+                    Node(n).IBases(newinter,:) = [p p];              % numbering internal to the node
+                    Node(n).InterIndices(newinter,:) = [fi fi];      % index of this nucleotide in the motif
                     Node(n).SubsProb(length(dist),length(dist),newinter) = 0; % make space if needed
-                    Node(n).SubsProb(:,:,newinter) = diag(dist);          % put dist down the diagonal
+                    Node(n).SubsProb(:,:,newinter) = diag(dist);     % put dist down the diagonal
                     Node(n).InteractionComment{newinter} = [' // Hairpin fixed base, nucleotide ' num2str(fi) ' at position ' num2str(p)];
                 end
 
