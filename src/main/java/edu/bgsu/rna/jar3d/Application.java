@@ -114,8 +114,21 @@ public class Application {
 	 */
 	public List<List<LoopResult>> runQuery(Query query, String base) {
 		List<List<LoopResult>> allResults = new ArrayList<List<LoopResult>>();
+		//Load Motif Group information
+		File f = new File(base);
+		String folder = f.getParent();
+
+		System.out.println("Looking for a list of motifs to use in "+base);
+		System.out.println("Looking for motifs in "+folder);
+
+		System.setProperty("user.dir", folder);
+
+		Vector<String> modelNames = Sequence.getModelNames(base, modelType, false);		
+		HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(base, modelType);
+
+		
 		for(Loop loop: query) {
-			List<LoopResult> results = motifParse(base, loop); 
+			List<LoopResult> results = motifParse(modelNames, groupData, loop); 
 			allResults.add(results);
 		}
 		return allResults;
@@ -132,13 +145,38 @@ public class Application {
 	
 	public List<List<LoopResult>> runQuery(Query query, String ILbase, String HLbase) {
 		List<List<LoopResult>> allResults = new ArrayList<List<LoopResult>>();
+		
+		//Load IL Motif Group information
+		File ilf = new File(ILbase);
+		String ilfolder = ilf.getParent();
+
+		System.out.println("Looking for a list of motifs to use in "+ILbase);
+		System.out.println("Looking for motifs in "+ilfolder);
+
+		System.setProperty("user.dir", ilfolder);
+
+		Vector<String> ILModelNames = Sequence.getModelNames(ILbase, modelType, false);		
+		HashMap<String,MotifGroup> ILGroupData = webJAR3D.loadMotifGroups(ILbase, modelType);
+
+		//Load HL Motif Group information
+		File hlf = new File(HLbase);
+		String hlfolder = hlf.getParent();
+
+		System.out.println("Looking for a list of motifs to use in "+HLbase);
+		System.out.println("Looking for motifs in "+hlfolder);
+
+		System.setProperty("user.dir", hlfolder);
+
+		Vector<String> HLModelNames = Sequence.getModelNames(HLbase, modelType, false);		
+		HashMap<String,MotifGroup> HLGroupData = webJAR3D.loadMotifGroups(HLbase, modelType);
+
 		for(Loop loop: query) {
 			String type = loop.getLoopType().getShortName();
 			List<LoopResult> results;
 			if(type.equals("IL")){
-				results = motifParse(ILbase, loop); 
+				results = motifParse(ILModelNames, ILGroupData, loop); 
 			}else {
-				results = motifParse(HLbase, loop);
+				results = motifParse(HLModelNames, HLGroupData, loop);
 			}
 			allResults.add(results);
 		}
@@ -153,25 +191,8 @@ public class Application {
 	 * @param loop The loop.
 	 * @return Results of running the loop.
 	 */
-	private List<LoopResult> motifParse(String modellist, Loop loop) {
+	private List<LoopResult> motifParse(Vector<String> modelNames, HashMap<String,MotifGroup> groupData, Loop loop) {
 		List<LoopResult> result = new ArrayList<LoopResult>();
-
-		// String folder = base + File.separator + loop.getTypeString() + File.separator + version;
-		// 2013-11-07 CLZ user specifies complete path to file telling what models to use
-		
-		File f = new File(modellist);
-		String folder = f.getParent();
-		
-		System.out.println("Looking for a list of motifs to use in "+modellist);
-		System.out.println("Looking for motifs in "+folder);
-		
-		System.setProperty("user.dir", folder);
-
-		// 2013-11-05 CLZ The third argument on the next line makes the choice between structured or all models 
-		// 2013-11-05 CLZ But now that is ignored because the user specifies the path to the models
-		
-		Vector<String> modelNames = Sequence.getModelNames(modellist, modelType, false);		
-		HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(modellist, modelType);
 
 		if (modelNames.size() == 0) {
 			System.out.println("Found " + modelNames.size() + " model files");

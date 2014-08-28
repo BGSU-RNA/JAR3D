@@ -1,20 +1,11 @@
 package edu.bgsu.rna.jar3d;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Vector;
+
 
 import edu.bgsu.rna.jar3d.io.loaders.DBLoader;
-import edu.bgsu.rna.jar3d.io.loaders.FastaLoader;
 import edu.bgsu.rna.jar3d.io.loaders.QueryLoader;
-import edu.bgsu.rna.jar3d.io.writers.CSVSaver;
 import edu.bgsu.rna.jar3d.io.writers.DBResultSaver;
 import edu.bgsu.rna.jar3d.io.writers.ResultSaver;
-import edu.bgsu.rna.jar3d.loop.Loop;
-import edu.bgsu.rna.jar3d.query.Query;
-import edu.bgsu.rna.jar3d.results.LoopResult;
 
 public class JAR3Database {
 
