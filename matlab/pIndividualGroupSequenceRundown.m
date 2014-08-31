@@ -2,13 +2,17 @@
 
 % Copy Text into a spreadsheet, then sort by columns B, S, and U to get a nice ordering
 
-function [Text,ROC,Confusion] = pIndividualGroupSequenceRundown(Params,OnlyStructured,OwnMotif,GroupData,MLPS,FASTA,ModelPath,SeqGroup,OwnEditDistance,CoreEditDistance,Percentile,Criterion,Verbose,CutoffScore,FullEditDistance,AvgCoreEditDistance,CutoffMet,MotifEquivalence)
+function [Text,ROC,Confusion,Correctness] = pIndividualGroupSequenceRundown(Params,OnlyStructured,OwnMotif,GroupData,MLPS,FASTA,ModelPath,SeqGroup,OwnEditDistance,CoreEditDistance,Percentile,Criterion,Verbose,CutoffScore,FullEditDistance,AvgCoreEditDistance,CutoffMet,MotifEquivalence)
 
 CoreDistSL = Params.CoreDistSL;
 SizeOfGuessSet = Params.SizeOfGuessSet;
 UseMultiplicity = Params.UseMultiplicity;
 
 Confusion = zeros(length(GroupData),length(GroupData)+1);   % to count mis-classifications
+
+Correctness.Criterion = Criterion;
+Correctness.NumSeqs   = length(FASTA);
+Correctness.TotalMultiplicity = 
 
 if nargin < 17,
   Criterion = 3;

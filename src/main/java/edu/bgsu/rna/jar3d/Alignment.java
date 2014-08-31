@@ -255,7 +255,7 @@ public class Alignment {
 	 */
 	public static List<Sequence> doParse(List<Sequence> sData, String nodeFileName, int range)
 	{
-		return Alignment.doParse(sData, nodeFileName, range, false);
+		return Alignment.doParse(sData, nodeFileName, range, false, false);
 	}
 
 
@@ -1009,7 +1009,7 @@ public class Alignment {
 	}
 
 	//Overloaded doParse that can take model/node data as a string instead of a file name
-	public static List<Sequence> doParse(List<Sequence> sData, String nodeInfo, int range, boolean fullModelText)
+	public static List<Sequence> doParse(List<Sequence> sData, String nodeInfo, int range, boolean fullModelText, boolean calculateCorrespondences)
 	{
 		Node current;
 		List<Double> mProbs = new Vector<Double>();
@@ -1064,25 +1064,26 @@ public class Alignment {
 			sData.get(i).appendProbabilities(mProbs);
 			sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 
-			String correspondences = ((InitialNode)S.first).showCorrespondences(S.nucleotides);
+			if (calculateCorrespondences) {
+				String correspondences = ((InitialNode)S.first).showCorrespondences(S.nucleotides);
+				correspondences = correspondences.replace("JAR3D_aligns_to", "aligns_to_JAR3D");
+				String SF = "Sequence_"+i;
+				correspondences = correspondences.replace("SSS",SF);
+				sData.get(i).correspondences = correspondences;
+			}
+		}				
 
-			correspondences = correspondences.replace("JAR3D_aligns_to", "aligns_to_JAR3D");
-
-			String SF = "Sequence_"+i;
-			correspondences = correspondences.replace("SSS",SF);
-
-			sData.get(i).correspondences = correspondences;
+		if (calculateCorrespondences) {
+			for (int i = 1; i < sData.size(); i++)
+				{
+					sData.get(i).correspondences += "Sequence_"+i+" has_name "+sData.get(i).organism.replace(" ","_")+"\n";
+				}
+			for (int i = 1; i < sData.size(); i++)
+				{
+					sData.get(i).correspondences += "Sequence_"+i+" has_score "+sData.get(i).getMaxLogProbability(0)+"\n";
+				}
 		}
-		
-		for (int i = 1; i < sData.size(); i++)
-		{
-			sData.get(i).correspondences += "Sequence_"+i+" has_name "+sData.get(i).organism.replace(" ","_")+"\n";
-		}
 
-		for (int i = 1; i < sData.size(); i++)
-		{
-			sData.get(i).correspondences += "Sequence_"+i+" has_score "+sData.get(i).getMaxLogProbability(0)+"\n";
-		}
 		return sData;
 	}
 
