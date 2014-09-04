@@ -27,8 +27,8 @@ public class DBResultSaver extends AbstractResultsSaver {
 	
 	public DBResultSaver(String username, String password, String dbConnection) throws SQLException {
         connection = DriverManager.getConnection(dbConnection, username, password);
-        String loopResultSQL = "insert into jar3d_results_by_loop (query_id, loop_id, motif_id, cutoff_percent, meanscore, meaninterioreditdist, meanfulleditdist, medianscore, medianinterioreditdist, medianfulleditdist, signature, rotation, correspondences) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-        String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (query_id, seq_id, loop_id, cutoff, score, interioreditdist, fulleditdist, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String loopResultSQL = "insert into jar3d_results_by_loop (query_id, loop_id, motif_id, cutoff_percent, meanscore, meaninterioreditdist, meanfulleditdist, medianscore, medianinterioreditdist, medianfulleditdist, signature, rotation, correspondences) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (query_id, seq_id, loop_id, cutoff, score, interioreditdist, fulleditdist, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?);";
         String updateLoopSQL = "UPDATE jar3d_query_info SET status=1, time_completed=? WHERE query_id = ?;";
         String updateSequenceSQL = "UPDATE jar3d_query_sequences SET status=1, time_completed=? WHERE query_id = ? and seq_id = ? and loop_id = ?;";
         String failureSQL = "UPDATE jar3d_query_info SET status=-1, time_completed = ? WHERE query_id = ?;";

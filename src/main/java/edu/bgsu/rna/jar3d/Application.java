@@ -98,11 +98,12 @@ public class Application {
 	 * @param HLbase Base path to the HL models.
 	 * @return The results.
 	 * @throws QueryLoadingFailed
+	 * @throws SaveFailed 
 	 */
 	
-	public List<List<LoopResult>> runQuery(String queryId, String ILbase, String HLbase) throws QueryLoadingFailed {
+	public void runQuery(String queryId, String ILbase, String HLbase) throws QueryLoadingFailed, SaveFailed {
 		Query query = loader.load(queryId);
-		return runQuery(query, ILbase, HLbase);
+		this.runQuery(query, ILbase, HLbase);
 	}
 
 	/**
@@ -141,11 +142,10 @@ public class Application {
 	 * @param HLbase The base path to the HL models
 	 * @param query The query to run.
 	 * @return The results.
+	 * @throws SaveFailed 
 	 */
 	
-	public List<List<LoopResult>> runQuery(Query query, String ILbase, String HLbase) {
-		List<List<LoopResult>> allResults = new ArrayList<List<LoopResult>>();
-		
+	public void runQuery(Query query, String ILbase, String HLbase) throws SaveFailed {
 		//Load IL Motif Group information
 		File ilf = new File(ILbase);
 		String ilfolder = ilf.getParent();
@@ -178,9 +178,8 @@ public class Application {
 			}else {
 				results = motifParse(HLModelNames, HLGroupData, loop);
 			}
-			allResults.add(results);
+			saveResult(results);
 		}
-		return allResults;
 	}
 
 	/**
@@ -198,7 +197,7 @@ public class Application {
 			System.out.println("Found " + modelNames.size() + " model files");
 		}
 
-//		System.out.println("Application.motifParse: " +loop.getLoopType());
+		System.out.println("Application.motifParse: " +loop.getLoopType());
 		
 /**
 		// 2013-11-05 CLZ Old code only ran for internal loops.  Others returned empty results and saving crashed.
@@ -226,6 +225,17 @@ public class Application {
 		}
 		saver.cleanUp();
 	}
+	
+	/**
+	 * Save results using the ResultSaver. 
+	 * 
+	 * @param results The results to save.
+	 * @throws SaveFailed
+	 */
+	public void saveResult(List<LoopResult> result) throws SaveFailed {
+		saver.save(result);
+		saver.cleanUp();
+	}
 
 	/**
 	 * Load a query, run the query and then save the results.
@@ -236,9 +246,8 @@ public class Application {
 	 * @throws QueryLoadingFailed
 	 */
 	public void runAndSave(String queryId, String base) throws SaveFailed, QueryLoadingFailed {
-		List<List<LoopResult>> results = this.runQuery(queryId, base);
 		saver.writeHeader();
-		saveResults(results);
+		List<List<LoopResult>> results = this.runQuery(queryId, base);
 	}
 	
 	/**
@@ -252,8 +261,7 @@ public class Application {
 	 */
 	
 	public void runAndSave(String queryId, String ILbase, String HLbase) throws SaveFailed, QueryLoadingFailed {
-		List<List<LoopResult>> results = this.runQuery(queryId, ILbase, HLbase);
 		saver.writeHeader();
-		saveResults(results);
+		this.runQuery(queryId, ILbase, HLbase);
 	}
 }
