@@ -877,9 +877,9 @@ public class Alignment {
 	    for(int k = 0; k < modNames.size(); k++)
 		{
 	    	group = groupData.get(modNames.get(k));
-			sData  = Alignment.doParse(sData, group.Model, range, true);
+			sData  = Alignment.doParse(sData, group.Model, range, true, false);
 			if(type.equalsIgnoreCase("IL")){
-				rsData = Alignment.doParse(rsData, group.Model, range, true);
+				rsData = Alignment.doParse(rsData, group.Model, range, true, false);
 			}
 		}
 

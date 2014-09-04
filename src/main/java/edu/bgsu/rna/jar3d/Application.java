@@ -178,8 +178,9 @@ public class Application {
 			}else {
 				results = motifParse(HLModelNames, HLGroupData, loop);
 			}
-			saveResult(results);
+			saver.save(results);
 		}
+		saver.cleanUp();
 	}
 
 	/**
@@ -226,17 +227,6 @@ public class Application {
 		saver.cleanUp();
 	}
 	
-	/**
-	 * Save results using the ResultSaver. 
-	 * 
-	 * @param results The results to save.
-	 * @throws SaveFailed
-	 */
-	public void saveResult(List<LoopResult> result) throws SaveFailed {
-		saver.save(result);
-		saver.cleanUp();
-	}
-
 	/**
 	 * Load a query, run the query and then save the results.
 	 * 
