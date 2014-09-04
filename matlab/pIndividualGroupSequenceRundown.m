@@ -2,7 +2,7 @@
 
 % Copy Text into a spreadsheet, then sort by columns B, S, and U to get a nice ordering
 
-function [Text,ROC,Confusion,Correctness] = pIndividualGroupSequenceRundown(Params,OnlyStructured,OwnMotif,GroupData,MLPS,FASTA,ModelPath,SeqGroup,OwnEditDistance,CoreEditDistance,Percentile,Criterion,Verbose,CutoffScore,FullEditDistance,AvgCoreEditDistance,CutoffMet,MotifEquivalence)
+function [Text,ROC,Confusion,Correctness] = pIndividualGroupSequenceRundown(Params,OnlyStructured,OwnMotif,GroupData,MLPS,FASTA,ModelPath,SeqGroup,OwnCoreEditDistance,CoreEditDistance,Percentile,Criterion,Verbose,CutoffScore,FullEditDistance,AvgCoreEditDistance,CutoffMet,MotifEquivalence)
 
 CoreDistSL = Params.CoreDistSL;
 SizeOfGuessSet = Params.SizeOfGuessSet;
@@ -103,7 +103,7 @@ for gg = 1:length(grouporder),                 % run through sequence groups
       if OnlyStructured == 0 || GroupData(n).Structured > 0,
         alignmentnumrows = alignmentnumrows + FASTA(n).Multiplicity;
         
-        if OwnEditDistance(n) == 0,
+        if OwnCoreEditDistance(n) == 0,
           alignmentzeroedit = alignmentzeroedit + FASTA(n).Multiplicity;
         end
       end
@@ -247,6 +247,11 @@ for gg = 1:length(grouporder),                 % run through sequence groups
         elseif numbetter < SizeOfGuessSet,
           score = min(1,(SizeOfGuessSet - numbetter) / (numequal + 1));
         end
+      end
+
+      if Params.CoreEditZeroSuccess > 0 && OwnCoreEditDistance(n) == 0,    % simply recognize these as being correct
+        OwnCutoffMet = 1;
+        score = 1;
       end
 
       Correctness.CorrectByMultiplicity = Correctness.CorrectByMultiplicity + FASTA(n).Multiplicity * score;
