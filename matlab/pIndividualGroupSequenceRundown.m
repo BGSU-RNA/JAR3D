@@ -2,13 +2,25 @@
 
 % Copy Text into a spreadsheet, then sort by columns B, S, and U to get a nice ordering
 
-function [Text,ROC,Confusion] = pIndividualGroupSequenceRundown(Params,OnlyStructured,OwnMotif,GroupData,MLPS,FASTA,ModelPath,SeqGroup,OwnEditDistance,CoreEditDistance,Percentile,Criterion,Verbose,CutoffScore,FullEditDistance,AvgCoreEditDistance,CutoffMet,MotifEquivalence)
+function [Text,ROC,Confusion,Correctness] = pIndividualGroupSequenceRundown(Params,OnlyStructured,OwnMotif,GroupData,MLPS,FASTA,ModelPath,SeqGroup,OwnEditDistance,CoreEditDistance,Percentile,Criterion,Verbose,CutoffScore,FullEditDistance,AvgCoreEditDistance,CutoffMet,MotifEquivalence)
 
 CoreDistSL = Params.CoreDistSL;
 SizeOfGuessSet = Params.SizeOfGuessSet;
 UseMultiplicity = Params.UseMultiplicity;
 
 Confusion = zeros(length(GroupData),length(GroupData)+1);   % to count mis-classifications
+
+Correctness.Criterion = Criterion;
+Correctness.NumSeqs   = length(FASTA);
+Correctness.TotalMultiplicity = sum(cat(1,FASTA.Multiplicity));
+Correctness.CorrectByMultiplicity = 0;
+Correctness.CorrectSequences = 0;
+Correctness.NumNT = GroupData(OwnMotif(1)).NumNT;
+Correctness.MeanSequenceLength = GroupData(OwnMotif(1)).MeanSequenceLength;
+Correctness.GroupNum = OwnMotif(1);
+Correctness.MotifID = GroupData(OwnMotif(1)).MotifID;
+Correctness.NumBasepairs = GroupData(OwnMotif(1)).NumBasepairs;
+Correctness.NumBPh = GroupData(OwnMotif(1)).NumBPh;
 
 if nargin < 17,
   Criterion = 3;
@@ -96,6 +108,8 @@ for gg = 1:length(grouporder),                 % run through sequence groups
         end
       end
     end
+
+    Correctness.PercentZeroEdit = alignmentzeroedit/alignmentnumrows;
 
     em = find(MotifEquivalence(mn,:) > 0);     % this model and all equivalent to it
 
@@ -235,6 +249,9 @@ for gg = 1:length(grouporder),                 % run through sequence groups
         end
       end
 
+      Correctness.CorrectByMultiplicity = Correctness.CorrectByMultiplicity + FASTA(n).Multiplicity * score;
+      Correctness.CorrectSequences = Correctness.CorrectSequences + score;
+
       ROC(ed+1,1) = ROC(ed+1,1) + Counter * score;  % record degree of success
       ROC(ed+1,2) = ROC(ed+1,2) + Counter;          % count this sequence by its edit distance to its own group
 
@@ -339,3 +356,6 @@ end
 if Params.NumSequencesToShow < Inf,
   pause
 end
+
+Correctness.PercentageCorrectSequences = Correctness.CorrectSequences / Correctness.NumSeqs;
+Correctness.PercentageCorrectMultiplicity = Correctness.CorrectByMultiplicity / Correctness.TotalMultiplicity;

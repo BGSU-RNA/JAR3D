@@ -21,8 +21,21 @@ MotifEquivalence = zeros(length(GroupData),length(GroupData));
 MotifNotEquiv    = zeros(length(GroupData),length(GroupData));
 FN = [OutputPath filesep 'lib' filesep 'equivalent_motifs.txt'];
 
+switch loopType,
+case 'IL'
+  Rotations = 1;
+case 'HL'
+  Rotations = 0;
+end
+
 for m = 1:length(GroupData),
   MotifNames{m,1} = GroupData(m).MotifID;
+  SequenceLengths = [];
+  for s = 1:length(GroupData(m).OwnSequence),
+    SequenceLengths(s) = length(GroupData(m).OwnSequence{s}) - Rotations;
+  end
+  GroupData(m).SequenceLengths = SequenceLengths;
+  GroupData(m).MeanSequenceLength = mean(SequenceLengths);
 end
 
 if exist(FN,'file') > 0,
