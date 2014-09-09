@@ -59,10 +59,13 @@ public class DBResultSaver extends AbstractResultsSaver {
 	public void save(LoopResult results)  throws SaveFailed {
 		// TODO Do all sequences at once for speed up?
 		// TODO When save a sequence update time.
-		for(SequenceResult sequenceResult: results.sequenceResults()) {
+		// Disabling sequence saving to help with speed.  When sequence pages are displayed,
+		// we need to re-do the calculations to get the correspondences, so we can save sequence level
+		// results then
+/*		for(SequenceResult sequenceResult: results.sequenceResults()) {
 			saveSequenceResult(sequenceResult);
 		}
-
+*/
 		try {
 			insertLoopResult.setString(1, results.getLoop().getQuery().getId());
 			insertLoopResult.setInt(2, (int)results.getLoop().getId());

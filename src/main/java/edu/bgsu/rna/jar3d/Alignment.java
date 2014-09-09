@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
@@ -854,6 +856,9 @@ public class Alignment {
 		// TODO 2013-11-07 CLZ generalize this so that it can apply to HL, IL, 3WJ, 4WJ, etc.
 		// Currently there is only space for rotations 0 and 1
 		
+		// int num2save = modNames.size();   /save all
+		int num2save = 20;
+		
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
 		double[] modelScores = new double[modNames.size()];
@@ -933,10 +938,30 @@ public class Alignment {
 		for(int k = 0; k < modNames.size(); k++) {
 			indices[k] = k;
 		}
+		
+		// the following block of code sorts modelScores in an inefficient way
+		for(int a = 0; a < modelScores.length; a++)
+		   {
+	            int max = a; //array position of largest element
+	            for(int b = a; b < modelScores.length; b++)
+	            {
+	                if(modelScores[b] > modelScores[max])
+	                	max = b;
+	            }
+	            // exchange scores
+	            double dtemp = modelScores[max];
+	            modelScores[max] = modelScores[a];
+	            modelScores[a] = dtemp;
+
+	            // exchange indices for use with vectors
+	            int itemp = indices[max];
+	            indices[max] = indices[a];
+	            indices[a] = itemp;
+		    }
 
 		//Calculate extra information (edit distances, cutoffs) and output
 		int numInputSeqs = sData.size()-1;
-		for(int g = 0; g < modNames.size(); g++) {
+		for(int g = 0; g < num2save; g++) {
 
 			int index = indices[g];
 			String groupName = tinyModNames.get(index);
@@ -1132,5 +1157,4 @@ public class Alignment {
 		}
 		return sData;
 	}
-
 }
