@@ -1020,13 +1020,11 @@ public class Alignment {
 			}
 			if (true) {
 				List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
-				//Sequence results not being saved for efficiency.
-				/*
 				for(int m = 0; m < sData.size() - 1; m++) {
 					SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], InteriorMinDist[m], FullMinDist[m],rotation,cutoffs[m],cutoffscores[m]);
 					seqRes.add(seqR);
 				}
-				*/
+				
 				LoopResult loopR = new BasicLoopResult(groupName, rotation, sig, seqRes, "NA");
 				loopR.setLoop(loop);
 				loopRes.add(loopR);
