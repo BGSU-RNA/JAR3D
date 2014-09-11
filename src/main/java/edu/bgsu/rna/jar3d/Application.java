@@ -169,16 +169,17 @@ public class Application {
 
 		Vector<String> HLModelNames = Sequence.getModelNames(HLbase, modelType, false);		
 		HashMap<String,MotifGroup> HLGroupData = webJAR3D.loadMotifGroups(HLbase, modelType);
-
+		List<LoopResult> results;
+		
 		for(Loop loop: query) {
 			String type = loop.getLoopType().getShortName();
-			List<LoopResult> results;
 			if(type.equals("IL")){
 				results = motifParse(ILModelNames, ILGroupData, loop); 
 			}else {
 				results = motifParse(HLModelNames, HLGroupData, loop);
 			}
 			saver.save(results);
+			results.clear();
 		}
 		saver.cleanUp();
 	}
