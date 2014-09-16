@@ -36,6 +36,16 @@ for m = 1:length(GroupData),
   end
   GroupData(m).SequenceLengths = SequenceLengths;
   GroupData(m).MeanSequenceLength = mean(SequenceLengths);
+
+  if strcmp(GroupData(m).Signature{1},'cWW-cWW') && strcmp(loopType,'IL'),
+    GroupData(m).Structured = 0;
+  elseif strcmp(GroupData(m).Signature{1},'cWW') && strcmp(loopType,'HL'),
+    GroupData(m).Structured = 0;
+  else
+    GroupData(m).Structured = 1;
+  end
+%  fprintf('%d %s %s\n',GroupData(m).Structured,GroupData(m).MotifID,GroupData(m).Signature{1});
+
 end
 
 if exist(FN,'file') > 0,

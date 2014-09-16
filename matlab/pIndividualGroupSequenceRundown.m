@@ -14,6 +14,10 @@ Correctness.Criterion = Criterion;
 Correctness.NumSeqs   = length(FASTA);
 Correctness.TotalMultiplicity = sum(cat(1,FASTA.Multiplicity));
 Correctness.CorrectByMultiplicity = 0;
+Correctness.CorrectByMultiplicityExclFullMatch = 0;
+Correctness.CorrectByMultiplicityExclInteriorMatch = 0;
+Correctness.TotalMultiplicityExclFullMatch = 0;
+Correctness.TotalMultiplicityExclInteriorMatch = 0;
 Correctness.CorrectSequences = 0;
 Correctness.NumNT = GroupData(OwnMotif(1)).NumNT;
 Correctness.MeanSequenceLength = GroupData(OwnMotif(1)).MeanSequenceLength;
@@ -255,6 +259,14 @@ for gg = 1:length(grouporder),                 % run through sequence groups
       end
 
       Correctness.CorrectByMultiplicity = Correctness.CorrectByMultiplicity + FASTA(n).Multiplicity * score;
+      if OwnCoreEditDistance(n) > 0,
+        Correctness.TotalMultiplicityExclInteriorMatch = Correctness.TotalMultiplicityExclInteriorMatch + FASTA(n).Multiplicity;
+        Correctness.CorrectByMultiplicityExclInteriorMatch = Correctness.CorrectByMultiplicityExclInteriorMatch + FASTA(n).Multiplicity * score;
+      end
+      if FullEditDistance(n,mn,1) > 0,
+        Correctness.TotalMultiplicityExclFullMatch = Correctness.TotalMultiplicityExclFullMatch + FASTA(n).Multiplicity;
+        Correctness.CorrectByMultiplicityExclFullMatch = Correctness.CorrectByMultiplicityExclFullMatch + FASTA(n).Multiplicity * score;
+      end
       Correctness.CorrectSequences = Correctness.CorrectSequences + score;
 
       ROC(ed+1,1) = ROC(ed+1,1) + Counter * score;  % record degree of success
@@ -364,3 +376,5 @@ end
 
 Correctness.PercentageCorrectSequences = Correctness.CorrectSequences / Correctness.NumSeqs;
 Correctness.PercentageCorrectMultiplicity = Correctness.CorrectByMultiplicity / Correctness.TotalMultiplicity;
+Correctness.PercentageCorrectExclFullMatch = Correctness.CorrectByMultiplicityExclFullMatch / Correctness.TotalMultiplicityExclFullMatch;
+Correctness.PercentageCorrectExclInteriorMatch = Correctness.CorrectByMultiplicityExclInteriorMatch / Correctness.TotalMultiplicityExclInteriorMatch;
