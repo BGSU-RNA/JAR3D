@@ -57,6 +57,27 @@ public final class BasicLoopResult implements LoopResult {
 		this.correspondences = correspondences;
 		computeData();
 	}
+	
+	public BasicLoopResult(String modelId, int rotation,
+			String signature, String correspondences, 
+			double medianScore, double meanScore,
+			double meanInteriorEditDistance, double medianInteriorEditDistance,
+			double meanFullEditDistance, double medianFullEditDistance,
+			double meanCutoff, double meanCutoffScore) {
+		this.sequenceResults = null;
+		this.modelId = modelId;
+		this.rotation = rotation;
+		this.signature = signature;
+		this.correspondences = correspondences;
+		this.medianScore = medianScore;
+		this.meanScore = meanScore;
+		this.meanInteriorEditDistance = meanInteriorEditDistance;
+		this.medianInteriorEditDistance = medianInteriorEditDistance;
+		this.meanFullEditDistance = meanFullEditDistance;
+		this.medianFullEditDistance = medianFullEditDistance;
+		this.meanCutoff = meanCutoff;
+		this.meanCutoffScore = meanCutoffScore;
+	}
 
     /**
      * Compute the mean and median data. This goes through all Sequence results

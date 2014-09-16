@@ -856,8 +856,6 @@ public class Alignment {
 		// TODO 2013-11-07 CLZ generalize this so that it can apply to HL, IL, 3WJ, 4WJ, etc.
 		// Currently there is only space for rotations 0 and 1
 		
-		// int num2save = modNames.size();   /save all
-		int num2save = 20;
 		
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
@@ -939,29 +937,9 @@ public class Alignment {
 			indices[k] = k;
 		}
 		
-		// the following block of code sorts modelScores in an inefficient way
-		for(int a = 0; a < modelScores.length; a++)
-		   {
-	            int max = a; //array position of largest element
-	            for(int b = a; b < modelScores.length; b++)
-	            {
-	                if(modelScores[b] > modelScores[max])
-	                	max = b;
-	            }
-	            // exchange scores
-	            double dtemp = modelScores[max];
-	            modelScores[max] = modelScores[a];
-	            modelScores[a] = dtemp;
-
-	            // exchange indices for use with vectors
-	            int itemp = indices[max];
-	            indices[max] = indices[a];
-	            indices[a] = itemp;
-		    }
-
 		//Calculate extra information (edit distances, cutoffs) and output
 		int numInputSeqs = sData.size()-1;
-		for(int g = 0; g < num2save; g++) {
+		for(int g = 0; g < modNames.size(); g++) {
 
 			int index = indices[g];
 			String groupName = tinyModNames.get(index);
@@ -1019,17 +997,42 @@ public class Alignment {
 				}
 			}
 			if (true) {
-				List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
+/*				List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
 				for(int m = 0; m < sData.size() - 1; m++) {
 					SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], InteriorMinDist[m], FullMinDist[m],rotation,cutoffs[m],cutoffscores[m]);
 					seqRes.add(seqR);
 				}
+*/				
+				double medianScore = ArrayMath.median(groupScores);
+				double meanScore = ArrayMath.mean(groupScores);
+				double meanInteriorEditDistance = ArrayMath.mean(InteriorMinDist);
+				double medianInteriorEditDistance = ArrayMath.median(InteriorMinDist);
+				double meanFullEditDistance = ArrayMath.mean(FullMinDist);
+				double medianFullEditDistance = ArrayMath.median(FullMinDist);
+				double meanCutoff = ArrayMath.mean(cutoffs);
+				double meanCutoffScore = ArrayMath.mean(cutoffscores);
 				
-				LoopResult loopR = new BasicLoopResult(groupName, rotation, sig, seqRes, "NA");
+				LoopResult loopR = new BasicLoopResult(groupName, rotation, sig, "NA",
+						medianScore, meanScore,
+						meanInteriorEditDistance, medianInteriorEditDistance,
+						meanFullEditDistance, medianFullEditDistance,
+						meanCutoff, meanCutoffScore);
 				loopR.setLoop(loop);
 				loopRes.add(loopR);
 			}
+			groupScores = null;
+			InteriorMinDist = null;
+			FullMinDist = null;
+			cutoffs = null;
+			cutoffscores = null;
 		}
+		modelScoreMat = null;
+		rmodelScoreMat = null;
+		modelScores = null;
+		rmodelScores = null;
+		modelSums =  null;
+		rmodelSums = null;
+		
 		return loopRes;
 	}
 
