@@ -1026,6 +1026,8 @@ public class Alignment {
 			cutoffs = null;
 			cutoffscores = null;
 		}
+		sData = null;
+		rsData = null;
 		modelScoreMat = null;
 		rmodelScoreMat = null;
 		modelScores = null;
