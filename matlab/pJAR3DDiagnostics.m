@@ -21,6 +21,7 @@ Params.MinMotifSize = 6;
 Params.MinSeqLengthIL = 6;
 Params.MaxSeqLength = 30;
 Params.NumSequencesToShow = Inf;
+Params.CoreEditZeroSuccess = 0;
 
 % basic cutoffs only
 Params.CutoffType       = 2;      % use generic cutoffs

@@ -2,7 +2,7 @@
 
 % -------------------------------------------------------------------- % choices for the user
 
-Release = ['IL' filesep '1.13'];
+Release = ['HL' filesep '1.17'];
 
 MotifLibraryLocation = 'C:\Users\zirbel\Documents\JAR3DMotifs\';
 OutputBase = pwd;                                                      % start Matlab in the directory containing IL and HL
