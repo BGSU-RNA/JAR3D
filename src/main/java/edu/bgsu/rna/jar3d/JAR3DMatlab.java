@@ -166,8 +166,8 @@ public class JAR3DMatlab {
 					alnm += pData.get(j).charAt(i);
 			}		
 			alnm += " "+((Sequence)sData.elementAt(j)).organism+" ";
-			for(int x = 0; x < ((Sequence)sData.elementAt(j)).getMaxLogProbabilitySize(); x++)
-				alnm += ((Sequence)sData.elementAt(j)).getMaxLogProbabilities(x).get(0);
+			for(int x = 0; x < ((Sequence)sData.elementAt(j)).getMaxNodeLogProbabilitySize(); x++)
+				alnm += ((Sequence)sData.elementAt(j)).getMaxNodeLogProbabilities(x).get(0);
 			alignmentVect.add(alnm);
 		}
 		return alignmentVect;	
@@ -267,6 +267,7 @@ public class JAR3DMatlab {
 				Value = Double.parseDouble(ValueS);
 				modVals.add(Value);
 			}
+			in.close();
 		} catch(Exception e) {
 			System.out.println("webJAR3D.getQuantilesFromFile: Error reading file " + quantileFileName + "\n" + e);
 		}

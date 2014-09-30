@@ -26,9 +26,10 @@ public class Sequence {
 	Node first, last;          // first and last nodes of parsing model
 
 	int code[];                // code for letters A, C, G, U
-	private List<List<Double>> maxLogProbs;
-    String parseData;
-    String correspondences;
+	private List<List<Double>> maxNodeLogProbs;
+	private List<Double> maxLogProbs;
+	String parseData;
+	String correspondences;
 	double totalProbability;   // total probability for the entire sequence
 
 	/**
@@ -40,7 +41,8 @@ public class Sequence {
 	public Sequence(String org, String let) {
 		organism = org;
 		letters = let.toUpperCase();
-		maxLogProbs = new Vector<List<Double>>();
+		maxNodeLogProbs = new Vector<List<Double>>();
+		maxLogProbs = new Vector<Double>();
 	}
 
 	/**
@@ -54,7 +56,8 @@ public class Sequence {
 		letters = let.toUpperCase();;
 		setNucleotides();
 		setArrays();
-		maxLogProbs = new Vector<List<Double>>();
+		maxNodeLogProbs = new Vector<List<Double>>();
+		maxLogProbs = new Vector<Double>();
 
 		ctiFirst = new int[firstSeq.cti.length];
 		itcFirst = new int[firstSeq.itc.length];
@@ -77,24 +80,36 @@ public class Sequence {
 		setArrays();
 	}
 
+	public int getMaxNodeLogProbabilitySize() {
+		return maxNodeLogProbs.size();
+	}
+	
 	public int getMaxLogProbabilitySize() {
-	    return maxLogProbs.size();
+		return maxLogProbs.size();
 	}
 
-	public List<Double> getMaxLogProbabilities(int index) {
-	    return maxLogProbs.get(index);
+	public List<Double> getMaxNodeLogProbabilities(int index) {
+		return maxNodeLogProbs.get(index);
+	}
+	
+	public Double getMaxLogProbability(int index) {
+		return maxLogProbs.get(index);
 	}
 
-	public Double getMaxLogProbabilityOf(int i, int j) {
-	    return getMaxLogProbabilities(i).get(j);
+	public Double getMaxNodeLogProbabilityOf(int i, int j) {
+		return getMaxNodeLogProbabilities(i).get(j);
 	}
 
-	public Double getMaxLogProbability(int i) {
-	    return getMaxLogProbabilityOf(i, 0);
+	public Double getMaxNodeLogProbability(int i) {
+		return getMaxNodeLogProbabilityOf(i, 0);
 	}
 
-	public void appendProbabilities(List<Double> probs) {
-	    maxLogProbs.add(probs);
+	public void appendNodeProbabilities(List<Double> probs) {
+		maxNodeLogProbs.add(probs);
+	}
+	
+	public void appendProbabilities(Double mlp) {
+		maxLogProbs.add(mlp);
 	}
 
 	/**
@@ -207,7 +222,7 @@ public class Sequence {
 		if (modelText == null) {
 			System.out.println("addNodeDataModelText:  modelText is null");
 		}
-		
+
 		String[] modelArray;
 		modelArray = modelText.split("\\n");
 
@@ -443,8 +458,8 @@ public class Sequence {
 	{
 		String modelText = "";
 		String nodeLine = "";
-		
-//		System.out.println("Sequence.addNodeData: "+modelFileName);
+
+		//		System.out.println("Sequence.addNodeData: "+modelFileName);
 
 		BufferedReader rdr;
 
@@ -453,12 +468,12 @@ public class Sequence {
 			{
 				String curDir = System.getProperty("user.dir");
 				// TODO Figure out what the next line is for and find a better fix.
-		        curDir = curDir.replace(File.separator + "bin","");
+				curDir = curDir.replace(File.separator + "bin","");
 
 				try
 				{
-					
-//					File f2 = new File(curDir + File.separator + "Models" + File.separator + modelFileName);
+
+					//					File f2 = new File(curDir + File.separator + "Models" + File.separator + modelFileName);
 					// 2013-11-05 CLZ Assume that modelFileName is found in curDir
 					File f2 = new File(curDir + File.separator + modelFileName);
 					rdr = new BufferedReader(new FileReader(f2));
@@ -476,18 +491,18 @@ public class Sequence {
 				// if the model filename has http in it, use URL stuff, if not, look for a local file.
 				System.out.println("Working online...");
 				URL dirurl = new URL("http://rna.bgsu.edu/JAR3D/");
-		        URLConnection dircon = dirurl.openConnection();
-		        rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
+				URLConnection dircon = dirurl.openConnection();
+				rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
 
-		        String ln = rdr.readLine();
+				String ln = rdr.readLine();
 				while(ln != null)
-					{
+				{
 					ln = rdr.readLine();
-					}
+				}
 
 				dirurl = new URL(modelFileName);
-		        dircon = dirurl.openConnection();
-		        rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
+				dircon = dirurl.openConnection();
+				rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
 			}
 
 			nodeLine = rdr.readLine();
@@ -501,7 +516,7 @@ public class Sequence {
 			}
 
 			addNodeDataModelText(modelText);
-			}
+		}
 		catch (IOException e) {
 			System.out.println("Sequence.addNodeData: Could not open model file");
 			System.out.println(e);
@@ -534,7 +549,7 @@ public class Sequence {
 			if(!(modelFileName.contains("http")))
 			{
 				String curDir = System.getProperty("user.dir");
-		        curDir = curDir.replace(File.separator + "bin","");
+				curDir = curDir.replace(File.separator + "bin","");
 
 				try
 				{
@@ -554,18 +569,18 @@ public class Sequence {
 				// if the model filename has http in it, use URL stuff, if not, look for a local file.
 				System.out.println("Working online...");
 				URL dirurl = new URL("http://rna.bgsu.edu/JAR3D/");
-		        URLConnection dircon = dirurl.openConnection();
-		        rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
+				URLConnection dircon = dirurl.openConnection();
+				rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
 
-		        String ln = rdr.readLine();
+				String ln = rdr.readLine();
 				while(ln != null)
-					{
+				{
 					ln = rdr.readLine();
-					}
+				}
 
 				dirurl = new URL(modelFileName);
-		        dircon = dirurl.openConnection();
-		        rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
+				dircon = dirurl.openConnection();
+				rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
 			}
 
 			nodeLine = rdr.readLine();
@@ -697,7 +712,6 @@ public class Sequence {
 				else
 					nodeLine = rdr.readLine();
 			}
-			//rdr.close();
 			rdr.close();
 		}
 		catch (IOException e) {
@@ -837,12 +851,12 @@ public class Sequence {
 			current = current.previous;		 // current equals the one before
 		}
 
-//		System.out.println("Sequence.parseSequence: nucleotides 0 to "+(nucleotides.length()-1)+" "+nucleotides);
+		//		System.out.println("Sequence.parseSequence: nucleotides 0 to "+(nucleotides.length()-1)+" "+nucleotides);
 
 		// CYK algorithm for determining maximum log probability parse
 		for (int p=1; p <= nucleotides.length(); p++)         // length of subsequence
 		{
-//			long start2 = System.currentTimeMillis();
+			//			long start2 = System.currentTimeMillis();
 			for(int i=0; i+p <= nucleotides.length(); i++)   // starting point of subsequence
 			{
 				int j = i+p-1;                          // right side of this subsequence
@@ -857,11 +871,11 @@ public class Sequence {
 		}// for
 
 		double mlp = first.maxLogProb[0][nucleotides.length()-1-first.jMin];
-		
+
 		((InitialNode)first).traceback(0,nucleotides.length()-1);  // start traceback from first node, full sequence
-		
+
 		return mlp;
-	
+
 	}// end parseSequence()
 
 	/**
@@ -874,44 +888,44 @@ public class Sequence {
 		Vector<String> modelNames = new Vector<String>();
 		String listName = loopType + "_Models.txt";
 
-	try {
-		String curDir = System.getProperty("user.dir");
-        curDir = curDir.replace(File.separator + "bin","");
+		try {
+			String curDir = System.getProperty("user.dir");
+			curDir = curDir.replace(File.separator + "bin","");
 
-		BufferedReader rdr;
+			BufferedReader rdr;
 
-		File f2 = new File(curDir + File.separator + "models" + File.separator + listName);
-		rdr = new BufferedReader(new FileReader(f2));
+			File f2 = new File(curDir + File.separator + "models" + File.separator + listName);
+			rdr = new BufferedReader(new FileReader(f2));
 
-		String fileLine = "";
-		fileLine = rdr.readLine();
-
-		while(fileLine != null)
-		{
-			modelNames.add(fileLine);
+			String fileLine = "";
 			fileLine = rdr.readLine();
-		}
 
+			while(fileLine != null)
+			{
+				modelNames.add(fileLine);
+				fileLine = rdr.readLine();
+			}
+			rdr.close();
 		}
-	catch (Exception e) {
-		try{
-			System.out.println("Couldn't find model files locally, looking online.");
-			URL dirurl = new URL("http://rna.bgsu.edu/JAR3D/models/"+listName);
-	        URLConnection dircon = dirurl.openConnection();
-	        BufferedReader rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
-	        String ln = rdr.readLine();
-			while(ln != null)
+		catch (Exception e) {
+			try{
+				System.out.println("Couldn't find model files locally, looking online.");
+				URL dirurl = new URL("http://rna.bgsu.edu/JAR3D/models/"+listName);
+				URLConnection dircon = dirurl.openConnection();
+				BufferedReader rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
+				String ln = rdr.readLine();
+				while(ln != null)
 				{
 					modelNames.add("http://rna.bgsu.edu/JAR3D/models/" + ln);
 					ln = rdr.readLine();
 				}
+			}
+			catch (Exception ex)
+			{
+				System.out.println(ex.getMessage());
+			}
 		}
-		catch (Exception ex)
-		{
-			System.out.println(ex.getMessage());
-		}
-	}
-	return modelNames;
+		return modelNames;
 	}
 
 	//Overloaded getModelNames for the new file system
@@ -923,49 +937,49 @@ public class Sequence {
 
 		// 2013-11-05 CLZ the user directly specifies a file that lists all models to run
 		listName = modelList;
-		
-	try {
-		String curDir = System.getProperty("user.dir");
-        curDir = curDir.replace(File.separator + "bin","");
 
-		BufferedReader rdr;
+		try {
+			String curDir = System.getProperty("user.dir");
+			curDir = curDir.replace(File.separator + "bin","");
 
-		File f2 = new File(listName);
-		rdr = new BufferedReader(new FileReader(f2));
+			BufferedReader rdr;
 
-		String fileLine = "";
-		fileLine = rdr.readLine();
+			File f2 = new File(listName);
+			rdr = new BufferedReader(new FileReader(f2));
 
-		while(fileLine != null)
-		{
-			//remove _model.txt from file name to get group name
-			fileLine = fileLine.substring(0,fileLine.length()-10);
-			modelNames.add(fileLine);
+			String fileLine = "";
 			fileLine = rdr.readLine();
-		}
 
-		rdr.close();
-		
+			while(fileLine != null)
+			{
+				//remove _model.txt from file name to get group name
+				fileLine = fileLine.substring(0,fileLine.length()-10);
+				modelNames.add(fileLine);
+				fileLine = rdr.readLine();
+			}
+
+			rdr.close();
+
 		}
-	catch (Exception e) {
-		try{
-			System.out.println("Could not find model files locally, looking online.");
-			URL dirurl = new URL("http://rna.bgsu.edu/JAR3D/models/"+listName);
-	        URLConnection dircon = dirurl.openConnection();
-	        BufferedReader rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
-	        String ln = rdr.readLine();
-			while(ln != null)
+		catch (Exception e) {
+			try{
+				System.out.println("Could not find model files locally, looking online.");
+				URL dirurl = new URL("http://rna.bgsu.edu/JAR3D/models/"+listName);
+				URLConnection dircon = dirurl.openConnection();
+				BufferedReader rdr = new BufferedReader(new InputStreamReader(dircon.getInputStream()));
+				String ln = rdr.readLine();
+				while(ln != null)
 				{
 					modelNames.add("http://rna.bgsu.edu/JAR3D/models/" + ln);
 					ln = rdr.readLine();
 				}
+			}
+			catch (Exception ex)
+			{
+				System.out.println(ex.getMessage());
+			}
 		}
-		catch (Exception ex)
-		{
-			System.out.println(ex.getMessage());
-		}
-	}
-	return modelNames;
+		return modelNames;
 	}
 
 
@@ -978,68 +992,68 @@ public class Sequence {
 	{
 		Vector<String> lineValues = new Vector<String>();
 
-	try {
-		String curDir = System.getProperty("user.dir");
-        curDir = curDir.replace(File.separator + "bin","");
+		try {
+			String curDir = System.getProperty("user.dir");
+			curDir = curDir.replace(File.separator + "bin","");
 
-		BufferedReader rdr;
+			BufferedReader rdr;
 
-		File f2 = new File(curDir + File.separator + fileName);
-		rdr = new BufferedReader(new FileReader(f2));
+			File f2 = new File(curDir + File.separator + fileName);
+			rdr = new BufferedReader(new FileReader(f2));
 
-		String fileLine = "";
-		fileLine = rdr.readLine();
-
-		while(fileLine != null)
-		{
-			lineValues.add(fileLine);
+			String fileLine = "";
 			fileLine = rdr.readLine();
-		}
 
-		rdr.close();
+			while(fileLine != null)
+			{
+				lineValues.add(fileLine);
+				fileLine = rdr.readLine();
+			}
+
+			rdr.close();
 		}
-	catch (Exception e) {
+		catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
 
-	return lineValues;
+		return lineValues;
 	}
 
-  /**
-   * Get the String sequence of this Sequence.
-   *
-   * @return The sequence
-   */
+	/**
+	 * Get the String sequence of this Sequence.
+	 *
+	 * @return The sequence
+	 */
 	public String getSequence() {
 		return letters;
 	}
 
-    /**
-     * Get the String identifer for this Sequence.
-     *
-     * @return The id.
-     */
-    public String getId() {
-        return organism;
-    }
+	/**
+	 * Get the String identifer for this Sequence.
+	 *
+	 * @return The id.
+	 */
+	public String getId() {
+		return organism;
+	}
 
-    /**
-     * Reverse this sequence. This will return a new sequence with the same id,
-     * but the strands will be in the reversed order. Strands are separated by
-     * '*'.
-     *
-     * @return A reversed Sequence.
-     */
-    public Sequence reverse() {
-      StringTokenizer tokens = new StringTokenizer(letters,"*");
-      StringBuffer buff = new StringBuffer();
-      while(tokens.hasMoreTokens()) {
-          buff.append(tokens.nextToken());
-          buff.append("*");
-      }
-      buff.deleteCharAt(buff.length() - 1);
-      return new Sequence(organism, buff.reverse().toString());
-  }
+	/**
+	 * Reverse this sequence. This will return a new sequence with the same id,
+	 * but the strands will be in the reversed order. Strands are separated by
+	 * '*'.
+	 *
+	 * @return A reversed Sequence.
+	 */
+	public Sequence reverse() {
+		StringTokenizer tokens = new StringTokenizer(letters,"*");
+		StringBuffer buff = new StringBuffer();
+		while(tokens.hasMoreTokens()) {
+			buff.append(tokens.nextToken());
+			buff.append("*");
+		}
+		buff.deleteCharAt(buff.length() - 1);
+		return new Sequence(organism, buff.reverse().toString());
+	}
 
 	/**
 	 * This method converts the sequence into an array of numbers [0,1,2,3]
@@ -1072,19 +1086,19 @@ public class Sequence {
 			}// for
 
 		}// for
-		
+
 
 		for (int i = first.iMin; i <= first.iMax; i++)
 		{
 			for (int j = first.jMin; j <= first.jMax; j++) {
 				double p = first.totalProb[i-first.iMin][j-first.jMin];
-//				if (p > 0)
-//					System.out.println("i "+i+" j "+j+" prob "+p);
+				//				if (p > 0)
+				//					System.out.println("i "+i+" j "+j+" prob "+p);
 			}
 		}
-			
-//		System.out.println(nucleotides+" "+nucleotides.length());
-//		System.out.println("Total probability is "+first.totalProb[0][nucleotides.length()-1-first.jMin]);
+
+		//		System.out.println(nucleotides+" "+nucleotides.length());
+		//		System.out.println("Total probability is "+first.totalProb[0][nucleotides.length()-1-first.jMin]);
 		return first.totalProb[0][nucleotides.length()-1-first.jMin];
 
 	}// end calculateTotalProbability()

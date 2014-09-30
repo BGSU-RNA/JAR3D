@@ -92,6 +92,7 @@ public class MotifGroup implements java.io.Serializable{
     				Cutoffs[i] = Double.valueOf(Cutoffs_strings[i]);
     			}
     		}
+    		br.close();
     	}  catch (Exception e1) {
 			e1.printStackTrace();
 			System.out.println("MotifGroup.MotifGroup:  Could not read model files, check path and name");

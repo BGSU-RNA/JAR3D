@@ -385,8 +385,7 @@ public class HairpinNode extends BasicNode {
 		int j = optimalGen1.j;            // ending index of the sequence for this hairpin
 		
 		
-		if (0>1) {
-			System.out.println("Max log prob is " + optimalMaxLogProb);
+/*			System.out.println("Max log prob is " + optimalMaxLogProb);
 			System.out.println("Is this node deleted? "+optimalGen1.deleted);
 			System.out.println("Current sequence is 012345678901234567890");
 			System.out.println("Current sequence is " + letters);
@@ -396,7 +395,7 @@ public class HairpinNode extends BasicNode {
 			for (int m=0; m < insert.length; m++)
 				System.out.print(insert[m] + " ");
 			System.out.println();
-		}
+		*/
 		
 		String left = "SSS_Position_" + (i+1) + "_" + letters.charAt(i) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_1" + "\n";
 //		System.out.println(left);

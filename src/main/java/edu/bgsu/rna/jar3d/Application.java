@@ -180,11 +180,7 @@ public class Application {
 				results = motifParse(HLModelNames, HLGroupData, loop);
 			}
 			saver.save(results);
-			results = null;
-			System.gc();
 		}
-		ILGroupData = null;
-		HLGroupData = null;
 		saver.cleanUp();
 	}
 

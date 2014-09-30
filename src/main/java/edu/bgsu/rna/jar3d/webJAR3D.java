@@ -48,6 +48,7 @@ public class webJAR3D {
 				Value = Double.parseDouble(ValueS);
 				modVals.add(Value);
 			}
+			in.close();
 		} catch(Exception e) {
 			System.out.println("Error reading file " + modDistFN + "\n"+e);
 		}
@@ -122,6 +123,7 @@ public class webJAR3D {
 				Value = Double.parseDouble(ValueS);
 				modVals.add(Value);
 			}
+			in.close();
 		} catch(Exception e) {
 			System.out.println("Error reading file " + modDistFN + "\n"+e);
 		}
@@ -199,6 +201,7 @@ public class webJAR3D {
 				forward.add(forwS);
 				reversed.add(revS);
 			}
+			in.close();
 		} catch(Exception e) {
 			System.out.println("Error reading file " + sigFN + "\n"+e);
 		}

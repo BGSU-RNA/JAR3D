@@ -373,8 +373,8 @@ public class Alignment {
 			else
 			{
 				System.out.print(">" + sData.get(j).organism + " ");
-				for(int x = 0; x < sData.get(j).getMaxLogProbabilitySize(); x++)
-					System.out.print(sData.get(j).getMaxLogProbability(x));
+				for(int x = 0; x < sData.get(j).getMaxNodeLogProbabilitySize(); x++)
+					System.out.print(sData.get(j).getMaxNodeLogProbability(x));
 				System.out.println();
 			}
 			for(int i = 0; i < mask.length; i++)
@@ -417,8 +417,8 @@ public class Alignment {
 			else
 			{
 				System.out.print(">" + sData.get(j).organism + " ");
-				for(int x = 0; x < sData.get(j).getMaxLogProbabilitySize(); x++)
-					System.out.print(sData.get(j).getMaxLogProbability(x));
+				for(int x = 0; x < sData.get(j).getMaxNodeLogProbabilitySize(); x++)
+					System.out.print(sData.get(j).getMaxNodeLogProbability(x));
 				System.out.println();
 			}
 			for(int i = 0; i < mask.length; i++)
@@ -472,9 +472,9 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.get(m).getMaxLogProbabilitySize(); x++)
+			for(int x = 0; x < sData.get(m).getMaxNodeLogProbabilitySize(); x++)
 			{
-				double tempo = sData.get(0).getMaxLogProbability(x);
+				double tempo = sData.get(0).getMaxNodeLogProbability(x);
 				modelSums[x] += tempo;
 			}
 		}
@@ -545,10 +545,10 @@ public class Alignment {
 			}
 			alnm += " " + sData.get(j).organism + " ";
 
-			for(int x = 0; x < sData.get(j).getMaxLogProbabilitySize(); x++)
+			for(int x = 0; x < sData.get(j).getMaxNodeLogProbabilitySize(); x++)
 			{
 				fmt = new Formatter();
-				fmt.format("%10.6f", sData.get(j).getMaxLogProbability(indices[x]));
+				fmt.format("%10.6f", sData.get(j).getMaxNodeLogProbability(indices[x]));
 				alnm += tinyModNames.get(indices[x]) + " score: " + fmt + " ";
 			}
 			alignmentVect.add(alnm);
@@ -601,14 +601,14 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.get(m).getMaxLogProbabilitySize(); x++)
+			for(int x = 0; x < sData.get(m).getMaxNodeLogProbabilitySize(); x++)
 			{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-			    double tempo = sData.get(m).getMaxLogProbability(x);
+			    double tempo = sData.get(m).getMaxNodeLogProbability(x);
 				modelSums[x] += tempo;
 
-				tempo = rsData.get(m).getMaxLogProbability(x);
+				tempo = rsData.get(m).getMaxNodeLogProbability(x);
 				rmodelSums[x] += tempo;
 			}
 		}
@@ -710,9 +710,9 @@ public class Alignment {
 			{
 				fmt = new Formatter();
 				if (reversed[indices[x]] == 0)
-					fmt.format("%12.6f", sData.get(j).getMaxLogProbability(indices[x]));
+					fmt.format("%12.6f", sData.get(j).getMaxNodeLogProbability(indices[x]));
 				else
-					fmt.format("%12.6f", rsData.get(j).getMaxLogProbability(indices[x]));
+					fmt.format("%12.6f", rsData.get(j).getMaxNodeLogProbability(indices[x]));
 				alnm += tinyModNames.get(indices[x]) + " score: " + fmt + " ";
 			}
 			}
@@ -773,7 +773,7 @@ public class Alignment {
 				mProbs.add(new Double(current.optimalMaxLogProb));
 				current =  current.next;
 			}
-			sData.get(i).appendProbabilities(mProbs);
+			sData.get(i).appendNodeProbabilities(mProbs);
 			probsM.add(mProbs);
 			sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 
@@ -808,11 +808,11 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.get(m).getMaxLogProbabilitySize(); x++)
+			for(int x = 0; x < sData.get(m).getMaxNodeLogProbabilitySize(); x++)
 			{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-				double tempo = sData.get(m).getMaxLogProbabilityOf(x, 0);
+				double tempo = sData.get(m).getMaxNodeLogProbabilityOf(x, 0);
 				scores[m][x] = tempo;
 			}
 		}
@@ -826,7 +826,7 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size()-1; m++)
 		{
-				double tempo = sData.get(m+1).getMaxLogProbabilityOf(0, 0);
+				double tempo = sData.get(m+1).getMaxNodeLogProbabilityOf(0, 0);
 				scores[m] = tempo;
 		}
 		return scores;
@@ -880,9 +880,9 @@ public class Alignment {
 	    for(int k = 0; k < modNames.size(); k++)
 		{
 	    	group = groupData.get(modNames.get(k));
-			sData  = Alignment.doParse(sData, group.Model, range, true, false);
+			sData  = Alignment.doParse(sData, group.Model, range, true, false, false);
 			if(type.equalsIgnoreCase("IL")){
-				rsData = Alignment.doParse(rsData, group.Model, range, true, false);
+				rsData = Alignment.doParse(rsData, group.Model, range, true, false, false);
 			}
 		}
 
@@ -891,16 +891,17 @@ public class Alignment {
 	    {
 	    	for(int x = 0; x < sData.get(m).getMaxLogProbabilitySize(); x++)
 	    	{
-	    		double tempo = sData.get(m).getMaxLogProbabilityOf(x, 0);
+	    		double tempo = sData.get(m).getMaxLogProbability(x);
 	    		modelSums[x] += tempo;
 	    		modelScoreMat[x][m] = tempo;
 	    		if(type.equalsIgnoreCase("IL")){
-	    			tempo = rsData.get(m).getMaxLogProbabilityOf(x, 0);
+	    			tempo = rsData.get(m).getMaxLogProbability(x);
 	    			rmodelSums[x] += tempo;
 	    			rmodelScoreMat[x][m] = tempo;
 	    		}
 	    	}
 	    }
+	    
 	    for(int g = 0; g < modelSums.length; g++)
 	    {
 	    	modelScores[g] = (modelSums[g]/(sData.size()-1));
@@ -922,7 +923,6 @@ public class Alignment {
 	    	}else{
 	    		reversed[g] = 0;
 	    	}
-
 	    }
 
 		// re-sort models & their totals
@@ -1020,26 +1020,22 @@ public class Alignment {
 				loopR.setLoop(loop);
 				loopRes.add(loopR);
 			}
-			groupScores = null;
-			InteriorMinDist = null;
-			FullMinDist = null;
-			cutoffs = null;
-			cutoffscores = null;
 		}
-		sData = null;
-		rsData = null;
-		modelScoreMat = null;
-		rmodelScoreMat = null;
-		modelScores = null;
-		rmodelScores = null;
-		modelSums =  null;
-		rmodelSums = null;
+		//Try to clean up the memory we used
+		System.gc();
+		System.runFinalization();
+		System.gc();
 		
 		return loopRes;
 	}
+	
+	public static List<Sequence> doParse(List<Sequence> sData, String nodeInfo, int range, boolean fullModelText, boolean calculateCorrespondences)
+	{
+		return doParse(sData,nodeInfo,range,fullModelText,calculateCorrespondences,true);
+	}
 
 	//Overloaded doParse that can take model/node data as a string instead of a file name
-	public static List<Sequence> doParse(List<Sequence> sData, String nodeInfo, int range, boolean fullModelText, boolean calculateCorrespondences)
+	public static List<Sequence> doParse(List<Sequence> sData, String nodeInfo, int range, boolean fullModelText, boolean calculateCorrespondences, boolean saveNodeProbs)
 	{
 		Node current;
 		List<Double> mProbs = new Vector<Double>();
@@ -1078,22 +1074,27 @@ public class Alignment {
 
 			mlp = S.parseSequence(range);                             	      // parse this sequence
 
+			sData.get(i).appendProbabilities(mlp); 							  // save mlp
+		
 			// We also need to store the parse information somewhere!  All we have is a parse sequence.
 			// We need to store the max log probabilities too
 
-			mProbs = new Vector<Double>();
-			current = S.first;
-			while(current != null)
+			mProbs.clear();
+			if(saveNodeProbs)
 			{
-				mProbs.add(new Double(current.optimalMaxLogProb));
-//				System.out.println("Alignment.doParse optimalMaxLogProb for a node is "+current.optimalMaxLogProb);
-				current =  current.next;
-			}
-//			System.out.println("Alignment.doParse actual MLP is "+mlp);
-			
-			sData.get(i).appendProbabilities(mProbs);
-			sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
+				current = S.first;
+				while(current != null)
+				{
+					mProbs.add(new Double(current.optimalMaxLogProb));
+					//				System.out.println("Alignment.doParse optimalMaxLogProb for a node is "+current.optimalMaxLogProb);
+					current =  current.next;
+				}
+				//	System.out.println("Alignment.doParse actual MLP is "+mlp);
 
+				sData.get(i).appendNodeProbabilities(mProbs);
+				sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
+			}
+			
 			if (calculateCorrespondences) {
 				String correspondences = ((InitialNode)S.first).showCorrespondences(S.nucleotides);
 				correspondences = correspondences.replace("JAR3D_aligns_to", "aligns_to_JAR3D");
@@ -1110,7 +1111,7 @@ public class Alignment {
 				}
 			for (int i = 1; i < sData.size(); i++)
 				{
-					sData.get(i).correspondences += "Sequence_"+i+" has_score "+sData.get(i).getMaxLogProbability(0)+"\n";
+					sData.get(i).correspondences += "Sequence_"+i+" has_score "+sData.get(i).getMaxNodeLogProbability(0)+"\n";
 				}
 		}
 
