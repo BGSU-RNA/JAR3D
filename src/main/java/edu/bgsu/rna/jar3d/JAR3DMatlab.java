@@ -28,7 +28,7 @@ public class JAR3DMatlab {
 		if (rotation > 0)
 			sequenceData = Alignment.reverse(sequenceData);
 		
-		sequenceData = Alignment.doParse(sequenceData, modelFileName, 15, false, true);
+		sequenceData = Alignment.doParse(sequenceData, modelFileName, 999, false, true);
 
 //		Alignment.displayAlignmentFASTA(sequenceData);
 		
