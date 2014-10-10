@@ -898,54 +898,57 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
   	        print(gcf,'-dpdf',[DiagnosticPath filesep CF '_RandomSequenceMatchRate_edit_distance.pdf']);
   	      end
 
-          figure(v+2)
-          clf
-          for a = 1:length(LengthToPosition(:,1)),
-            for b = 1:length(LengthToPosition(:,2)),
-              sl = LengthToPosition(a,b);
-              MatchRate(a,b) = 0;
-              if sl > 0,
-                fprintf('%d %d %d %6.2f\n',a,b,sl,CoreEditZeroperc(sl));
-                CEZRate(a,b) = CoreEditZeroperc(sl);
-                GMRate(a,b) = GoodMatchperc(sl);
-                MRate(a,b) = Matchperc(sl);
+          % grayscale heat map for IL
+
+          if strcmp(loopType,'IL'),
+            figure(v+2)
+            clf
+            for a = 1:length(LengthToPosition(:,1)),
+              for b = 1:length(LengthToPosition(:,2)),
+                sl = LengthToPosition(a,b);
+                MatchRate(a,b) = 0;
+                if sl > 0,
+                  fprintf('%d %d %d %6.2f\n',a,b,sl,CoreEditZeroperc(sl));
+                  CEZRate(a,b) = CoreEditZeroperc(sl);
+                  GMRate(a,b) = GoodMatchperc(sl);
+                  MRate(a,b) = Matchperc(sl);
+                end
               end
             end
+
+            colormap(gray)
+            map = colormap;
+            map = 1-map;
+
+            if v == 1,
+              subplot(2,2,1)
+              pcolor(CEZRate);
+              shading flat
+              colormap(map);
+              colorbar('eastoutside')
+              title('Percentage with interior edit distance 0')
+              subplot(2,2,2)
+              pcolor(GMRate);
+              shading flat
+              colormap(map);
+              colorbar('eastoutside')
+              title('Percentage with cutoff score 40 or over')
+              subplot(2,2,3)
+              pcolor(MRate);
+              shading flat
+              colormap(map);
+              colorbar('eastoutside')
+              title('Percentage accepted by at least one motif group')
+              subplot(2,2,4)
+              [s,t] = size(MRate);
+              pcolor(nummodelsbylengths(1:s,1:t));
+              shading flat
+              colormap(map);
+              colorbar('eastoutside')
+              title('Number of motif groups with instance of the given size')
+              print(gcf,'-dpng',[DiagnosticPath filesep loopType '_FP_heatmap.png']);
+            end
           end
-
-          colormap(gray)
-          map = colormap;
-          map = 1-map;
-
-          if v == 1,
-            subplot(2,2,1)
-            pcolor(CEZRate);
-            shading flat
-            colormap(map);
-            colorbar('eastoutside')
-            title('Percentage with interior edit distance 0')
-            subplot(2,2,2)
-            pcolor(GMRate);
-            shading flat
-            colormap(map);
-            colorbar('eastoutside')
-            title('Percentage with cutoff score 40 or over')
-            subplot(2,2,3)
-            pcolor(MRate);
-            shading flat
-            colormap(map);
-            colorbar('eastoutside')
-            title('Percentage accepted by at least one motif group')
-            subplot(2,2,4)
-            [s,t] = size(MRate);
-            pcolor(nummodelsbylengths(1:s,1:t));
-            shading flat
-            colormap(map);
-            colorbar('eastoutside')
-            title('Number of motif groups with instance of the given size')
-            print(gcf,'-dpng',[DiagnosticPath filesep loopType '_FP_heatmap.png']);
-          end
-
   	    end
 
   	    fprintf('\n\n\n\n\n');

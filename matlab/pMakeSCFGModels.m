@@ -267,7 +267,7 @@ for m = 1:length(Filenames),
  if isempty(Node),
 %    mkdir([MotifLibraryPath filesep 'trouble']);
 %    movefile([MotifLibraryPath filesep MotifName '.mat'],[MotifLibraryPath filesep 'trouble' filesep MotifName '.mat']); 
-    fprintf('@@@@@@@@@@@@ Motif %s could not be modeled for some reason\n', MotifName);
+    fprintf('@@@@@@@@@@@@ pMakeSCFGModels: Motif %s could not be modeled for some reason\n', MotifName);
     Filenames(m).modeled = 0;
 
  else
