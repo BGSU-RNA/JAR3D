@@ -26,7 +26,7 @@ end
 Params.DeficitCutoff    = 20;
 Params.CoreEditCutoff   = 5;
 
-Grayscale = 1;                              % plot in grayscale for the paper or in color for talks
+Grayscale = 0;                              % plot in grayscale for the paper or in color for talks
 tfs = 13;
 
 if UseAlignmentSequences == 2,
@@ -205,6 +205,8 @@ for iii = 1:length(GroupData),
 		clear SDR
 		SDR(:,1) = SD(:,1);
 		SDR(:,2) = SD(:,2) + 0.25*max(0,(min(Source,2)-1)) + 0.25*rand(LL,1);
+		i = find(Source == 0);
+		SDR(i,2) = SD(i,2);                  % no random shift for edit distances for sequences from 3D structures
 		SDR(:,3) = SD(:,3) + rand(LL,1)/4;
 		SDR(:,4) = SD(:,4) + rand(LL,1)/4;
 		SDR(:,5) = SD(:,5) + rand(LL,1)/4;
@@ -288,42 +290,6 @@ for iii = 1:length(GroupData),
 		GroupData(motifnum).CoreEditCoeff = 3;               % insist on this being 3
 		CoreEditCoeff = GroupData(motifnum).CoreEditCoeff;
 		Coeff = [DeficitCoeff CoreEditCoeff];
-
-    % ---------------------------- Deficit versus core edit distance - the graph that really matters
-		% ---------------- main figure - represent points from 3D, from alignments, random sequences
-    figure(1)
-    clf
-
-    i = find(Source >= 2);                        % randomly-generated sequences
-    if length(i) > 2000,
-    	i = i(1:2000);
-    end
-    ii = find(Source == 1);                        % sequences from alignments
-    if length(i) > 2000,
-    	ii = ii(1:2000);
-    end
-    iii = find(Source == 0);                        % sequences from 3D
-
-    if Grayscale > 0,
-	    plot(SDR(i,2),SDR(i,1),'k.');
-	    hold on
-	    plot(SDR(ii,2),SDR(ii,1),'x','color',0.6*[1 1 1]);
-	    plot(SDR(iii,2),SDR(iii,1),'x','Color',0.3*[1 1 1],'MarkerSize',8,'LineWidth',2);
-	  else
-	    plot(SDR(i,2),SDR(i,1),'r.');
-	    hold on
-	    plot(SDR(ii,2),SDR(ii,1),'b.');
-	    plot(SDR(iii,2),SDR(iii,1),'c.','MarkerSize',20,'LineWidth',3);
-	  end
-		NameForTitle = strrep(GroupData(motifnum).MotifID,'_','\_');
-		xlabel(['Minimum interior edit distance to 3D instances in ' NameForTitle],'fontsize',tfs);
-		ylabel('Alignment score deficit','fontsize',tfs)
-		title(['Random and alignment sequences for ' NameForTitle],'fontsize',tfs);
-		set(gca,'fontsize',tfs);
-
-		ced = 0:0.1:5.5;                                % range of core edit distances
-
-		axis([0 5.5 0 20]);                           % show every case on the same scale
 
 		BinarySource = 1*(Source <= 1) + 2*(Source > 1);
 
@@ -443,7 +409,7 @@ figure(1)
 		    MixedScoreCutoff = max(20,quantile(RandomMixedScores,0.02));  % find the cutoff which gets the true negative rate roughly equal to 96%
 	  		GroupData(motifnum).CutoffMethod = 8;
 			end
-
+ 
 	  elseif sum(Source == 2) == 0,                         % no random sequences meet the generic cutoffs
 	  	MixedScoreCutoff = 35;                                        % impose essentially no model-specific cutoff
 	  	fprintf('No random sequence matches, so essentially no model-specific cutoff imposed\n');
@@ -491,9 +457,69 @@ figure(1)
 		fprintf('Group %3d, %-11s has acceptance rules AlignmentScore >= %8.4f, CoreEdit <= %d, and %8.4f * CoreEdit - %8.4f * AlignmentScore <= %8.4f\n',motifnum, GD.MotifID, GD.MinScore, GD.CoreEditCutoff, GD.CoreEditCoeff, GD.DeficitCoeff, GD.ScoreEditCutoff);
 		fprintf('TP %8.2f%%, TN %8.2f%%, min %8.2f%%, %3d 3D sequences, %5d alignment sequences, %4d random sequences, %4d random matches, %2d NTs, %s\n',100*GD.TruePositiveRate, 100*GD.TrueNegativeRate, 100*min(GD.TruePositiveRate,GD.TrueNegativeRate), GD.NumInstances, GD.NumberOfAlignmentSequences, GD.NumberOfRandomSequences, GD.NumberOfFalsePositives, GD.NumNT, GD.Signature{1});
 
-		figure(1)
-		hold on
-		plot(ced,(GroupData(motifnum).DeficitEditCutoff - Coeff(2) * ced)/Coeff(1),'k','linewidth',3);
+    % ---------------------------- Deficit versus core edit distance - the graph that really matters
+		% ---------------- main figure - represent points from 3D, from alignments, random sequences
+    figure(1)
+    clf
+
+    i = find(Source >= 2);                        % randomly-generated sequences
+    if length(i) > 2000,
+    	i = i(1:2000);
+    end
+    ii = find(Source == 1);                        % sequences from alignments
+    if length(i) > 2000,
+    	ii = ii(1:2000);
+    end
+    iii = find(Source == 0);                        % use all sequences from 3D
+
+		ced = 0.01:0.01:100;                                % range of core edit distances
+  	ycutoff = (GroupData(motifnum).DeficitEditCutoff - Coeff(2) * ced)/Coeff(1);
+  	ar = find(ycutoff >= 0);
+  	ced = ced(ar);
+  	ycutoff = ycutoff(ar);
+  	cutofffifty = ycutoff - 0.5*ycutoff(1);
+  	ycutoff = min(19.9,ycutoff);
+  	cutofffifty = min(19.9,cutofffifty);
+  	ar2 = find(cutofffifty >= 0);
+
+    if Grayscale > 0,
+			plot(ced,(GroupData(motifnum).DeficitEditCutoff - Coeff(2) * ced)/Coeff(1),'k','linewidth',3);
+	    hold on
+	    plot(SDR(i,2),SDR(i,1),'k.');
+	    plot(SDR(ii,2),SDR(ii,1),'x','color',0.6*[1 1 1]);
+	    plot(SDR(iii,2),SDR(iii,1),'x','Color',0.3*[1 1 1],'MarkerSize',8,'LineWidth',2);
+	  else
+	  	mediumorchid1 = [224	102	255]/255;
+	  	thistle1 = [255	225	255]/255;
+			patch([0.01 ced 0.01],[0.01 ycutoff 0.01],thistle1)
+			hold on
+			plot(ced,ycutoff,'color',0.9*thistle1,'linewidth',3);
+			plot(ced,cutofffifty,'color',0.9*thistle1,'linewidth',3);
+			plot([0 5.5],[0 0],'k');
+			plot([0 0],[0 20],'k');
+			if ced(ar(end)) < 5.3,
+				text(ced(ar(end)),1,'0','color',0.9*thistle1,'fontweight','bold','fontsize',20)
+			end
+			text(ced(ar2(end)),1,'50','color',0.9*thistle1,'fontweight','bold','fontsize',20)
+			text(0.1,1,'100','color',0.9*thistle1,'fontweight','bold','fontsize',20)
+	    scatter(SDR(i,2),SDR(i,1),4,'k','filled');
+	    scatter(SDR(ii,2),SDR(ii,1),4,'c','filled');
+	    plot(SDR(iii,2),SDR(iii,1),'bx','MarkerSize',14,'LineWidth',3);
+	  end
+		NameForTitle = strrep(GroupData(motifnum).MotifID,'_','\_');
+		xlabel(['Minimum interior edit distance to 3D instances in ' NameForTitle],'fontsize',tfs);
+		ylabel('Alignment score deficit','fontsize',tfs)
+		title(['Random and alignment sequences for ' NameForTitle],'fontsize',tfs);
+		set(gca,'fontsize',tfs);
+		set(gca,'XTick',0:5);
+
+		axis([0 5.5 0 20]);                           % show every case on the same scale
+
+		if SaveDeficitCoreEditPlot > 0,
+			figure(1)
+			saveas(gcf,[MSCOutputPath filesep CurrentMotif '_alignment_random_sequences_method_' num2str(GroupData(motifnum).CutoffMethod) '_NumNT_' num2str(GroupData(motifnum).NumNT) '.png']);
+			saveas(gcf,[MSCOutputPath filesep CurrentMotif '_alignment_random_sequences_method_' num2str(GroupData(motifnum).CutoffMethod) '_NumNT_' num2str(GroupData(motifnum).NumNT) '.pdf']);
+		end
 
 		if PlotCutoffPlane > 0 && MixedScoreCutoff < Inf,
 			figure(1)
@@ -525,10 +551,6 @@ figure(1)
 			drawnow
 		end
 
-		if SaveDeficitCoreEditPlot > 0,
-			figure(1)
-			saveas(gcf,[MSCOutputPath filesep CurrentMotif '_alignment_random_sequences_method_' num2str(GroupData(motifnum).CutoffMethod) '_NumNT_' num2str(GroupData(motifnum).NumNT) '.png']);
-		end
 
 		if 0 > 1,
 			figure(12)

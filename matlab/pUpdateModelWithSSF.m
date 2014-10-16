@@ -280,6 +280,15 @@ end
 
             Node(n).Delete = DeletionProbPerNucleotide^AvgNumNT;              % deletion probability controlled by number of nucleotides
 
+            Node(n)
+
+            NewNormCons = pClusterNorm(Node(n).InterIndices,Node(n).SubsProb,Node(n).LeftIndex,Node(n).RightIndex);
+
+            fprintf('Old normalization constant: %16.8f\n',Node(n).NormCons);
+            fprintf('New normalization constant: %16.8f\n',NewNormCons);
+
+            pause
+
         case 'Junction' % =========================================================
 
         case 'Hairpin'  % =========================================================

@@ -72,7 +72,7 @@ case 3                                    % run the diagnostic using model-speci
   AccumulateRandomSequenceData = 0;       % data on sequences for each model
   AccumulateFPData = 0;                   % detailed data about each sequence
   Depth = Inf;
-  MinimumCutoffScore = 40;
+  MinimumCutoffScore = 50;
   FindFullEditDistance = 0;
 
 end
@@ -932,7 +932,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
               shading flat
               colormap(map);
               colorbar('eastoutside')
-              title('Percentage with cutoff score 40 or over')
+              title('Percentage with cutoff score 50 or over')
               subplot(2,2,3)
               pcolor(MRate);
               shading flat
@@ -979,7 +979,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
     fprintf('Overall false positive rate is %0.4f%%\n', 100*sum(Match(:,1,1))/SequenceCounter);
     fprintf('Number of models giving false positives is %d out of %d\n',sum(FPModelCounter > 0),length(GroupData));
     fprintf('Rate at which sequences have interior edit distance 0 is %8.2f\n',100*sum(CoreEditZero(:,1))/SequenceCounter);
-    fprintf('Rate at which sequences have cutoff score greater than 40 is %8.2f\n',100*sum(GoodMatch(:,1))/SequenceCounter);
+    fprintf('Rate at which sequences have cutoff score greater than 50 is %8.2f\n',100*sum(GoodMatch(:,1))/SequenceCounter);
 
     diary off
 
