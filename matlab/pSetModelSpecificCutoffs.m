@@ -260,8 +260,6 @@ for iii = 1:length(GroupData),
 
 	  	clear Triple
 
-%			Triple(1,:) = [2 4 8];
-%			Triple(2,:) = [2 4 1];
 			Triple(1,:) = [2 4 1];
 
 			j = 1:min(2000,length(Source));  % plot up to 2000 points
@@ -370,8 +368,6 @@ for iii = 1:length(GroupData),
 	  		fprintf('TP rate %8.4f, TN rate %8.4f\n', 100*performance(ii(1),1), 100*performance(ii(1),2));
 	  		GroupData(motifnum).CutoffMethod = 2;
 	  	else
-%	  		MixedScoreCutoff = DefaultMixedScoreCutoff;
-%	  		fprintf('Using default cutoff, %8.4f\n',MixedScoreCutoff);
 		    MixedScoreCutoff = (quantile(RandomMixedScores,0.04)+quantile(RandomMixedScoresB,0.02))/2;  % find the cutoff which gets the true negative rate roughly equal to 98%
 	  		fprintf('Setting cutoff by percentiles of random sequences, %8.4f\n',MixedScoreCutoff);
 	  		GroupData(motifnum).CutoffMethod = 3;
@@ -384,10 +380,6 @@ for iii = 1:length(GroupData),
 		  TP = sum((mynewclasses == 1) .* (BinarySource(k,:) == 1)) / sum(BinarySource(k,:) == 1);
 
 	  	if NumFalsePositive > LocalMaxNumFP && TP > 0.5,  % large number of false positives and an acceptable true positive rate
-
-figure(1)
-%plot(ced,(MixedScoreCutoff - Coeff(2) * ced)/Coeff(1),'r','linewidth',3);
-
 	  		while NumFalsePositive >= LocalMaxNumFP && MixedScoreCutoff > 0,
 	  			fprintf('Constant %8.4f False positives %4d\n',MixedScoreCutoff,sum((2 - (MixedScores <= MixedScoreCutoff) == 1) .* (BinarySource(k,:) == 2)));
 		  		MixedScoreCutoff = MixedScoreCutoff - 0.1;
@@ -430,12 +422,6 @@ figure(1)
 		if MixedScoreCutoff > 25,
 			MixedScoreCutoff = 25;
 			fprintf('Decreased cutoff to %8.4f so that it is possible to reject matches\n',MixedScoreCutoff);
-	  	GroupData(motifnum).CutoffMethod = 12;
-		end
-
-		if 0 > 1 && MixedScoreCutoff < quantile(AlignmentMixedScores,0.2),
-			MixedScoreCutoff = min(20,quantile(AlignmentMixedScores,0.2));
-			fprintf('Increased cutoff to %8.4f to try to get up to a 20%% true positive rate\n',MixedScoreCutoff);
 	  	GroupData(motifnum).CutoffMethod = 12;
 		end
 
@@ -555,30 +541,6 @@ figure(1)
 			view([0 0]);
 %			axis(ax);
 			drawnow
-		end
-
-
-		if 0 > 1,
-			figure(12)
-			clf
-			j = 1:min(2000,length(Source));  % plot up to 2000 points
-			j = [j find(Source == 0)'];
-
-			scatter(SDR(j,2),SD(j,7),4+40*(Source(j) == 0),min(Source(j),2),'filled')
-			xlabel('Core edit distance');
-			ylabel('Alignment score');
-			xmin = min(SDR(j,2));
-			xmax = max(SDR(j,2));
-			ymin = min(SD(j,7));
-			ymax = max(SD(j,7));
-			hold on
-			x = [0 5];
-			plot(x,GroupData(motifnum).MinScore*[1 1],'r');
-			plot(GroupData(motifnum).CoreEditCutoff*[1 1],[ymin ymax],'b');
-			plot(x,(GroupData(motifnum).ScoreEditCutoff - Coeff(2) * x)/(-Coeff(1)),'c');
-			caxis([-0.5 3]);
-			ax = axis;
-			axis([0 5 ymax-20 ymax]);
 		end
 
 		fprintf('Sensitivity %6.2f%%, Specificity %6.2f%%, Minimum %6.2f%% using method %d\n', 100*TP, 100*TN, 100*min(TP,TN),GroupData(motifnum).CutoffMethod);
