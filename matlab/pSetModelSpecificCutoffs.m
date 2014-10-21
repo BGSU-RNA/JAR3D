@@ -427,6 +427,12 @@ figure(1)
 	  	GroupData(motifnum).CutoffMethod = 11;
 		end
 
+		if MixedScoreCutoff > 25,
+			MixedScoreCutoff = 25;
+			fprintf('Decreased cutoff to %8.4f so that it is possible to reject matches\n',MixedScoreCutoff);
+	  	GroupData(motifnum).CutoffMethod = 12;
+		end
+
 		if 0 > 1 && MixedScoreCutoff < quantile(AlignmentMixedScores,0.2),
 			MixedScoreCutoff = min(20,quantile(AlignmentMixedScores,0.2));
 			fprintf('Increased cutoff to %8.4f to try to get up to a 20%% true positive rate\n',MixedScoreCutoff);
