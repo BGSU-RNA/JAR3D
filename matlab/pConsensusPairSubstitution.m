@@ -2,7 +2,7 @@
 
 % The argument Noncanonical being set to 1 means that this pair should set low probabilities for CG, GC, AU, and UA base combinations, because this pair is the first non-canonical pair in a motif.
 
-function [Score] = pConsensusPairSubstitution(a,b,f,File,F,Search,Param,Normalize,Noncanonical)
+function [Score] = pConsensusPairSubstitution(a,b,f,File,F,Search,Param,Normalize,Noncanonical,Prior)
 
 if nargin < 9,
   Noncanonical = [];
@@ -136,21 +136,32 @@ if a ~= b,                                % two different bases
 
   Score = (1-(L/(L+Param(9)))) * Score + (L/(L+Param(9))) * Count;   % weighted average of scoring methods
 
-else                                         % conserved insertion
+else                                      % conserved but non-basepairing position
 
-  Count = 0.2*eye(4);                     % pseudocounts in each position, Dirichlet prior
+  Count = zeros(size(Prior));                     % place to store actual counts
 
   for c = 1:L,                            % loop through candidates
     i   = Search.Candidates(c,a);         % index 1 of pair in candidate
     NT1 = File(f(c)).NT(i);               % retrieve the first nucleotide
 
     if Verbose > 0,
-      fprintf('pConsensusPairSubstitution: File %4s has conserved insertion %s%4s\n', File(f(c)).Filename, NT1.Base, NT1.Number);
+      fprintf('pConsensusPairSubstitution: File %4s has non-basepairing core base %s%4s\n', File(f(c)).Filename, NT1.Base, NT1.Number);
     end
 
-    Count(NT1.Code,NT1.Code) = Count(NT1.Code,NT1.Code) + 1;    
+    Count(1,NT1.Code) = Count(1,NT1.Code) + 1;    
   end
 
-  Score = Count / sum(sum(Count));         % normalize
+  Pr = Prior;
+
+  for e = 1:3,                                        % loop through edges
+      if Param(10) > 0 && sum(Search.BPh(a,:)==e) > 0,
+          Pr = Pr / Param(10);                  % weaken the prior distribution
+      elseif Param(11) > 0 && sum(Search.BR(a,:)==e) > 0,
+          Pr = Pr / Param(11);                  % weaken the prior distribution
+      end
+  end
+
+  Count = Count + Pr;                       % add the prior
+  Score = diag(Count / sum(Count));         % normalize
 
 end
