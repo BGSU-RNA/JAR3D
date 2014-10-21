@@ -201,7 +201,7 @@ end
             Positions = 1:length(Indices);                         % positions within the cluster node
             AvgNumNT = length(Indices);
 
-            % ---------- find consensus 4x4 substitution matrix for basepairs
+            % -------------- add 4x4 "interaction" matrices for fixed bases not in basepairs and not already accounted for; there should be none
 
             for ii = 1:length(Node(n).IBases(:,1)),
                 a = Node(n).InterIndices(ii,1);
@@ -209,13 +209,34 @@ end
 
                 FixedIndices = setdiff(FixedIndices,a);
                 FixedIndices = setdiff(FixedIndices,b);
+            end
+
+            for fi = FixedIndices,
+                [s,t] = size(Node(n).IBases);
+                newinter = s + 1;                                % place to add new "interaction"
+                dist = Prior;
+                p = find(Indices == fi);                         % position within node
+                Node(n).IBases(newinter,:) = [p p];              % record position within node
+                Node(n).InterIndices(newinter,:) = [fi fi];      % index of this nucleotide in the motif
+                Node(n).SubsProb(length(dist),length(dist),newinter) = 0; % make space if needed
+                Node(n).SubsProb(:,:,newinter) = diag(dist);     % put dist down the diagonal
+                Node(n).InteractionComment{newinter} = [' // Cluster node fixed base, nucleotide ' num2str(fi) ' at position ' num2str(p)];
+                fprintf('pUpdateModelWithSSF:  Added a fixed base that was not previously modeled\n');
+                pause
+            end
+
+            % ---------- find consensus 4x4 substitution matrix for basepairs and for fixed but non-basepairing nucleotides
+
+            for ii = 1:length(Node(n).IBases(:,1)),
+                a = Node(n).InterIndices(ii,1);
+                b = Node(n).InterIndices(ii,2);
 
                 if a ~= 0 && b ~= 0,
                     if Verbose > 0,
                         disp(['pUpdateModelWithSSF: Getting consensus for pairs in a cluster, bases ' num2str(a) ' and ' num2str(b)]);
                     end
 
-                    Score = pConsensusPairSubstitution(a,b,f,Search.File,F,Search,Param,Normalize,Noncanonical);
+                    Score = pConsensusPairSubstitution(a,b,f,Search.File,F,Search,Param,Normalize,Noncanonical,Prior);
 
                     if Verbose > 0,
                         fprintf('Original substitution probabilities\n');
@@ -230,27 +251,6 @@ end
                     Search.SubsProb{a,b} = Score;
                     Search.SubsProb{b,a} = Score';
                 end
-            end
-
-            % -------------- add 4x4 "interaction" matrices for fixed bases not in basepairs
-
-            for fi = FixedIndices,
-                [s,t] = size(Node(n).IBases);
-                newinter = s + 1;                                % place to add new "interaction"
-                dist = Prior;
-                for j = 1:L                                      % loop through instances
-                    f = Search.Candidates(UseCandidate(j),end);  % file number
-                    k = Search.Candidates(UseCandidate(j),fi);   % nucleotide index in file
-                    baseCode = Search.File(f).NT(k).Code;
-                    dist(baseCode) = dist(baseCode) + 1;
-                end
-                dist = dist / sum(dist);                         % normalize base distribution
-                p = find(Indices == fi);                         % position within node
-                Node(n).IBases(newinter,:) = [p p];              % record position within node
-                Node(n).InterIndices(newinter,:) = [fi fi];      % index of this nucleotide in the motif
-                Node(n).SubsProb(length(dist),length(dist),newinter) = 0; % make space if needed
-                Node(n).SubsProb(:,:,newinter) = diag(dist);     % put dist down the diagonal
-                Node(n).InteractionComment{newinter} = [' // Cluster node fixed base, nucleotide ' num2str(fi) ' at position ' num2str(p)];
             end
 
             % ------- Adjust insertion probabilities between fixed nucleotides
@@ -280,14 +280,7 @@ end
 
             Node(n).Delete = DeletionProbPerNucleotide^AvgNumNT;              % deletion probability controlled by number of nucleotides
 
-            Node(n)
-
-            NewNormCons = pClusterNorm(Node(n).InterIndices,Node(n).SubsProb,Node(n).LeftIndex,Node(n).RightIndex);
-
-            fprintf('Old normalization constant: %16.8f\n',Node(n).NormCons);
-            fprintf('New normalization constant: %16.8f\n',NewNormCons);
-
-            pause
+            Node(n).NormCons = pClusterNorm(Node(n).InterIndices,Node(n).SubsProb,Node(n).LeftIndex,Node(n).RightIndex);
 
         case 'Junction' % =========================================================
 
