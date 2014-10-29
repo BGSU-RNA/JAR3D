@@ -377,7 +377,7 @@ end
 for m = 1:length(q),
   fprintf('%5.2f%% score higher than %3.0f\n', 100*sum(OwnCutoffScore > q(m))/NumSequences, q(m));
 end
-pause
+
 print(gcf,'-dpng',[DiagnosticPath filesep 'Own_CutoffScore_Histogram' DM{DiagnosticMode} '.png']);
 
 % ------------------------------- Group-group diagnostic, all groups

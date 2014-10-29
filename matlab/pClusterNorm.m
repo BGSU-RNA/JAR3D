@@ -16,9 +16,6 @@ function NormC = pClusterNorm(InterIndicesF,SubsProbF,LeftIndex,RightIndex)
         end
     end
 
-InterIndicesF
-Inters
-
     SubsProb = SubsProbF(:,:,Inters);
     IBases = sort(unique(InterIndices(:)));
 
@@ -80,7 +77,4 @@ Inters
         SubsProbR = SubsProbF(:,:,remInt);
         NormC = psum*pClusterNorm(InterIndicesR,SubsProbR,LeftIndex,RightIndex);
     end
-
-NormC
-
 end
