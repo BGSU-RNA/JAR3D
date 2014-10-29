@@ -206,7 +206,6 @@ end
             for ii = 1:length(Node(n).IBases(:,1)),
                 a = Node(n).InterIndices(ii,1);
                 b = Node(n).InterIndices(ii,2);
-
                 FixedIndices = setdiff(FixedIndices,a);
                 FixedIndices = setdiff(FixedIndices,b);
             end
@@ -214,14 +213,14 @@ end
             for fi = FixedIndices,
                 [s,t] = size(Node(n).IBases);
                 newinter = s + 1;                                % place to add new "interaction"
-                dist = Prior;
+                dist = Prior(1:4);
                 p = find(Indices == fi);                         % position within node
                 Node(n).IBases(newinter,:) = [p p];              % record position within node
                 Node(n).InterIndices(newinter,:) = [fi fi];      % index of this nucleotide in the motif
                 Node(n).SubsProb(length(dist),length(dist),newinter) = 0; % make space if needed
                 Node(n).SubsProb(:,:,newinter) = diag(dist);     % put dist down the diagonal
                 Node(n).InteractionComment{newinter} = [' // Cluster node fixed base, nucleotide ' num2str(fi) ' at position ' num2str(p)];
-                fprintf('pUpdateModelWithSSF:  Added a fixed base that was not previously modeled\n');
+                fprintf('pUpdateModelWithSSF:  Added a fixed base to a cluster node that was not previously modeled\n');
                 pause
             end
 
@@ -292,12 +291,41 @@ end
                 b = Node(n).RightIndex;
                 Positions = 1:(b-a+1);        % positions in the node, internal to the node
                 Indices = a:b;                % indices of nucleotides in the motif
-                FixedIndices = a:b;           % identify nts that are not in basepairs
 
                 if b < a,                     % not supposed to happen
                     fprintf('pUpdateModelWithSSF:  Hairpin left and right indices out of order! **************\n');
                     a = min(a,b);             % should avoid crashing, but model won't be good
                     b = max(a,b);
+                end
+
+                % -------------- add 4x4 "interaction" matrices for fixed bases not in basepairs and not already accounted for; there should be none
+                FixedIndices = a:b;           % identify nts that are not in basepairs
+                if ~isempty(Node(n).IBases),
+                    [s,t] = size(Node(n).IBases);
+
+                    for ii = 1:s,
+                        if Node(n).IBases(ii,1) ~= 0 && Node(n).IBases(ii,2) ~= 0,
+                            a = Node(n).InterIndices(ii,1);
+                            b = Node(n).InterIndices(ii,2);
+                            FixedIndices = setdiff(FixedIndices,a);
+                            FixedIndices = setdiff(FixedIndices,b);
+                        end
+                    end
+                end
+
+                for fi = FixedIndices,
+                    [s,t] = size(Node(n).IBases);
+                    newinter = s + 1;                                % place to add new "interaction"
+                    dist = Prior(1:4);
+                    dist = dist / sum(dist);                         % normalize
+                    p = find(Indices == fi);                         % position within node
+                    Node(n).IBases(newinter,:) = [p p];              % numbering internal to the node
+                    Node(n).InterIndices(newinter,:) = [fi fi];      % index of this nucleotide in the motif
+                    Node(n).SubsProb(length(dist),length(dist),newinter) = 0; % make space if needed
+                    Node(n).SubsProb(:,:,newinter) = diag(dist);     % put dist down the diagonal
+                    Node(n).InteractionComment{newinter} = [' // Hairpin fixed base, nucleotide ' num2str(fi) ' at position ' num2str(p)];
+                    fprintf('pUpdateModelWithSSF:  Added a fixed base to a hairpin node that was not previously modeled\n');
+                    pause
                 end
 
                 % ---------- find consensus 4x4 substitution matrix for basepairs
@@ -316,7 +344,7 @@ end
                                 disp(['pUpdateModelWithSSF: Getting consensus for pairs in a cluster, bases ' num2str(a) ' and ' num2str(b)]);
                             end
 
-                            Score = pConsensusPairSubstitution(a,b,f,Search.File,F,Search,Param,Normalize,Noncanonical);
+                            Score = pConsensusPairSubstitution(a,b,f,Search.File,F,Search,Param,Normalize,Noncanonical,Prior);
 
                             if Verbose > 0,
                                 fprintf('Original substitution probabilities\n');
@@ -332,27 +360,6 @@ end
                             Search.SubsProb{b,a} = Score';
                         end
                     end
-                end
-
-                % -------------- add 4x4 "interaction" matrices for fixed bases not in basepairs
-
-                for fi = FixedIndices,
-                    [s,t] = size(Node(n).IBases);
-                    newinter = s + 1;                                % place to add new "interaction"
-                    dist = Prior;
-                    for j = 1:L                                      % loop through instances
-                        f = Search.Candidates(UseCandidate(j),end);  % file number
-                        k = Search.Candidates(UseCandidate(j),fi);   % nucleotide index in file
-                        baseCode = Search.File(f).NT(k).Code;
-                        dist(baseCode) = dist(baseCode) + 1;
-                    end
-                    dist = dist / sum(dist);                         % normalize
-                    p = find(Indices == fi);                         % position within node
-                    Node(n).IBases(newinter,:) = [p p];              % numbering internal to the node
-                    Node(n).InterIndices(newinter,:) = [fi fi];      % index of this nucleotide in the motif
-                    Node(n).SubsProb(length(dist),length(dist),newinter) = 0; % make space if needed
-                    Node(n).SubsProb(:,:,newinter) = diag(dist);     % put dist down the diagonal
-                    Node(n).InteractionComment{newinter} = [' // Hairpin fixed base, nucleotide ' num2str(fi) ' at position ' num2str(p)];
                 end
 
                 % -------------- check for insertions between fixed bases
@@ -372,6 +379,14 @@ end
                         Node(n).InsertionComment{insertions} = ['// Insertion in Hairpin after nucleotide ' num2str(i) ', position ' num2str(i-a+1)];
                     end
                 end
+
+                if ~isempty(Node(n).InterIndices),
+                    Left = Node(n).MiddleIndex(1:length(Node(n).MiddleIndex)-1);
+                    Node(n).NormCons = pClusterNorm(Node(n).InterIndices,Node(n).SubsProb,Left,Node(n).RightIndex);
+                else
+                    Node(n).NormCons = 1;
+                end
+
             end
         end
     end
