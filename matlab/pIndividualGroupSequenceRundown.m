@@ -25,6 +25,7 @@ Correctness.GroupNum = OwnMotif(1);
 Correctness.MotifID = GroupData(OwnMotif(1)).MotifID;
 Correctness.NumBasepairs = GroupData(OwnMotif(1)).NumBasepairs;
 Correctness.NumBPh = GroupData(OwnMotif(1)).NumBPh;
+Correctness.MostCommonSequence = FASTA(1).Sequence;
 
 if nargin < 17,
   Criterion = 3;
