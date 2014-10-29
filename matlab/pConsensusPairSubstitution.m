@@ -138,7 +138,7 @@ if a ~= b,                                % two different bases
 
 else                                      % conserved but non-basepairing position
 
-  Count = zeros(size(Prior));                     % place to store actual counts
+  Count = zeros(1,4);                     % place to store actual counts
 
   for c = 1:L,                            % loop through candidates
     i   = Search.Candidates(c,a);         % index 1 of pair in candidate
@@ -151,7 +151,7 @@ else                                      % conserved but non-basepairing positi
     Count(1,NT1.Code) = Count(1,NT1.Code) + 1;    
   end
 
-  Pr = Prior;
+  Pr = Prior(1:4);
 
   for e = 1:3,                                        % loop through edges
       if Param(10) > 0 && sum(Search.BPh(a,:)==e) > 0,
