@@ -19,6 +19,7 @@ end
 % ----------------------------------- user controls
 
 MakeEmpiricalDistribution = 0; % no longer making percentile scores
+WriteNodeOutput = 0;           % write file telling the individual sequences output by each node.  Slow!
 
 switch Mode,
 case 1                      % normal mode to make models.  do not edit
@@ -271,6 +272,7 @@ for m = 1:length(Filenames),
     Filenames(m).modeled = 0;
 
  else
+
     Filenames(m).modeled = 1;
 
     Text = pNodeToSCFGModelText(Node,5);
