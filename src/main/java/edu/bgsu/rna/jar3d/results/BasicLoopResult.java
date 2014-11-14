@@ -34,7 +34,6 @@ public final class BasicLoopResult implements LoopResult {
 
 	private final List<SequenceResult> sequenceResults;
 
-	private String correspondences;
 
     /**
      * Build a new BasicLoopResult. The given SequenceResults will have their
@@ -48,18 +47,16 @@ public final class BasicLoopResult implements LoopResult {
      * sequences.
      */
 	public BasicLoopResult(String modelId, int rotation,
-			String signature, List<SequenceResult> sequenceResults,
-			String correspondences) {
+			String signature, List<SequenceResult> sequenceResults) {
 		this.sequenceResults = sequenceResults;
 		this.modelId = modelId;
 		this.rotation = rotation;
 		this.signature = signature;
-		this.correspondences = correspondences;
 		computeData();
 	}
 	
 	public BasicLoopResult(String modelId, int rotation,
-			String signature, String correspondences, 
+			String signature, 
 			double medianScore, double meanScore,
 			double meanInteriorEditDistance, double medianInteriorEditDistance,
 			double meanFullEditDistance, double medianFullEditDistance,
@@ -68,7 +65,6 @@ public final class BasicLoopResult implements LoopResult {
 		this.modelId = modelId;
 		this.rotation = rotation;
 		this.signature = signature;
-		this.correspondences = correspondences;
 		this.medianScore = medianScore;
 		this.meanScore = meanScore;
 		this.meanInteriorEditDistance = meanInteriorEditDistance;
@@ -147,10 +143,6 @@ public final class BasicLoopResult implements LoopResult {
 
 	public int bestRotation() {
 		return rotation;
-	}
-
-	public String correspondences() {
-		return correspondences;
 	}
 
 	public Loop getLoop() {

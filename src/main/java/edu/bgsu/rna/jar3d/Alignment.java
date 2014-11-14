@@ -848,6 +848,18 @@ public class Alignment {
 
 		return results;
 	}
+	
+	public static List<SequenceResult> doSingleDBQuery(Loop loop, MotifGroup group, String model_id, int range) {
+		
+		List<Sequence> sData = loop.getSequences();
+		Query query = loop.getQuery();
+		
+		// 2013-11-05 CLZ Last argument cannot be null, must be something like "IL"
+		// 2013-11-05 CLZ Last argument seems to be reliably obtained from loop
+		List<SequenceResult> results = doSingleDBQuery(query, sData, group, model_id, range, loop, loop.getTypeString());
+		
+		return results;
+	}
 
 	//Takes a JAR3D query and submits results to MySQL database
 	public static List<LoopResult> doLoopDBQuery(int loopID, Query query, List<Sequence> sData, List<String> modNames,
@@ -1012,7 +1024,7 @@ public class Alignment {
 				double meanCutoff = ArrayMath.mean(cutoffs);
 				double meanCutoffScore = ArrayMath.mean(cutoffscores);
 				
-				LoopResult loopR = new BasicLoopResult(groupName, rotation, sig, "NA",
+				LoopResult loopR = new BasicLoopResult(groupName, rotation, sig,
 						medianScore, meanScore,
 						meanInteriorEditDistance, medianInteriorEditDistance,
 						meanFullEditDistance, medianFullEditDistance,
@@ -1027,6 +1039,121 @@ public class Alignment {
 		System.gc();
 		
 		return loopRes;
+	}
+	
+	//Takes a JAR3D query and submits results to MySQL database
+	public static List<SequenceResult> doSingleDBQuery(Query query, List<Sequence> sData,
+			MotifGroup group, String model_id, int range, Loop loop, String type) {
+
+		// TODO 2013-11-07 CLZ generalize this so that it can apply to HL, IL, 3WJ, 4WJ, etc.
+		// Currently there is only space for rotations 0 and 1
+		double modelSum=0;
+		double rmodelSum=0;
+		double modelScore=-9999;
+		double rmodelScore=-9999;
+		double[] modelScores = new double[sData.size()];
+		double[] rmodelScores = new double[sData.size()];
+		int reversed;
+		List<Sequence> rsData = new Vector<Sequence>();
+		
+		if(type.equalsIgnoreCase("IL")){
+			rsData = Alignment.reverse(sData);  // reversed sequence data
+		}
+		
+	    sData  = Alignment.doParse(sData, group.Model, range, true, true, false);
+			if(type.equalsIgnoreCase("IL")){
+				rsData = Alignment.doParse(rsData, group.Model, range, true, true, false);
+			}
+	    //Add up model scores for each sequence, find mean score, compare regular and reversed scores
+	    for(int m = 1; m < sData.size(); m++)
+	    {
+	    	double tempo = sData.get(m).getMaxLogProbability(0);
+	    	modelSum += tempo;
+	    	modelScores[m] =  tempo;
+	    	if(type.equalsIgnoreCase("IL")){
+	    		tempo = rsData.get(m).getMaxLogProbability(0);
+	    		rmodelSum += tempo;
+	    		rmodelScores[m] = tempo;
+	    	}
+	    }
+	    
+	    modelScore = (modelSum/(sData.size()-1));
+	    if(type.equalsIgnoreCase("IL")){
+	    	rmodelScore = (rmodelSum/(sData.size()-1));
+	    }
+	    if(type.equalsIgnoreCase("IL")){
+	    	if(rmodelScore > modelScore)          // choose between forward and reversed for each model
+	    	{
+	    		modelScore = rmodelScore;
+	    		modelScores = rmodelScores;
+	    		reversed = 1;
+	    	}
+	    	else {
+	    		reversed = 0;
+	    	}
+	    }else{
+	    	reversed = 0;
+	    }
+	    
+	    double[] groupScores = new double[sData.size()];
+	    for(int i=1; i <sData.size(); i++){
+	    	groupScores[i-1] = modelScores[i];
+	    }
+	    int numInputSeqs = sData.size()-1;
+	    
+	    //Calculate edit distances
+	    Vector<Sequence> modsData = Alignment.parseFastaText(group.Sequences,0,0);
+	    int[][] InteriorEditDistances;
+	    int[][] FullEditDistances;
+	    if(type.equalsIgnoreCase("IL")){
+	    	InteriorEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,reversed);
+	    	FullEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,reversed,false,false);
+	    }else {
+	    	InteriorEditDistances = SimpleAlign.calcHLEditDistances(sData, modsData);
+	    	FullEditDistances = SimpleAlign.calcHLEditDistances(sData,modsData,false,false);
+	    }
+	    int[] InteriorMinDist = new int[InteriorEditDistances.length];
+	    int[] FullMinDist = new int[FullEditDistances.length];
+	    for(int i = 0; i < InteriorEditDistances.length; i ++){
+	    	InteriorMinDist[i] = ArrayMath.min(InteriorEditDistances[i]);
+	    	FullMinDist[i] = ArrayMath.min(FullEditDistances[i]);
+	    }
+	    boolean[] cutoffs = new boolean[numInputSeqs];
+	    double[] cutoffscores = new double[numInputSeqs];
+	    for(int i = 0; i < numInputSeqs; i++){
+	    	if(groupScores[i]>=group.Cutoffs[0] && InteriorMinDist[i]<=group.Cutoffs[1]
+	    			&& group.Cutoffs[2]*InteriorMinDist[i]-group.Cutoffs[3]*groupScores[i]<=group.Cutoffs[4]){
+	    		cutoffs[i] = Boolean.TRUE;
+	    	}else if(InteriorMinDist[i]==0){
+	    		cutoffs[i] = Boolean.TRUE;
+	    	}else{
+	    		cutoffs[i] = Boolean.FALSE;
+	    	}
+	    	cutoffscores[i] = 100 * (group.Cutoffs[2] * InteriorMinDist[i] - group.Cutoffs[3] * groupScores[i] - group.Cutoffs[4]) / -group.Cutoffs[5];
+	    	if(cutoffscores[i] > 0 && (groupScores[i] < group.Cutoffs[0] || InteriorMinDist[i] > group.Cutoffs[1])){
+	    		cutoffscores[i] = 0;
+	    	}
+	    }
+	    
+	    List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
+		for(int m = 0; m < sData.size() - 1; m++) {
+			SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], InteriorMinDist[m], FullMinDist[m],reversed,cutoffs[m],cutoffscores[m],sData.get(m + 1).correspondences);
+			seqRes.add(seqR);
+		}
+		
+		LoopResult result = new BasicLoopResult(model_id, reversed, "sig", seqRes);
+	    
+		for(SequenceResult res : seqRes) {
+			res.setLoopResult(result);
+		}
+		
+	    //Try to clean up the memory we used
+	    System.gc();
+	    System.runFinalization();
+	    System.gc();
+
+	    return seqRes;
+			
 	}
 	
 	public static List<Sequence> doParse(List<Sequence> sData, String nodeInfo, int range, boolean fullModelText, boolean calculateCorrespondences)
@@ -1111,7 +1238,7 @@ public class Alignment {
 				}
 			for (int i = 1; i < sData.size(); i++)
 				{
-					sData.get(i).correspondences += "Sequence_"+i+" has_score "+sData.get(i).getMaxNodeLogProbability(0)+"\n";
+					sData.get(i).correspondences += "Sequence_"+i+" has_score "+sData.get(i).getMaxLogProbability(0)+"\n";
 				}
 		}
 

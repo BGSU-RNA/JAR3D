@@ -3,9 +3,11 @@ package edu.bgsu.rna.jar3d.io.writers;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 import edu.bgsu.rna.jar3d.results.LoopResult;
 import edu.bgsu.rna.jar3d.results.SequenceResult;
+import edu.bgsu.rna.jar3d.query.Query;
 
 /**
  * This class saves results to a CSV file.
@@ -125,6 +127,12 @@ public class CSVSaver extends AbstractResultsSaver {
 			throw new SaveFailed(e);
 		}
 
+	}
+
+	public void saveSequenceResults(List<SequenceResult> results, Query query)
+			throws SaveFailed {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

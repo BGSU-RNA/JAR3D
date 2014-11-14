@@ -30,6 +30,9 @@ public class BasicSequenceResult implements SequenceResult {
     
     /** Score based on cutoff values */
     private double cutoffscore;
+    
+    /** Correspondences string */
+    private String correspondences;
 	
     /** The sequence scored. */
     private final Sequence sequence;
@@ -45,7 +48,7 @@ public class BasicSequenceResult implements SequenceResult {
 	 * @param editDistance The edit distance.
 	 * @param rotation True if the sequence was rotated relative to the model.
 	 */
-	public BasicSequenceResult(LoopResult result, Sequence sequence, double score, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff, double cutoffscore) {
+	public BasicSequenceResult(LoopResult result, Sequence sequence, double score, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff, double cutoffscore, String correspondences) {
 		this.result = result;
         this.sequence = sequence;
 		this.score = score;
@@ -54,6 +57,7 @@ public class BasicSequenceResult implements SequenceResult {
 		this.rotation = rotation;
 		this.cutoff = cutoff;
 		this.cutoffscore = cutoffscore;
+		this.correspondences = correspondences;
 	}
 
 	/**
@@ -66,7 +70,20 @@ public class BasicSequenceResult implements SequenceResult {
 	 * @param rotation True if the sequence was rotated relative to the model.
 	 */
 	public BasicSequenceResult(Sequence sequence, double score, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff, double cutoffscore) {
-		this(null, sequence, score, InteriorEditDistance, FullEditDistance, rotation, cutoff,cutoffscore);
+		this(null, sequence, score, InteriorEditDistance, FullEditDistance, rotation, cutoff,cutoffscore,"NA");
+	}
+	
+	/**
+	 * Create a new MutableSequenceResults. This contains the information for
+	 * running a single sequence against a single model.
+	 *
+	 * @param score The score.
+	 * @param percentile Percentile of the sequence.
+	 * @param editDistance The edit distance.
+	 * @param rotation True if the sequence was rotated relative to the model.
+	 */
+	public BasicSequenceResult(Sequence sequence, double score, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff, double cutoffscore, String correspondences) {
+		this(null, sequence, score, InteriorEditDistance, FullEditDistance, rotation, cutoff,cutoffscore,correspondences);
 	}
 
 	public double score() {
@@ -151,5 +168,9 @@ public class BasicSequenceResult implements SequenceResult {
 	
 	public double cutoffscore() {
 		return cutoffscore;
+	}
+
+	public String correspondences() {
+		return correspondences;
 	}
 }

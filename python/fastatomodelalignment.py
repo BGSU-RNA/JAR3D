@@ -23,6 +23,9 @@ def fastatomodelalignment(libDirectory,motifID,alignmentfile,outputfile):
   # read correspondences for the given motif group; there are many such correspondences
   InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModelDummy, ModelHasName, ModelHasScore = readcorrespondencesfromfile(FN)
 
+  print HasScore
+  print ModelHasName
+
   HasName.update(ModelHasName)
   HasScore.update(ModelHasScore)
 

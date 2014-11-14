@@ -46,6 +46,13 @@ public interface SequenceResult {
      * @return The query id.
      */
 	public String queryId();
+	
+	/**
+     * Get the correspondences for this sequences.
+     *
+     * @return The correspondences.
+     */
+	public String correspondences();
 
     /**
      * Get the sequence id of the sequence this belongs to.

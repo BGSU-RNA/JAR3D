@@ -103,13 +103,6 @@ public interface LoopResult {
 	public int bestRotation();
 
 	/**
-	 * Get the correspondences between the model and positions in this loop.
-	 * 
-	 * @return The correspondences.
-	 */
-	public String correspondences();
-
-	/**
 	 * A list of per sequence results. These are the results for each sequence in loop against the model used here.
 	 * 
 	 * @return A list of sequence level results.

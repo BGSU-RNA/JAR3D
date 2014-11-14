@@ -102,6 +102,7 @@ def alignmentrowshtml(DisplayColor,aligdata,HasName,HasScore):
   t = ""
 
   for a in sorted(aligdata.iterkeys(),key = keyforsortbynumber):
+    print HasScore
     if HasScore[a] == ".":
       Score = 0
       DisplayScore = ""

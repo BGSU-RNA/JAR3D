@@ -14,6 +14,7 @@ import edu.bgsu.rna.jar3d.loop.Loop;
 import edu.bgsu.rna.jar3d.loop.LoopType;
 import edu.bgsu.rna.jar3d.query.Query;
 import edu.bgsu.rna.jar3d.results.LoopResult;
+import edu.bgsu.rna.jar3d.results.SequenceResult;
 
 /**
  * An Application is simple way to load sequences and models, run the models over the sequences and save the results.
@@ -183,7 +184,48 @@ public class Application {
 		}
 		saver.cleanUp();
 	}
+	
+	/**
+	 * Run a loop query and return the results.
+	 * 
+	 * @param queryId Query to load.
+	 * @param loopNumber Which loop to run on.
+	 * @param folder Folder the model files are in.
+	 * @param model Name of the model to load.
+	 * @return The results.
+	 * @throws QueryLoadingFailed 
+	 * @throws SaveFailed 
+	 */
 
+	private void runQuery(String queryID, String loopNumber, String folder,
+			String model) throws QueryLoadingFailed, SaveFailed {
+		Query query = loader.load(queryID);
+		this.runQuery(query, loopNumber, folder, model);
+	}
+	
+	/**
+	 * Run a loop query and return the results.
+	 * 
+	 * @param queryId Query to load.
+	 * @param loopNumber Which loop to run on.
+	 * @param folder Folder the model files are in.
+	 * @param model Name of the model to load.
+	 * @return The results.
+	 * @throws SaveFailed 
+	 */
+
+	private void runQuery(Query query, String loopNumber, String folder,
+			String model) throws SaveFailed {
+		// Load Motif Group
+		MotifGroup Group = new MotifGroup(folder, modelType, model);
+		Loop loop = query.getLoops().get(Integer.parseInt(loopNumber));
+		List<SequenceResult> results;
+		
+		results = Alignment.doSingleDBQuery(loop, Group, model, rangeLimit);
+		
+		saver.saveSequenceResults(results,query);
+	}
+	
 	/**
 	 * Run a loop against a single loop and return the results. This will only score internal loops, all other loop
 	 * types will give empty results.
@@ -255,4 +297,21 @@ public class Application {
 		saver.writeHeader();
 		this.runQuery(queryId, ILbase, HLbase);
 	}
+	
+	/**
+	 * Load a loop query, run the query and then save the results.
+	 * 
+	 * @param queryId Query to load.
+	 * @param loopNumber Which loop to run on.
+	 * @param folder Folder the model files are in.
+	 * @param model Name of the model to load.
+	 * @throws SaveFailed
+	 * @throws QueryLoadingFailed
+	 */
+	
+	public void runAndSave(String queryId, String loopNumber, String folder, String model) throws SaveFailed, QueryLoadingFailed {
+		saver.writeHeader();
+		this.runQuery(queryId, loopNumber, folder, model);
+	}
+
 }
