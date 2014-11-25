@@ -483,19 +483,26 @@ for iii = 1:length(GroupData),
 	  else
 	  	mediumorchid1 = [224	102	255]/255;
 	  	thistle1 = [255	225	255]/255;
-			patch([0.01 ced 0.01],[0.01 ycutoff 0.01],thistle1)
+
+	  	Lightgreen = [233 250 233]/255;
+			Darkgreen  = [211 227 211]/255;
+
+			background = Lightgreen;
+			cutofflines = Darkgreen;
+
+			patch([0.01 ced 0.01],[0.01 ycutoff 0.01],background)
 			hold on
-			plot(ced,ycutoff,'color',0.9*thistle1,'linewidth',3);
-			plot(ced,cutofffifty,'color',0.9*thistle1,'linewidth',3);
+			plot(ced,ycutoff,'color',cutofflines,'linewidth',3);
+			plot(ced,cutofffifty,'color',cutofflines,'linewidth',3);
 			plot([0 5.5],[0 0],'k');
 			plot([0 0],[0 20],'k');
 			if ced(ar(end)) < 5.3,
-				text(ced(ar(end)),1,'0','color',0.9*thistle1,'fontweight','bold','fontsize',20)
+				text(ced(ar(end)),1,'0','color',cutofflines,'fontweight','bold','fontsize',20)
 			end
-			text(ced(ar2(end)),1,'50','color',0.9*thistle1,'fontweight','bold','fontsize',20)
-			text(0.1,1,'100','color',0.9*thistle1,'fontweight','bold','fontsize',20)
+			text(ced(ar2(end)),1,'50','color',cutofflines,'fontweight','bold','fontsize',20)
+			text(0.1,1,'100','color',cutofflines,'fontweight','bold','fontsize',20)
 	    scatter(SDR(i,2),SDR(i,1),4,'k','filled');
-	    scatter(SDR(ii,2),SDR(ii,1),4,'c','filled');
+	    scatter(SDR(ii,2),SDR(ii,1),4,'r','filled');
 	    plot(SDR(iii,2),SDR(iii,1),'bx','MarkerSize',14,'LineWidth',3);
 	  end
 		NameForTitle = strrep(GroupData(motifnum).MotifID,'_','\_');
