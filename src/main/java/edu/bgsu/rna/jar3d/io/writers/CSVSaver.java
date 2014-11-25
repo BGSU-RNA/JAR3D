@@ -56,7 +56,7 @@ public class CSVSaver extends AbstractResultsSaver {
 
 	private void saveSequenceResults(String loopName, SequenceResult result) throws SaveFailed {
 		//need to replace commas so file can be read as a csv
-		String sequenceId = result.sequenceId().replace(",",";");
+		String sequenceId = String.valueOf(result.sequenceId());
 		String motifId = result.motifId();
 		String score = format(result.score());
 		String interiorEditDistance = Integer.valueOf(result.InteriorEditDistance()).toString();

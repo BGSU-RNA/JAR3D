@@ -26,8 +26,25 @@ if TertiaryFreeNode == 0 || Extension < 2,  % this stem has long-range inter
     Node(n).InteractionComment{k} = [ ' // Hairpin Interaction ' File.NT(i1).Base File.NT(i1).Number ' - ' File.NT(i2).Base File.NT(i2).Number ' ' zEdgeText(File.Edge(i1,i2))];
   end
 
-% if we were adding insertions in hairpins automatically, ...
-% Node(n).InsertionComment{i} = 
+  NotBasepaired = setdiff(1:length(MI),union(i,j));
+
+  for i = NotBasepaired,
+    [K,KK] = size(Node(n).IBases);
+    K = K + 1;
+
+    Node(n).IBases(K,:) = [i i]; 
+    i1 = i + a - 1;                        % index in original file
+    Node(n).InterIndices(K,:) = [i1 i1];
+    Node(n).InteractionComment{K} = [' // Hairpin conserved non-basepairing position ' File.NT(i1).Base File.NT(i1).Number];
+    M = eye(4);
+    M(File.NT(i1).Code,File.NT(i1).Code) = 4;
+    Node(n).SubsProb(:,:,K) = M / sum(sum(M));            % favor the observed base
+
+    if Verbose > 0,
+      fprintf('    Right strand conserved insertion %c%4s at right strand position %d\n', File.NT(i1).Base, File.NT(i1).Number, i);
+    end
+
+  end
 
   Node(n).Comment = [ ' // Hairpin node ' File.NT(a).Base File.NT(a).Number ':' File.NT(B).Base File.NT(B).Number];
 
@@ -75,10 +92,7 @@ else                                        % no long-range interactions
 
 end
 
-
-
 EndLoop = 1;
-
 
 % ----------------------------------------- Look for long-range interactions
 

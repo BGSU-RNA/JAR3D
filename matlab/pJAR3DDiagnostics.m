@@ -369,10 +369,15 @@ ylabel('Frequency','fontsize',tfs);
 title(['Cutoff Score of ' num2str(length(FASTA)) ' ' loopType ' sequences from 3D structures'],'fontsize',tfs);
 ax = axis;
 set(gca,'fontsize',tfs);
-q = 100*[0.99 0.95 0.9 0.8 0.5 0];
-for m = 1:length(q),
+q = 100*[0.99 0.95 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0];
+qq = 100*[0.99 0.95 0.9 0.8 0.5 0];
+for m = 1:length(qq),
   text(ax(1)+0.1*(ax(2)-ax(1)), (0.98-0.08*m)*ax(4), sprintf('%5.2f%% score higher than %3.0f', 100*sum(OwnCutoffScore > q(m))/NumSequences, q(m)),'fontsize',tfs);
 end
+for m = 1:length(q),
+  fprintf('%5.2f%% score higher than %3.0f\n', 100*sum(OwnCutoffScore > q(m))/NumSequences, q(m));
+end
+
 print(gcf,'-dpng',[DiagnosticPath filesep 'Own_CutoffScore_Histogram' DM{DiagnosticMode} '.png']);
 
 % ------------------------------- Group-group diagnostic, all groups

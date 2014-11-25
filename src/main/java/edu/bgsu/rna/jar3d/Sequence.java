@@ -15,6 +15,7 @@ import java.io.*;
  *
  */
 public class Sequence {
+	int seq_id;				   // seq_id for db saver
 	String organism;
 	String letters;            // as read from the fasta file
 	String nucleotides = "";   // with gaps stripped out
@@ -39,6 +40,7 @@ public class Sequence {
 	 * @param let holds the sequence of characters as read from the file
 	 */
 	public Sequence(String org, String let) {
+		seq_id = -1;
 		organism = org;
 		letters = let.toUpperCase();
 		maxNodeLogProbs = new Vector<List<Double>>();
@@ -53,7 +55,8 @@ public class Sequence {
 	 */
 	public Sequence(String org, String let, Sequence firstSeq) {
 		organism = org;
-		letters = let.toUpperCase();;
+		letters = let.toUpperCase();
+		seq_id = -1;
 		setNucleotides();
 		setArrays();
 		maxNodeLogProbs = new Vector<List<Double>>();
@@ -75,9 +78,17 @@ public class Sequence {
 	 */
 	public Sequence(Sequence aSeq)
 	{
-		this(aSeq.organism, aSeq.letters);
+		this(aSeq.seq_id, aSeq.organism, aSeq.letters);
 		setNucleotides();
 		setArrays();
+	}
+
+	public Sequence(int id, String org, String let) {
+		seq_id = id;
+		organism = org;
+		letters = let.toUpperCase();
+		maxNodeLogProbs = new Vector<List<Double>>();
+		maxLogProbs = new Vector<Double>();	
 	}
 
 	public int getMaxNodeLogProbabilitySize() {
@@ -1035,6 +1046,15 @@ public class Sequence {
 	 */
 	public String getId() {
 		return organism;
+	}
+	
+	/**
+	 * Get the Int identifer for this Sequence.
+	 *
+	 * @return The id.
+	 */
+	public int getSeqId() {
+		return seq_id;
 	}
 
 	/**

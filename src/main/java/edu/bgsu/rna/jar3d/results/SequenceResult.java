@@ -59,7 +59,7 @@ public interface SequenceResult {
      *
      * @return The sequence id.
      */
-	public String sequenceId();
+	public int sequenceId();
 
     /**
      * Get the motif Id of the motif that this was scored against.

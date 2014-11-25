@@ -126,13 +126,9 @@ public class BasicSequenceResult implements SequenceResult {
 		return null;
 	}
 
-	public String sequenceId() {
-        Sequence sequence = sequence();
-        if (sequence != null) {
-            return sequence.getId();
-        }
-		return null;
-	}
+	public int sequenceId() {
+        return sequence.getSeqId();
+    }
 
 	public String motifId() {
         LoopResult result = getLoopResult();
