@@ -13,6 +13,9 @@ Confusion = zeros(length(GroupData),length(GroupData)+1);   % to count mis-class
 Correctness.Criterion = Criterion;
 Correctness.NumSeqs   = length(FASTA);
 Correctness.TotalMultiplicity = sum(cat(1,FASTA.Multiplicity));
+Correctness.AcceptedByMultiplicity = 0;
+Correctness.AcceptedByMultiplicityExclInteriorMatch = 0;
+Correctness.AcceptedByMultiplicityExclFullMatch = 0;
 Correctness.CorrectByMultiplicity = 0;
 Correctness.CorrectByMultiplicityExclFullMatch = 0;
 Correctness.CorrectByMultiplicityExclInteriorMatch = 0;
@@ -245,6 +248,13 @@ for gg = 1:length(grouporder),                 % run through sequence groups
       score = 0;
 
       if OwnCutoffMet > 0,
+        Correctness.AcceptedByMultiplicity = Correctness.AcceptedByMultiplicity + FASTA(n).Multiplicity;
+        if OwnCoreEditDistance(n) > 0,
+          Correctness.AcceptedByMultiplicityExclInteriorMatch = Correctness.AcceptedByMultiplicityExclInteriorMatch + FASTA(n).Multiplicity;
+        end
+        if FullEditDistance(n,mn,1) > 0,
+          Correctness.AcceptedByMultiplicityExclFullMatch = Correctness.AcceptedByMultiplicityExclFullMatch + FASTA(n).Multiplicity;
+        end
         if Criterion == 7,
           score = 1;                                % does the sequence fit the correct model well enough?
         elseif numbetter + numequal < SizeOfGuessSet,
@@ -379,3 +389,6 @@ Correctness.PercentageCorrectSequences = Correctness.CorrectSequences / Correctn
 Correctness.PercentageCorrectMultiplicity = Correctness.CorrectByMultiplicity / Correctness.TotalMultiplicity;
 Correctness.PercentageCorrectExclFullMatch = Correctness.CorrectByMultiplicityExclFullMatch / Correctness.TotalMultiplicityExclFullMatch;
 Correctness.PercentageCorrectExclInteriorMatch = Correctness.CorrectByMultiplicityExclInteriorMatch / Correctness.TotalMultiplicityExclInteriorMatch;
+Correctness.PercentageAcceptedMultiplicity = Correctness.AcceptedByMultiplicity / Correctness.TotalMultiplicity;
+Correctness.PercentageAcceptedMultiplicityExclFullMatch = Correctness.AcceptedByMultiplicityExclFullMatch / Correctness.TotalMultiplicityExclFullMatch;
+Correctness.PercentageAcceptedMultiplicityExclInteriorMatch = Correctness.AcceptedByMultiplicityExclInteriorMatch / Correctness.TotalMultiplicityExclInteriorMatch;

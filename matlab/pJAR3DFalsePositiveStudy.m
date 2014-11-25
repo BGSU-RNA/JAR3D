@@ -891,23 +891,33 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
   	        print(gcf,'-dpdf',[DiagnosticPath filesep CF '_RandomSequenceMatchRate_edit_distance.pdf']);
   	      end
 
-          % grayscale heat map for IL
-
-          if strcmp(loopType,'IL'),
-            figure(v+2)
-            clf
+          switch loopType
+          case 'IL'
             for a = 1:length(LengthToPosition(:,1)),
-              for b = 1:length(LengthToPosition(:,2)),
+              for b = a:length(LengthToPosition(1,:)),
                 sl = LengthToPosition(a,b);
-                MatchRate(a,b) = 0;
-                if sl > 0,
-                  fprintf('%d %d %d %6.2f\n',a,b,sl,CoreEditZeroperc(sl));
+                if sl > 0 && v == 1,
+                  fprintf('%d\t%d\t%8.4f\t%8.4f\t%8.4f\t%d\n',a,b,Matchperc(sl),GoodMatchperc(sl),CoreEditZeroperc(sl),nummodelsbylengths(a,b));
                   CEZRate(a,b) = CoreEditZeroperc(sl);
                   GMRate(a,b) = GoodMatchperc(sl);
                   MRate(a,b) = Matchperc(sl);
                 end
               end
             end
+          case 'HL'
+            for a = 1:length(LengthToPosition(:,1)),
+              sl = LengthToPosition(a,1);
+              if sl > 0 && v == 1,
+                fprintf('%d\t%8.4f\t%8.4f\t%8.4f\t%d\n',a,Matchperc(sl),GoodMatchperc(sl),CoreEditZeroperc(sl),nummodelsbylengths(a,1));
+              end
+            end
+          end
+
+          % grayscale heat map for IL
+
+          if strcmp(loopType,'IL'),
+            figure(v+2)
+            clf
 
             colormap(gray)
             map = colormap;
