@@ -102,7 +102,7 @@ def alignmentrowshtml(DisplayColor,aligdata,HasName,HasScore):
   t = ""
 
   for a in sorted(aligdata.iterkeys(),key = keyforsortbynumber):
-    print HasScore
+#    print HasScore
     if HasScore[a] == ".":
       Score = 0
       DisplayScore = ""
@@ -117,10 +117,10 @@ def alignmentrowshtml(DisplayColor,aligdata,HasName,HasScore):
       t = t + '<td>' + DisplayScore + '</td>'
       t = t + '</tr>\n'
     else:
-      t = t + '<tr><td><font color = "' + DisplayColor[a]+ '">'+a+' '+HasName[a]+'</td>\n'
+      t = t + '<tr><td><font color = "' + DisplayColor[a]+ '">'+a+' '+HasName[a]+' (no alignment possible)</td>\n'
       for i in range(0,len(aligdata[a])):
-        t = t + '<td>:</td>'
-      t = t + '<td>' + DisplayScore + '</td>'
+        t = t + '<td></td>'
+      t = t + '<td></td>'
       t = t + '</tr>\n'
 
   return t
