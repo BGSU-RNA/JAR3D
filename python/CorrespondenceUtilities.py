@@ -141,8 +141,8 @@ def alignmentrowshtml(DisplayColor,aligdata,HasName,HasScore, HasInteriorEdit, H
         t = t + '<td></td>'
       t = t + '<td></td>'
 
-    t = t + '<td>' + HasInteriorEdit.get(a,'') + '</td>'     # '' is the default
     t = t + '<td>' + HasFullEdit.get(a,'') + '</td>'
+    t = t + '<td>' + HasInteriorEdit.get(a,'') + '</td>'     # '' is the default
     t = t + '<td>' + HasCutoffValue.get(a,'') + '</td>'
     x = HasCutoffScore.get(a,'')
     CutoffScore = "%.4f" % float(x) if '.' in x else ''
@@ -176,8 +176,8 @@ def alignmentheaderhtml(ModelToColumn,GroupToModel):
     t = t + '<br>' + PositionNumber[i+1] + '<br>'
     t = t + '</th>'
   t = t + '<th><br><br>Alignment<br>score</th>'
-  t = t + '<th><br>Interior<br>edit<br>distance</th>'
   t = t + '<th><br>Full<br>edit<br>distance</th>'
+  t = t + '<th><br>Interior<br>edit<br>distance</th>'
   t = t + '<th><br><br><br>Accepted?</th>'
   t = t + '<th><br><br>Cutoff<br>score</th>'
   t = t + '</tr>'
