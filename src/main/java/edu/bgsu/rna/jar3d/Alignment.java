@@ -975,39 +975,12 @@ public class Alignment {
 				}
 			}
 
-			//Calculate edit distances
-			Vector<Sequence> modsData = Alignment.parseFastaText(group.Sequences,0,0);
-			int[][] InteriorEditDistances;
-			int[][] FullEditDistances;
-			if(type.equalsIgnoreCase("IL")){
-				InteriorEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rotation);
-				FullEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rotation,false,false);
-			}else {
-				InteriorEditDistances = SimpleAlign.calcHLEditDistances(sData, modsData);
-				FullEditDistances = SimpleAlign.calcHLEditDistances(sData,modsData,false,false);
-			}
-			int[] InteriorMinDist = new int[InteriorEditDistances.length];
-			int[] FullMinDist = new int[FullEditDistances.length];
-			for(int i = 0; i < InteriorEditDistances.length; i ++){
-				InteriorMinDist[i] = ArrayMath.min(InteriorEditDistances[i]);
-				FullMinDist[i] = ArrayMath.min(FullEditDistances[i]);
-			}
-			boolean[] cutoffs = new boolean[numInputSeqs];
-			double[] cutoffscores = new double[numInputSeqs];
-			for(int i = 0; i < numInputSeqs; i++){
-				if(groupScores[i]>=group.Cutoffs[0] && InteriorMinDist[i]<=group.Cutoffs[1]
-						&& group.Cutoffs[2]*InteriorMinDist[i]-group.Cutoffs[3]*groupScores[i]<=group.Cutoffs[4]){
-					cutoffs[i] = Boolean.TRUE;
-				}else if(InteriorMinDist[i]==0){
-					cutoffs[i] = Boolean.TRUE;
-				}else{
-					cutoffs[i] = Boolean.FALSE;
-				}
-				cutoffscores[i] = 100 * (group.Cutoffs[2] * InteriorMinDist[i] - group.Cutoffs[3] * groupScores[i] - group.Cutoffs[4]) / -group.Cutoffs[5];
-				if(cutoffscores[i] > 0 && (groupScores[i] < group.Cutoffs[0] || InteriorMinDist[i] > group.Cutoffs[1])){
-					cutoffscores[i] = 0;
-				}
-			}
+			int[] InteriorMinDist = getMinEditDistance(group,sData,type,rotation,true);
+			int[] FullMinDist = getMinEditDistance(group,sData,type,rotation,false);
+			
+			boolean[] cutoffs = getCutoffs(group,groupScores,InteriorMinDist);
+			double[] cutoffscores = getCutoffScores(group,groupScores,InteriorMinDist);
+			
 			if (true) {
 /*				List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
 				for(int m = 0; m < sData.size() - 1; m++) {
@@ -1099,41 +1072,12 @@ public class Alignment {
 	    for(int i=1; i <sData.size(); i++){
 	    	groupScores[i-1] = modelScores[i];
 	    }
-	    int numInputSeqs = sData.size()-1;
 	    
-	    //Calculate edit distances
-	    Vector<Sequence> modsData = Alignment.parseFastaText(group.Sequences,0,0);
-	    int[][] InteriorEditDistances;
-	    int[][] FullEditDistances;
-	    if(type.equalsIgnoreCase("IL")){
-	    	InteriorEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,reversed);
-	    	FullEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,reversed,false,false);
-	    }else {
-	    	InteriorEditDistances = SimpleAlign.calcHLEditDistances(sData, modsData);
-	    	FullEditDistances = SimpleAlign.calcHLEditDistances(sData,modsData,false,false);
-	    }
-	    int[] InteriorMinDist = new int[InteriorEditDistances.length];
-	    int[] FullMinDist = new int[FullEditDistances.length];
-	    for(int i = 0; i < InteriorEditDistances.length; i ++){
-	    	InteriorMinDist[i] = ArrayMath.min(InteriorEditDistances[i]);
-	    	FullMinDist[i] = ArrayMath.min(FullEditDistances[i]);
-	    }
-	    boolean[] cutoffs = new boolean[numInputSeqs];
-	    double[] cutoffscores = new double[numInputSeqs];
-	    for(int i = 0; i < numInputSeqs; i++){
-	    	if(groupScores[i]>=group.Cutoffs[0] && InteriorMinDist[i]<=group.Cutoffs[1]
-	    			&& group.Cutoffs[2]*InteriorMinDist[i]-group.Cutoffs[3]*groupScores[i]<=group.Cutoffs[4]){
-	    		cutoffs[i] = Boolean.TRUE;
-	    	}else if(InteriorMinDist[i]==0){
-	    		cutoffs[i] = Boolean.TRUE;
-	    	}else{
-	    		cutoffs[i] = Boolean.FALSE;
-	    	}
-	    	cutoffscores[i] = 100 * (group.Cutoffs[2] * InteriorMinDist[i] - group.Cutoffs[3] * groupScores[i] - group.Cutoffs[4]) / -group.Cutoffs[5];
-	    	if(cutoffscores[i] > 0 && (groupScores[i] < group.Cutoffs[0] || InteriorMinDist[i] > group.Cutoffs[1])){
-	    		cutoffscores[i] = 0;
-	    	}
-	    }
+	    int[] InteriorMinDist = getMinEditDistance(group,sData,type,reversed,true);
+		int[] FullMinDist = getMinEditDistance(group,sData,type,reversed,false);
+		
+		boolean[] cutoffs = getCutoffs(group,groupScores,InteriorMinDist);
+		double[] cutoffscores = getCutoffScores(group,groupScores,InteriorMinDist);
 	    
 	    List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
 		for(int m = 0; m < sData.size() - 1; m++) {
@@ -1289,5 +1233,48 @@ public class Alignment {
 			sData.get(i).totalProbability = totalProb;      // record total probability for each sequence
 		}
 		return sData;
+	}
+
+
+	public static int[] getMinEditDistance(MotifGroup group, List<Sequence> sData, String type, int rotation, boolean interior){
+		//Calculate edit distances
+		Vector<Sequence> modsData = Alignment.parseFastaText(group.Sequences,0,0);
+		int[][] EditDistances;
+		if(type.equalsIgnoreCase("IL")){
+			EditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rotation,false,interior);
+		}else {
+			EditDistances = SimpleAlign.calcHLEditDistances(sData,modsData,false,interior);
+		}
+		int[] MinDist = new int[EditDistances.length];
+		for(int i = 0; i < EditDistances.length; i ++){
+			MinDist[i] = ArrayMath.min(EditDistances[i]);
+		}
+		return MinDist;
+	}
+	
+	public static boolean[] getCutoffs(MotifGroup group, double[] groupScores, int[] InteriorMinDist){
+		boolean[] cutoffs = new boolean[InteriorMinDist.length];
+		for(int i = 0; i < InteriorMinDist.length; i++){
+			if(groupScores[i]>=group.Cutoffs[0] && InteriorMinDist[i]<=group.Cutoffs[1]
+					&& group.Cutoffs[2]*InteriorMinDist[i]-group.Cutoffs[3]*groupScores[i]<=group.Cutoffs[4]){
+				cutoffs[i] = Boolean.TRUE;
+			}else if(InteriorMinDist[i]==0){
+				cutoffs[i] = Boolean.TRUE;
+			}else{
+				cutoffs[i] = Boolean.FALSE;
+			}
+		}
+		return cutoffs;
+	}
+
+	public static double[] getCutoffScores(MotifGroup group, double[] groupScores, int[] InteriorMinDist){
+		double[] cutoffscores = new double[InteriorMinDist.length];
+		for(int i = 0; i < InteriorMinDist.length; i++){
+			cutoffscores[i] = 100 * (group.Cutoffs[2] * InteriorMinDist[i] - group.Cutoffs[3] * groupScores[i] - group.Cutoffs[4]) / -group.Cutoffs[5];
+			if(cutoffscores[i] > 0 && (groupScores[i] < group.Cutoffs[0] || InteriorMinDist[i] > group.Cutoffs[1])){
+				cutoffscores[i] = 0;
+			}
+		}
+		return cutoffscores;
 	}
 }

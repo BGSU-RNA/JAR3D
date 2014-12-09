@@ -13,8 +13,6 @@ public class JAR3DCorrespondences {
 		int rotation = Integer.parseInt(args[3]);
 		String outputFileName = args[4];
 
-		System.out.println("JAR3DCorrespondences has some issues that need to be resolved");
-		
 		String corrs = JAR3DMatlab.ModelCorrespondences(fastaFileName, modelDirPath, modelName, rotation);
 		
 		try {

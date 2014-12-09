@@ -21,19 +21,44 @@ public class JAR3DMatlab {
 	
 	public static String ModelCorrespondences(String fastaFileName, String modelPath, String modelName, int rotation)
 	{
-		String modelFileName = modelPath + "\\" + modelName + "_model.txt";
-		
 		List<Sequence> sequenceData = Alignment.loadFasta(fastaFileName);
+		
+		MotifGroup group = new MotifGroup(modelPath, modelName);
+		
+		String type = group.loopType;
 		
 		if (rotation > 0)
 			sequenceData = Alignment.reverse(sequenceData);
 		
-		sequenceData = Alignment.doParse(sequenceData, modelFileName, 999, false, true);
+		sequenceData = Alignment.doParse(sequenceData, group.Model, 999, true, true);
+		
+		double[] modelScores = new double[sequenceData.size()];
+		
+		//Add up model scores for each sequence, find mean score, compare regular and reversed scores
+	    for(int m = 1; m < sequenceData.size(); m++)
+	    {
+	    	double tempo = sequenceData.get(m).getMaxLogProbability(0);
+	    	modelScores[m-1] =  tempo;
+	    }
+	    
+	    int[] InteriorMinDist = Alignment.getMinEditDistance(group,sequenceData,type,rotation,true);
+		int[] FullMinDist = Alignment.getMinEditDistance(group,sequenceData,type,rotation,false);
+		
+		boolean[] cutoffs = Alignment.getCutoffs(group,modelScores,InteriorMinDist);
+		double[] cutoffscores = Alignment.getCutoffScores(group,modelScores,InteriorMinDist);
 
 //		Alignment.displayAlignmentFASTA(sequenceData);
 		
 		String correspondences = "";
-
+		
+		for (int i = 1; i < sequenceData.size(); i++)
+		{
+			sequenceData.get(i).correspondences += "Sequence_"+i+" has_minimum_interior_edit_distance "+String.valueOf(InteriorMinDist[i-1])+"\n";
+			sequenceData.get(i).correspondences += "Sequence_"+i+" has_minimum_full_edit_distance "+String.valueOf(FullMinDist[i-1])+"\n";
+			sequenceData.get(i).correspondences += "Sequence_"+i+" has_cutoff_value "+String.valueOf(cutoffs[i-1])+"\n";
+			sequenceData.get(i).correspondences += "Sequence_"+i+" has_cutoff_score "+String.valueOf(cutoffscores[i-1])+"\n";
+		}
+		
 		for (int i = 1; i < sequenceData.size(); i++)
 		{
             correspondences += ((Sequence)sequenceData.get(i)).correspondences;

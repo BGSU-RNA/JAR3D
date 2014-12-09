@@ -16,8 +16,10 @@ public class MotifGroup implements java.io.Serializable{
 	String Model;			//Model data in text format
     String[] Signature;
     Double[] Cutoffs;
-//    int conserved;
-
+    
+    public MotifGroup(String folder, String name) {
+    	this(folder, "", name);
+    }
     //Constructor that takes string folder, the full path to the folder with model 
     //and sequence folders, and the name of the group to load
     public MotifGroup(String folder, String modelType, String name) {
