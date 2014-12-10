@@ -15,7 +15,8 @@ public class MotifGroup implements java.io.Serializable{
 	String Sequences;		//Sequences seen in 3d structure - fasta format
 	String Model;			//Model data in text format
     String[] Signature;
-    Double[] Cutoffs;
+    double[] Cutoffs;
+    double Best_Score;
     
     public MotifGroup(String folder, String name) {
     	this(folder, "", name);
@@ -84,8 +85,8 @@ public class MotifGroup implements java.io.Serializable{
     		line = br.readLine();
     		String[] Cutoffs_strings = line.split("\\t");
     		int n = Cutoffs_strings.length; 
-    		Cutoffs = new Double[n];
-    		for(int i = 0; i < n; i++){
+    		Cutoffs = new double[n-1];
+    		for(int i = 0; i < n-1; i++){
     			if(Cutoffs_strings[i].equalsIgnoreCase("Inf")){
     				Cutoffs[i] = Double.MAX_VALUE;
     			}else if(Cutoffs_strings[i].equalsIgnoreCase("-Inf")){
@@ -94,6 +95,7 @@ public class MotifGroup implements java.io.Serializable{
     				Cutoffs[i] = Double.valueOf(Cutoffs_strings[i]);
     			}
     		}
+    		Best_Score = Double.valueOf(Cutoffs_strings[n-1]);
     		br.close();
     	}  catch (Exception e1) {
 			e1.printStackTrace();

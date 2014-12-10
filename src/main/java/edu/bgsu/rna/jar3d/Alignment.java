@@ -1277,4 +1277,12 @@ public class Alignment {
 		}
 		return cutoffscores;
 	}
+	
+	public static double[] getDeficits(double best_score, double[] groupScores) {
+		double [] deficits =  new double[groupScores.length];
+		for(int i = 0; i < groupScores.length; i++) {
+			deficits[i] = Math.max(0, best_score - groupScores[i]);
+		}
+		return deficits;
+	}
 }

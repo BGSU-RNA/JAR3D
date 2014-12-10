@@ -41,6 +41,8 @@ public class JAR3DMatlab {
 	    	modelScores[m-1] =  tempo;
 	    }
 	    
+	    double[] Deficits = Alignment.getDeficits(group.Best_Score, modelScores);
+	    
 	    int[] InteriorMinDist = Alignment.getMinEditDistance(group,sequenceData,type,rotation,true);
 		int[] FullMinDist = Alignment.getMinEditDistance(group,sequenceData,type,rotation,false);
 		
@@ -53,6 +55,7 @@ public class JAR3DMatlab {
 		
 		for (int i = 1; i < sequenceData.size(); i++)
 		{
+			sequenceData.get(i).correspondences += "Sequence_"+i+" has_alignment_score_deficit "+String.valueOf(Deficits[i-1])+"\n";
 			sequenceData.get(i).correspondences += "Sequence_"+i+" has_minimum_interior_edit_distance "+String.valueOf(InteriorMinDist[i-1])+"\n";
 			sequenceData.get(i).correspondences += "Sequence_"+i+" has_minimum_full_edit_distance "+String.valueOf(FullMinDist[i-1])+"\n";
 			sequenceData.get(i).correspondences += "Sequence_"+i+" has_cutoff_value "+String.valueOf(cutoffs[i-1])+"\n";
