@@ -23,7 +23,7 @@ if nargin < 3,
 	UseAlignmentSequences = 0;               % don't use or show alignment sequences
 end
 
-Params.DeficitCutoff    = 20;
+Params.DeficitCutoff    = 20;              % don't ever change this number because it has become hard-coded into the java code
 Params.CoreEditCutoff   = 5;
 
 Grayscale = 0;                              % plot in grayscale for the paper or in color for talks
@@ -442,6 +442,7 @@ for iii = 1:length(GroupData),
 		GroupData(motifnum).DeficitEditCutoff = MixedScoreCutoff;
 
 		GroupData(motifnum).MinScore        = max(GroupData(motifnum).OwnScore) - Params.DeficitCutoff;
+		GroupData(motifnum).MaxScore        = max(GroupData(motifnum).OwnScore);
 		GroupData(motifnum).ScoreEditCutoff = GroupData(motifnum).DeficitEditCutoff - Coeff(1) * max(GroupData(motifnum).OwnScore);
 
 		m = motifnum;
@@ -489,6 +490,9 @@ for iii = 1:length(GroupData),
 
 			background = Lightgreen;
 			cutofflines = Darkgreen;
+
+			background = thistle1;
+			cutofflines = thistle1*0.7;
 
 			patch([0.01 ced 0.01],[0.01 ycutoff 0.01],background)
 			hold on
@@ -626,7 +630,7 @@ if isfield(GroupData,'ScoreEditCutoff'),
 
 	for m = 1:length(GroupData),
 		fid = fopen([ModelPath filesep GroupData(m).MotifID '_cutoffs.txt'],'w');
-		fprintf(fid,'%0.8f\t%d\t%0.8f\t%0.8f\t%0.8f\t%0.8f\n', GroupData(m).MinScore, GroupData(m).CoreEditCutoff, GroupData(m).CoreEditCoeff, GroupData(m).DeficitCoeff, GroupData(m).ScoreEditCutoff, GroupData(m).DeficitEditCutoff);
+		fprintf(fid,'%0.8f\t%d\t%0.8f\t%0.8f\t%0.8f\t%0.8f\t%0.8f\n', GroupData(m).MinScore, GroupData(m).CoreEditCutoff, GroupData(m).CoreEditCoeff, GroupData(m).DeficitCoeff, GroupData(m).ScoreEditCutoff, GroupData(m).DeficitEditCutoff, GroupData(m).MaxScore);
 		fclose(fid);
 	end
 
