@@ -157,7 +157,20 @@ for iii = 1:length(GroupData),
 
 	AllSD = [NSD SequenceData];      % put sequences from 3D first
 
-	RSNum = length(GroupData(motifnum).DeficitEditData(:,1));
+	if isfield(GroupData(motifnum),'DeficitEditData'),
+		RSNum = length(GroupData(motifnum).DeficitEditData(:,1));
+	else
+		fprintf('pSetModelSpecificCutoffs:  No data about how random sequences match the model\n');
+
+		for mm = 1:length(GroupData),
+			if ~isfield(GroupData(mm),'DeficitEditData'),
+				fprintf('Group %3d is missing DeficitEditData\n',mm);
+			end
+		end
+
+		pause
+		RSNum = 0;
+	end
 
 	fprintf('Using %d random sequences, %d from an alignment, and %d from 3D structures\n', RSNum, length(SequenceData), length(NSD));
 
@@ -186,18 +199,21 @@ for iii = 1:length(GroupData),
 		SD(:,10) = cat(1,AllSD.NumFixed);
 		SD(:,11) = cat(1,AllSD.Basepairs);
 
-		clear RSD
-		RSD(:,1) = cat(1,GroupData(motifnum).DeficitEditData(:,1));
-		RSD(:,2) = cat(1,GroupData(motifnum).DeficitEditData(:,2));
-		RSD(:,3) = 99 * ones(RSNum,1);                                % just pretend
-		RSD(:,4) = zeros(RSNum,1);                                    % just pretend
-		RSD(:,5) = GroupData(motifnum).NumNT * ones(RSNum,1);
-		RSD(:,6) = RSD(:,3) - RSD(:,2);
-		RSD(:,7) = max(GroupData(motifnum).OwnScore) - RSD(:,1);
-		RSD(:,10) = GroupData(motifnum).NumFixed * ones(RSNum,1);
-		RSD(:,11) = GroupData(motifnum).NumBasepairs * ones(RSNum,1);
+		if RSNum > 0,
+			clear RSD
+			RSD(:,1) = cat(1,GroupData(motifnum).DeficitEditData(:,1));
+			RSD(:,2) = cat(1,GroupData(motifnum).DeficitEditData(:,2));
+			RSD(:,3) = 99 * ones(RSNum,1);                                % just pretend
+			RSD(:,4) = zeros(RSNum,1);                                    % just pretend
+			RSD(:,5) = GroupData(motifnum).NumNT * ones(RSNum,1);
+			RSD(:,6) = RSD(:,3) - RSD(:,2);
+			RSD(:,7) = max(GroupData(motifnum).OwnScore) - RSD(:,1);
+			RSD(:,10) = GroupData(motifnum).NumFixed * ones(RSNum,1);
+			RSD(:,11) = GroupData(motifnum).NumBasepairs * ones(RSNum,1);
 
-		SD = [SD; RSD];              % append randomly-generated sequences
+			SD = [SD; RSD];              % append randomly-generated sequences
+		end
+
 		Source = [Source; 2*ones(RSNum,1)];
 
 		LL = length(Source);
