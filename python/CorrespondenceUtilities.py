@@ -193,7 +193,7 @@ def alignmentrowshtml(DisplayColor,aligdata,HasName,HasScore, HasInteriorEdit, H
       t = t + '<td></td>'     # '' is the default
     t = t + '</tr>\n'
 
-  return t, aligdata
+  return t
 
 def alignsequencesandinstancesfromtext(MotifCorrespondenceText,SequenceCorrespondenceText):
 

@@ -1,5 +1,8 @@
 # fastatomodelalignmentlists.py reads text files listing correspondences between 3D instances, their motif group, JAR3D models, and fasta files
 
+# Sample command:  C:\Users\zirbel\Documents\JAR3D>python c:\\users\\zirbel\\documents\\github\\jar3d\\python\\fastatomodelalignmentlists.py il\\1.13\\lib IL_85647.3 IL_85647.3_correspondences.txt IL_85647.3.html
+# sort by number:    for a in sorted(InstanceToGroup.iterkeys(), key=positionkeyforsortbynumber):
+
 import sys
 import os
 import re
@@ -118,6 +121,7 @@ def fastatomodelalignmentlists(libDirectory,motifID,alignmentfile,outputfile):
 
   print SequenceList
 
+  return HeaderColumnNumber, HeaderNodeNumber, HeaderInsertion, HeaderPosition, InstanceList, SequenceList
   
 if __name__ == "__main__":
   fastatomodelalignmentlists(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4])  
