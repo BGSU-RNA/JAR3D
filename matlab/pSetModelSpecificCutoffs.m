@@ -414,7 +414,7 @@ for iii = 1:length(GroupData),
 	    if MixedScoreCutoff > 20,
 				fprintf('Decreased cutoff from %8.4f because the cutoff seemed overly generous\n',MixedScoreCutoff);
 		    MixedScoreCutoff = max(20,min(RandomMixedScores)-0.1);
-		    MixedScoreCutoff = max(20,quantile(RandomMixedScores,0.02));  % find the cutoff which gets the true negative rate roughly equal to 96%
+		    MixedScoreCutoff = max(20,quantile(RandomMixedScores,0.02));  % find the cutoff which gets the true negative rate roughly equal to 98%
 	  		GroupData(motifnum).CutoffMethod = 8;
 			end
  
