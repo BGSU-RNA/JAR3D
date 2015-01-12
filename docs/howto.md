@@ -64,7 +64,7 @@ java -jar jar3d_2014-12-11.jar IL/1.13/lib/IL_85647.3.fasta IL/1.13/lib/all.txt 
 This is a **comma-delimited file** with a header line. Each line tells summary statistics covering all sequences in the input fasta file against each of the specified models. The header line is:
 
 ```
-filename,motifId,%passedCutoff,meanCutoffScore,meanScore,medianScore,meanInteriorEditDistance,medianInteriorEditDistance,meanFullEditDistance,medianFullEditDistance,rotation
+filename,motifId,%passedCutoff,meanCutoffScore,meanScore,medianScore,meanDeficit,medianDeficit,meanInteriorEditDistance,medianInteriorEditDistance,meanFullEditDistance,medianFullEditDistance,rotation
 ```
 
 Here is an explanation of each field:
@@ -100,14 +100,14 @@ Here is an explanation of each field:
 This is a **comma-delimited file** with a header line. The file contains one line for each sequence in the input fasta file and one line for each model, telling how the sequence scores against the model. The header line is:
 
 ```
-filename,sequenceId,motifId,passedCutoff,meanCutoffScore,score,interiorEditDistance,fullEditDistance,rotation
+filename,identifier,motifId,passedCutoff,meanCutoffScore,score,deficit,interiorEditDistance,fullEditDistance,rotation
 ```
 
 Here is an explanation of each field on each line:
 
 1. **filename** is the filename of the .fasta file of sequences that were run against JAR3D
 
-2. **sequenceId** is the text on the line before each sequence, after the `>` character
+2. **identifier** is the text on the line before each sequence, after the `>` character
 
 3. **motifId** is the name of the model that is being reported on this line
 
