@@ -510,6 +510,9 @@ for iii = 1:length(GroupData),
 			background = thistle1;
 			cutofflines = thistle1*0.7;
 
+			background = 0.85*[1 1 1];
+			cutofflines = 0.5*[1 1 1];
+
 			patch([0.01 ced 0.01],[0.01 ycutoff 0.01],background)
 			hold on
 			plot(ced,ycutoff,'color',cutofflines,'linewidth',3);
@@ -521,8 +524,8 @@ for iii = 1:length(GroupData),
 			end
 			text(ced(ar2(end)),1,'50','color',cutofflines,'fontweight','bold','fontsize',20)
 			text(0.1,1,'100','color',cutofflines,'fontweight','bold','fontsize',20)
-	    scatter(SDR(i,2),SDR(i,1),4,'k','filled');
-	    scatter(SDR(ii,2),SDR(ii,1),4,'r','filled');
+	    scatter(SDR(i,2),SDR(i,1),4,'r','filled');
+	    scatter(SDR(ii,2),SDR(ii,1),4,'k','filled');
 	    plot(SDR(iii,2),SDR(iii,1),'bx','MarkerSize',14,'LineWidth',3);
 	  end
 		NameForTitle = strrep(GroupData(motifnum).MotifID,'_','\_');
