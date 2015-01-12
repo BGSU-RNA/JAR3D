@@ -17,7 +17,7 @@ case 1                            % parse and calculate edit distance, which is 
   Params.PercentileCutoff = 0.2;          % generic cutoffs
 
   SequenceBySequence = 0;
-  CalculateAlignments = 0;
+  CalculateAlignments = 0;                % calculate alignment score, occasionally needed
   CalculateEditDistance = 0;
   PlotPercentileVersusDeficit = 0;
   AccumulateSequenceData = 0;
@@ -72,7 +72,7 @@ case 3                                    % run the diagnostic using model-speci
   AccumulateRandomSequenceData = 0;       % data on sequences for each model
   AccumulateFPData = 0;                   % detailed data about each sequence
   Depth = Inf;
-  MinimumCutoffScore = 40;
+  MinimumCutoffScore = 50;
   FindFullEditDistance = 0;
 
 end
@@ -239,8 +239,12 @@ case 'IL'
 
   [uniqueseqlengths,i,j] = unique([uniqueseqlengths; newlengths],'rows');
 
-  T = [seqlengths OwnMotif];
+  T = [seqlengths OwnMotif sum(seqlengths,2)];
   T = sortrows(T,[1 2 3]);
+
+% sort by total length???
+%  T = sortrows(T,[4 1 2 3]);
+%  T = T(:,1:3);
 end
 
 for seqfilenumber = 1:numfiles,                           % loop through files of random sequences
@@ -275,13 +279,9 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
   Skip = 0;
 
   if exist(DataFile,'file'),
-    if Mode > 1,
-      load(DataFile);
-      fprintf('Loaded data file %s\n',DataFile);
-      FirstTime = 0;
-    else
-      Skip = 1;
-    end
+    load(DataFile);
+    fprintf('Loaded data file %s\n',DataFile);
+    FirstTime = 0;
   elseif exist(StatusFile,'file') && Mode == 1,   % parsing random sequences, which is slow
     Skip = 1;
   else
@@ -289,129 +289,126 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
     fid = fopen(StatusFile,'w');
     fprintf(fid,'Currently being analyzed\n');
     fclose(fid);
-  end
-
-  if Skip == 0 && (CalculateEditDistance > 0 || FirstTime > 0),
-
     FASTA = zReadFASTA([ModelPath filesep SVN]);
     fprintf('Read random sequence variant file %s\n', SVN);
+  end
 
-    if length(FASTA) > 0,
-      for n = 1:length(FASTA),
-        FASTA(n).MotifGroup = 'Randomly-generated';
-        FASTA(n).Locus = '';
-        FASTA(n).Multiplicity = 1;
+  NumSequences = length(FASTA);
+
+  if Skip == 0 && (CalculateEditDistance > 0 || FirstTime > 0) && length(FASTA) > 0,
+
+    for n = 1:length(FASTA),
+      FASTA(n).MotifGroup = 'Randomly-generated';
+      FASTA(n).Locus = '';
+      FASTA(n).Multiplicity = 1;
+    end
+
+    SeqGroup = ones(NumSequences,1) * 0;
+    OwnMotif = ones(NumSequences,1) * 0;
+
+    % ----------------------- Calculate edit distance between FASTA and 3D instances
+    clear CoreEditDistance
+    clear FullEditDistance
+
+    fprintf('Finding core edit distance of %4d sequences against %4d models\n', NumSequences, length(GroupData));
+    for m = 1:length(GroupData),
+      ModelFASTA = zReadFASTA([ModelPath filesep GroupData(m).MotifID '.fasta']);
+
+      [D1,D2,D3] = pEditDistance(FASTA,ModelFASTA,loopType,'core');
+
+      CoreEditDistance(:,m,1) = min(D2,[],2);     % best match of core seq
+      if strcmp(loopType,'IL'),
+        CoreEditDistance(:,m,2) = min(D3,[],2);     % best match of core rev'd
       end
 
-      NumSequences = length(FASTA);
+      if mod(m,50) == 0,
+        fprintf('Checked edit distance for %4d models so far\n', m);
+      end
+    end
 
-      SeqGroup = ones(NumSequences,1) * 0;
-      OwnMotif = ones(NumSequences,1) * 0;
-
-      % ----------------------- Calculate edit distance between FASTA and 3D instances
-      clear CoreEditDistance
-      clear FullEditDistance
-
-      fprintf('Finding core edit distance of %4d sequences against %4d models\n', NumSequences, length(GroupData));
+    if FindFullEditDistance > 0,
+      fprintf('\nFinding full edit distance of %4d sequences against %4d models\n', NumSequences, length(GroupData));
       for m = 1:length(GroupData),
         ModelFASTA = zReadFASTA([ModelPath filesep GroupData(m).MotifID '.fasta']);
 
-        [D1,D2,D3] = pEditDistance(FASTA,ModelFASTA,loopType,'core');
+        [D1,D2,D3] = pEditDistance(FASTA,ModelFASTA,loopType,'full');
 
-        CoreEditDistance(:,m,1) = min(D2,[],2);     % best match of core seq
+        FullEditDistance(:,m,1) = min(D2,[],2);     % best match of full seq
         if strcmp(loopType,'IL'),
-          CoreEditDistance(:,m,2) = min(D3,[],2);     % best match of core rev'd
+          FullEditDistance(:,m,2) = min(D3,[],2);     % best match of full rev'd
         end
 
         if mod(m,50) == 0,
           fprintf('Checked edit distance for %4d models so far\n', m);
         end
       end
-
-      if FindFullEditDistance > 0,
-        fprintf('\nFinding full edit distance of %4d sequences against %4d models\n', NumSequences, length(GroupData));
-        for m = 1:length(GroupData),
-          ModelFASTA = zReadFASTA([ModelPath filesep GroupData(m).MotifID '.fasta']);
-
-          [D1,D2,D3] = pEditDistance(FASTA,ModelFASTA,loopType,'full');
-
-          FullEditDistance(:,m,1) = min(D2,[],2);     % best match of full seq
-          if strcmp(loopType,'IL'),
-            FullEditDistance(:,m,2) = min(D3,[],2);     % best match of full rev'd
-          end
-
-          if mod(m,50) == 0,
-            fprintf('Checked edit distance for %4d models so far\n', m);
-          end
-        end
-      else
-        FullEditDistance = 99 * ones(size(CoreEditDistance));
-      end
+    else
+      FullEditDistance = 99 * ones(size(CoreEditDistance));
     end
+  end
 
-		if Skip == 0 && (CalculateAlignments > 0 || FirstTime > 0) && length(FASTA) > 0,
-      % OwnMotif maps from sequence to MotifName index
-      % SeqGroup maps from sequence to 1:L, where L is the number of sequence groups
-      %   Each different sequence group gets a different number
-      % SeqNames maps from 1:L to a text string for the sequence group
+	if Skip == 0 && (CalculateAlignments > 0 || FirstTime > 0) && length(FASTA) > 0,
+    % OwnMotif maps from sequence to MotifName index
+    % SeqGroup maps from sequence to 1:L, where L is the number of sequence groups
+    %   Each different sequence group gets a different number
+    % SeqNames maps from 1:L to a text string for the sequence group
 
-      % --------------------- Write sequences to one file for each rotation
+    % --------------------- Write sequences to one file for each rotation
 
-      [AllSequencesFile] = pWriteSequencesWithRotations(DiagnosticPath,FASTA,loopType,Rotations,CF);
+    [AllSequencesFile] = pWriteSequencesWithRotations(DiagnosticPath,FASTA,loopType,Rotations,CF);
 
-      % ----------------------- Parse all sequences against all models, all rotations
+    % ----------------------- Parse all sequences against all models, all rotations
 
-      clear MLPS
-      clear TotalProb
-      clear Percentile
+    clear MLPS
+    clear TotalProb
+    clear Percentile
 
-      % MLPS(a,m,r) is the score of sequence a against model m using rotation r
-      % Percentile(a,m,r) is the percentile of sequence a against model m using r
+    % MLPS(a,m,r) is the score of sequence a against model m using rotation r
+    % Percentile(a,m,r) is the percentile of sequence a against model m using r
 
-      Temp.A = 12;
-      Temp.B = 27;
+    Temp.A = 12;
+    Temp.B = 27;
 
-      fprintf('Parsing %4d sequences against %4d models\n', NumSequences, length(GroupData));
-      for m = 1:length(GroupData),
-        quantileFile = [ModelPath filesep GroupData(m).MotifID '_distribution.txt'];
-        for r = 1:Rotations,
-          MN = [ModelPath filesep GroupData(m).MotifID '_model.txt'];
-          S = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifParseSingle(pwd,AllSequencesFile{r},MN);
-          MLPS(:,m,r) = S;          % max log probability score for each sequence
+    fprintf('Parsing %4d sequences against %4d models\n', NumSequences, length(GroupData));
+    for m = 1:length(GroupData),
+      quantileFile = [ModelPath filesep GroupData(m).MotifID '_distribution.txt'];
+      for r = 1:Rotations,
+        MN = [ModelPath filesep GroupData(m).MotifID '_model.txt'];
+        S = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifParseSingle(pwd,AllSequencesFile{r},MN);
+        MLPS(:,m,r) = S;          % max log probability score for each sequence
 %          T = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifTotalProbSingle(pwd,AllSequencesFile{r},MN);
 %          MixedScore = -(GroupData(m).DeficitCoeff * (max(GroupData(m).OwnScore) - S) + GroupData(m).CoreEditCoeff * CoreEditDistance(:,m,r));
 %          Q = edu.bgsu.rna.jar3d.JAR3DMatlab.getQuantilesFromFile(MixedScore,quantileFile);
 %          TotalProb(:,m,r) = T;     % total probability score for each sequence
 %          Percentile(:,m,r) = Q;    % percentile of this score
-          TotalProb(:,m,r) = zeros(size(S));     % total probability score for each sequence
-          Percentile(:,m,r) = zeros(size(S));    % percentile of this score
-        end
-
-        if mod(m,50) == 0,
-          fprintf('Parsed against %4d models so far\n', m);
-        end
+        TotalProb(:,m,r) = zeros(size(S));     % total probability score for each sequence
+        Percentile(:,m,r) = zeros(size(S));    % percentile of this score
       end
 
-      % ----------- The following lines prevent the program from being stopped
-      % ----------- by a crazy Matlab bug.  It is intermittent, but after a call
-      % ----------- to JAR3D, it is hell bent on saying
-      % ----------- "Dot name reference on non-scalar structure"
-      try
-        Temp.A
-      catch ME
-        Temp.B = 27;
+      if mod(m,50) == 0,
+        fprintf('Parsed against %4d models so far\n', m);
       end
     end
 
-    Marker = 2;
-    if Skip == 0 && (FirstTime > 0 || CalculateAlignments > 0 || CalculateEditDistance > 0),
-      save(DataFile,'FASTA','Marker','MLPS','TotalProb','Percentile','CoreEditDistance','FullEditDistance');
-
-      if exist(StatusFile) > 0,
-        delete(StatusFile);
-      end
-
+    % ----------- The following lines prevent the program from being stopped
+    % ----------- by a crazy Matlab bug.  It is intermittent, but after a call
+    % ----------- to JAR3D, it is hell bent on saying
+    % ----------- "Dot name reference on non-scalar structure"
+    try
+      Temp.A
+    catch ME
+      Temp.B = 27;
     end
+  end
+
+  Marker = 2;
+  if Skip == 0 && (FirstTime > 0 || CalculateAlignments > 0 || CalculateEditDistance > 0) && length(FASTA) > 0,
+    save(DataFile,'FASTA','Marker','MLPS','TotalProb','Percentile','CoreEditDistance','FullEditDistance');
+
+    if exist(StatusFile) > 0,
+      delete(StatusFile);
+    end
+
   end
 
   NumSequences = length(FASTA);
@@ -425,7 +422,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
       CutoffScore = zeros(size(MLPS));
       for mm = 1:length(GroupData),
         for r = 1:Rotations,
-          Features = [MLPS(:,mm,r) CoreEditDistance(:,mm,r) Percentile(:,mm,r)];
+          Features = [MLPS(:,mm,r) CoreEditDistance(:,mm,r)];
           [CutoffMet(:,mm,r) CutoffScore(:,mm,r)] = pModelSpecificCutoff(GroupData(mm),Features,Params);
         end
       end
@@ -459,7 +456,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
       PP.CutoffType = 2;                              % generic cutoff, for comparison
       for mm = 1:length(GroupData),
         for r = 1:Rotations,
-          Features = [MLPS(:,mm,r) CoreEditDistance(:,mm,r) Percentile(:,mm,r)];
+          Features = [MLPS(:,mm,r) CoreEditDistance(:,mm,r)];
           GenericCutoffMet(:,mm,r) = pModelSpecificCutoff(GroupData(mm),Features,PP);
         end
       end
@@ -639,7 +636,10 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
   		if SequenceBySequence > 0,
   	    [b,i,j] = unique(StrandLengths,'rows');
   	    [y,k] = sortrows(b,[1 2]);
-  	    [y,k] = sortrows(b,[2 3]);
+  	    [y,k] = sortrows(b,[2 3]);                        % sort by shorter strand length, then longer
+        [s,t] = size(b);
+        [y,k] = sortrows([b sum(b,2)],[t+1 1]);           % sort by decreasing total length
+
   	    for w = 1:length(k),
   	      LengthToPosition(y(w,2),y(w,3)) = w;
   	    end
@@ -890,6 +890,68 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
   	        print(gcf,'-dpng',[DiagnosticPath filesep CF '_RandomSequenceMatchRate_edit_distance.png']);
   	        print(gcf,'-dpdf',[DiagnosticPath filesep CF '_RandomSequenceMatchRate_edit_distance.pdf']);
   	      end
+
+          switch loopType
+          case 'IL'
+            for a = 1:length(LengthToPosition(:,1)),
+              for b = a:length(LengthToPosition(1,:)),
+                sl = LengthToPosition(a,b);
+                if sl > 0 && v == 1,
+                  fprintf('%d\t%d\t%8.4f\t%8.4f\t%8.4f\t%d\n',a,b,Matchperc(sl),GoodMatchperc(sl),CoreEditZeroperc(sl),nummodelsbylengths(a,b));
+                  CEZRate(a,b) = CoreEditZeroperc(sl);
+                  GMRate(a,b) = GoodMatchperc(sl);
+                  MRate(a,b) = Matchperc(sl);
+                end
+              end
+            end
+          case 'HL'
+            for a = 1:length(LengthToPosition(:,1)),
+              sl = LengthToPosition(a,1);
+              if sl > 0 && v == 1,
+                fprintf('%d\t%8.4f\t%8.4f\t%8.4f\t%d\n',a,Matchperc(sl),GoodMatchperc(sl),CoreEditZeroperc(sl),nummodelsbylengths(a,1));
+              end
+            end
+          end
+
+          % grayscale heat map for IL
+
+          if strcmp(loopType,'IL'),
+            figure(v+2)
+            clf
+
+            colormap(gray)
+            map = colormap;
+            map = 1-map;
+
+            if v == 1,
+              subplot(2,2,1)
+              pcolor(CEZRate);
+              shading flat
+              colormap(map);
+              colorbar('eastoutside')
+              title('Percentage with interior edit distance 0')
+              subplot(2,2,2)
+              pcolor(GMRate);
+              shading flat
+              colormap(map);
+              colorbar('eastoutside')
+              title('Percentage with cutoff score 50 or over')
+              subplot(2,2,3)
+              pcolor(MRate);
+              shading flat
+              colormap(map);
+              colorbar('eastoutside')
+              title('Percentage accepted by at least one motif group')
+              subplot(2,2,4)
+              [s,t] = size(MRate);
+              pcolor(nummodelsbylengths(1:s,1:t));
+              shading flat
+              colormap(map);
+              colorbar('eastoutside')
+              title('Number of motif groups with instance of the given size')
+              print(gcf,'-dpng',[DiagnosticPath filesep loopType '_FP_heatmap.png']);
+            end
+          end
   	    end
 
   	    fprintf('\n\n\n\n\n');
@@ -920,7 +982,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
     fprintf('Overall false positive rate is %0.4f%%\n', 100*sum(Match(:,1,1))/SequenceCounter);
     fprintf('Number of models giving false positives is %d out of %d\n',sum(FPModelCounter > 0),length(GroupData));
     fprintf('Rate at which sequences have interior edit distance 0 is %8.2f\n',100*sum(CoreEditZero(:,1))/SequenceCounter);
-    fprintf('Rate at which sequences have cutoff score greater than 40 is %8.2f\n',100*sum(GoodMatch(:,1))/SequenceCounter);
+    fprintf('Rate at which sequences have cutoff score greater than 50 is %8.2f\n',100*sum(GoodMatch(:,1))/SequenceCounter);
 
     diary off
 

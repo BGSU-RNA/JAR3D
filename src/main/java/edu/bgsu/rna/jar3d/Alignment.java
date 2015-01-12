@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
@@ -255,7 +257,7 @@ public class Alignment {
 	 */
 	public static List<Sequence> doParse(List<Sequence> sData, String nodeFileName, int range)
 	{
-		return Alignment.doParse(sData, nodeFileName, range, false);
+		return Alignment.doParse(sData, nodeFileName, range, false, false);
 	}
 
 
@@ -371,8 +373,8 @@ public class Alignment {
 			else
 			{
 				System.out.print(">" + sData.get(j).organism + " ");
-				for(int x = 0; x < sData.get(j).getMaxLogProbabilitySize(); x++)
-					System.out.print(sData.get(j).getMaxLogProbability(x));
+				for(int x = 0; x < sData.get(j).getMaxNodeLogProbabilitySize(); x++)
+					System.out.print(sData.get(j).getMaxNodeLogProbability(x));
 				System.out.println();
 			}
 			for(int i = 0; i < mask.length; i++)
@@ -415,8 +417,8 @@ public class Alignment {
 			else
 			{
 				System.out.print(">" + sData.get(j).organism + " ");
-				for(int x = 0; x < sData.get(j).getMaxLogProbabilitySize(); x++)
-					System.out.print(sData.get(j).getMaxLogProbability(x));
+				for(int x = 0; x < sData.get(j).getMaxNodeLogProbabilitySize(); x++)
+					System.out.print(sData.get(j).getMaxNodeLogProbability(x));
 				System.out.println();
 			}
 			for(int i = 0; i < mask.length; i++)
@@ -470,9 +472,9 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.get(m).getMaxLogProbabilitySize(); x++)
+			for(int x = 0; x < sData.get(m).getMaxNodeLogProbabilitySize(); x++)
 			{
-				double tempo = sData.get(0).getMaxLogProbability(x);
+				double tempo = sData.get(0).getMaxNodeLogProbability(x);
 				modelSums[x] += tempo;
 			}
 		}
@@ -543,10 +545,10 @@ public class Alignment {
 			}
 			alnm += " " + sData.get(j).organism + " ";
 
-			for(int x = 0; x < sData.get(j).getMaxLogProbabilitySize(); x++)
+			for(int x = 0; x < sData.get(j).getMaxNodeLogProbabilitySize(); x++)
 			{
 				fmt = new Formatter();
-				fmt.format("%10.6f", sData.get(j).getMaxLogProbability(indices[x]));
+				fmt.format("%10.6f", sData.get(j).getMaxNodeLogProbability(indices[x]));
 				alnm += tinyModNames.get(indices[x]) + " score: " + fmt + " ";
 			}
 			alignmentVect.add(alnm);
@@ -599,14 +601,14 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.get(m).getMaxLogProbabilitySize(); x++)
+			for(int x = 0; x < sData.get(m).getMaxNodeLogProbabilitySize(); x++)
 			{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-			    double tempo = sData.get(m).getMaxLogProbability(x);
+			    double tempo = sData.get(m).getMaxNodeLogProbability(x);
 				modelSums[x] += tempo;
 
-				tempo = rsData.get(m).getMaxLogProbability(x);
+				tempo = rsData.get(m).getMaxNodeLogProbability(x);
 				rmodelSums[x] += tempo;
 			}
 		}
@@ -708,9 +710,9 @@ public class Alignment {
 			{
 				fmt = new Formatter();
 				if (reversed[indices[x]] == 0)
-					fmt.format("%12.6f", sData.get(j).getMaxLogProbability(indices[x]));
+					fmt.format("%12.6f", sData.get(j).getMaxNodeLogProbability(indices[x]));
 				else
-					fmt.format("%12.6f", rsData.get(j).getMaxLogProbability(indices[x]));
+					fmt.format("%12.6f", rsData.get(j).getMaxNodeLogProbability(indices[x]));
 				alnm += tinyModNames.get(indices[x]) + " score: " + fmt + " ";
 			}
 			}
@@ -771,7 +773,7 @@ public class Alignment {
 				mProbs.add(new Double(current.optimalMaxLogProb));
 				current =  current.next;
 			}
-			sData.get(i).appendProbabilities(mProbs);
+			sData.get(i).appendNodeProbabilities(mProbs);
 			probsM.add(mProbs);
 			sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 
@@ -806,11 +808,11 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size(); m++)
 		{
-			for(int x = 0; x < sData.get(m).getMaxLogProbabilitySize(); x++)
+			for(int x = 0; x < sData.get(m).getMaxNodeLogProbabilitySize(); x++)
 			{
 				// there is no good reason for having to do these crazy manipulations
 				// in order to get the value of a double variable, but at least this works
-				double tempo = sData.get(m).getMaxLogProbabilityOf(x, 0);
+				double tempo = sData.get(m).getMaxNodeLogProbabilityOf(x, 0);
 				scores[m][x] = tempo;
 			}
 		}
@@ -824,7 +826,7 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size()-1; m++)
 		{
-				double tempo = sData.get(m+1).getMaxLogProbabilityOf(0, 0);
+				double tempo = sData.get(m+1).getMaxNodeLogProbabilityOf(0, 0);
 				scores[m] = tempo;
 		}
 		return scores;
@@ -846,6 +848,18 @@ public class Alignment {
 
 		return results;
 	}
+	
+	public static List<SequenceResult> doSingleDBQuery(Loop loop, MotifGroup group, String model_id, int range) {
+		
+		List<Sequence> sData = loop.getSequences();
+		Query query = loop.getQuery();
+		
+		// 2013-11-05 CLZ Last argument cannot be null, must be something like "IL"
+		// 2013-11-05 CLZ Last argument seems to be reliably obtained from loop
+		List<SequenceResult> results = doSingleDBQuery(query, sData, group, model_id, range, loop, loop.getTypeString());
+		
+		return results;
+	}
 
 	//Takes a JAR3D query and submits results to MySQL database
 	public static List<LoopResult> doLoopDBQuery(int loopID, Query query, List<Sequence> sData, List<String> modNames,
@@ -853,6 +867,7 @@ public class Alignment {
 
 		// TODO 2013-11-07 CLZ generalize this so that it can apply to HL, IL, 3WJ, 4WJ, etc.
 		// Currently there is only space for rotations 0 and 1
+		
 		
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
@@ -877,9 +892,9 @@ public class Alignment {
 	    for(int k = 0; k < modNames.size(); k++)
 		{
 	    	group = groupData.get(modNames.get(k));
-			sData  = Alignment.doParse(sData, group.Model, range, true);
+			sData  = Alignment.doParse(sData, group.Model, range, true, false, false);
 			if(type.equalsIgnoreCase("IL")){
-				rsData = Alignment.doParse(rsData, group.Model, range, true);
+				rsData = Alignment.doParse(rsData, group.Model, range, true, false, false);
 			}
 		}
 
@@ -888,16 +903,17 @@ public class Alignment {
 	    {
 	    	for(int x = 0; x < sData.get(m).getMaxLogProbabilitySize(); x++)
 	    	{
-	    		double tempo = sData.get(m).getMaxLogProbabilityOf(x, 0);
+	    		double tempo = sData.get(m).getMaxLogProbability(x);
 	    		modelSums[x] += tempo;
 	    		modelScoreMat[x][m] = tempo;
 	    		if(type.equalsIgnoreCase("IL")){
-	    			tempo = rsData.get(m).getMaxLogProbabilityOf(x, 0);
+	    			tempo = rsData.get(m).getMaxLogProbability(x);
 	    			rmodelSums[x] += tempo;
 	    			rmodelScoreMat[x][m] = tempo;
 	    		}
 	    	}
 	    }
+	    
 	    for(int g = 0; g < modelSums.length; g++)
 	    {
 	    	modelScores[g] = (modelSums[g]/(sData.size()-1));
@@ -919,7 +935,6 @@ public class Alignment {
 	    	}else{
 	    		reversed[g] = 0;
 	    	}
-
 	    }
 
 		// re-sort models & their totals
@@ -933,8 +948,8 @@ public class Alignment {
 		for(int k = 0; k < modNames.size(); k++) {
 			indices[k] = k;
 		}
-
-		//Calculate extra information (quantiles, edit distances) and output
+		
+		//Calculate extra information (edit distances, cutoffs) and output
 		int numInputSeqs = sData.size()-1;
 		for(int g = 0; g < modNames.size(); g++) {
 
@@ -960,54 +975,138 @@ public class Alignment {
 				}
 			}
 
-			//Calculate quantiles
-			double[] quants = webJAR3D.getQuantilesA(groupScores, group);
-
-			//Calculate edit distances
-			Vector<Sequence> modsData = Alignment.parseFastaText(group.Sequences,0,0);
-			int[][] InteriorEditDistances;
-			int[][] FullEditDistances;
-			if(type.equalsIgnoreCase("IL")){
-				InteriorEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rotation);
-				FullEditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rotation,false,false);
-			}else {
-				InteriorEditDistances = SimpleAlign.calcHLEditDistances(sData, modsData);
-				FullEditDistances = SimpleAlign.calcHLEditDistances(sData,modsData,false,false);
-			}
-			int[] InteriorMinDist = new int[InteriorEditDistances.length];
-			int[] FullMinDist = new int[FullEditDistances.length];
-			for(int i = 0; i < InteriorEditDistances.length; i ++){
-				InteriorMinDist[i] = ArrayMath.min(InteriorEditDistances[i]);
-				FullMinDist[i] = ArrayMath.min(FullEditDistances[i]);
-			}
-			boolean[] cutoffs = new boolean[numInputSeqs];
-			for(int i = 0; i < numInputSeqs; i++){
-				if(groupScores[i]>=group.Cutoffs[0] && InteriorMinDist[i]<=group.Cutoffs[1]
-						&& group.Cutoffs[2]*InteriorMinDist[i]-group.Cutoffs[3]*groupScores[i]<=group.Cutoffs[4]){
-					cutoffs[i] = Boolean.TRUE;
-				}else if(InteriorMinDist[i]==0){
-					cutoffs[i] = Boolean.TRUE;
-				}else{
-					cutoffs[i] = Boolean.FALSE;
-				}
-			}
+			int[] InteriorMinDist = getMinEditDistance(group,sData,type,rotation,true);
+			int[] FullMinDist = getMinEditDistance(group,sData,type,rotation,false);
+			
+			boolean[] cutoffs = getCutoffs(group,groupScores,InteriorMinDist);
+			double[] cutoffscores = getCutoffScores(group,groupScores,InteriorMinDist);
+			
 			if (true) {
-				List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
+/*				List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
 				for(int m = 0; m < sData.size() - 1; m++) {
-					SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], quants[m], InteriorMinDist[m], FullMinDist[m],rotation,cutoffs[m]);
+					SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], InteriorMinDist[m], FullMinDist[m],rotation,cutoffs[m],cutoffscores[m]);
 					seqRes.add(seqR);
 				}
-
-				LoopResult loopR = new BasicLoopResult(groupName, rotation, sig, seqRes, "NA");
+*/				
+				double medianScore = ArrayMath.median(groupScores);
+				double meanScore = ArrayMath.mean(groupScores);
+				double meanInteriorEditDistance = ArrayMath.mean(InteriorMinDist);
+				double medianInteriorEditDistance = ArrayMath.median(InteriorMinDist);
+				double meanFullEditDistance = ArrayMath.mean(FullMinDist);
+				double medianFullEditDistance = ArrayMath.median(FullMinDist);
+				double meanCutoff = ArrayMath.mean(cutoffs);
+				double meanCutoffScore = ArrayMath.mean(cutoffscores);
+				
+				LoopResult loopR = new BasicLoopResult(groupName, rotation, sig,
+						medianScore, meanScore,
+						meanInteriorEditDistance, medianInteriorEditDistance,
+						meanFullEditDistance, medianFullEditDistance,
+						meanCutoff, meanCutoffScore);
 				loopR.setLoop(loop);
 				loopRes.add(loopR);
 			}
 		}
+		//Try to clean up the memory we used
+		System.gc();
+		System.runFinalization();
+		System.gc();
+		
 		return loopRes;
+	}
+	
+	//Takes a JAR3D query and submits results to MySQL database
+	public static List<SequenceResult> doSingleDBQuery(Query query, List<Sequence> sData,
+			MotifGroup group, String model_id, int range, Loop loop, String type) {
+
+		// TODO 2013-11-07 CLZ generalize this so that it can apply to HL, IL, 3WJ, 4WJ, etc.
+		// Currently there is only space for rotations 0 and 1
+		double modelSum=0;
+		double rmodelSum=0;
+		double modelScore=-9999;
+		double rmodelScore=-9999;
+		double[] modelScores = new double[sData.size()];
+		double[] rmodelScores = new double[sData.size()];
+		int reversed;
+		List<Sequence> rsData = new Vector<Sequence>();
+		
+		if(type.equalsIgnoreCase("IL")){
+			rsData = Alignment.reverse(sData);  // reversed sequence data
+		}
+		
+	    sData  = Alignment.doParse(sData, group.Model, range, true, true, false);
+			if(type.equalsIgnoreCase("IL")){
+				rsData = Alignment.doParse(rsData, group.Model, range, true, true, false);
+			}
+	    //Add up model scores for each sequence, find mean score, compare regular and reversed scores
+	    for(int m = 1; m < sData.size(); m++)
+	    {
+	    	double tempo = sData.get(m).getMaxLogProbability(0);
+	    	modelSum += tempo;
+	    	modelScores[m] =  tempo;
+	    	if(type.equalsIgnoreCase("IL")){
+	    		tempo = rsData.get(m).getMaxLogProbability(0);
+	    		rmodelSum += tempo;
+	    		rmodelScores[m] = tempo;
+	    	}
+	    }
+	    
+	    modelScore = (modelSum/(sData.size()-1));
+	    if(type.equalsIgnoreCase("IL")){
+	    	rmodelScore = (rmodelSum/(sData.size()-1));
+	    }
+	    if(type.equalsIgnoreCase("IL")){
+	    	if(rmodelScore > modelScore)          // choose between forward and reversed for each model
+	    	{
+	    		modelScore = rmodelScore;
+	    		modelScores = rmodelScores;
+	    		reversed = 1;
+	    	}
+	    	else {
+	    		reversed = 0;
+	    	}
+	    }else{
+	    	reversed = 0;
+	    }
+	    
+	    double[] groupScores = new double[sData.size()];
+	    for(int i=1; i <sData.size(); i++){
+	    	groupScores[i-1] = modelScores[i];
+	    }
+	    
+	    int[] InteriorMinDist = getMinEditDistance(group,sData,type,reversed,true);
+		int[] FullMinDist = getMinEditDistance(group,sData,type,reversed,false);
+		
+		boolean[] cutoffs = getCutoffs(group,groupScores,InteriorMinDist);
+		double[] cutoffscores = getCutoffScores(group,groupScores,InteriorMinDist);
+	    
+	    List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
+		for(int m = 0; m < sData.size() - 1; m++) {
+			SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], InteriorMinDist[m], FullMinDist[m],reversed,cutoffs[m],cutoffscores[m],sData.get(m + 1).correspondences);
+			seqRes.add(seqR);
+		}
+		
+		LoopResult result = new BasicLoopResult(model_id, reversed, "sig", seqRes);
+	    
+		for(SequenceResult res : seqRes) {
+			res.setLoopResult(result);
+		}
+		
+	    //Try to clean up the memory we used
+	    System.gc();
+	    System.runFinalization();
+	    System.gc();
+
+	    return seqRes;
+			
+	}
+	
+	public static List<Sequence> doParse(List<Sequence> sData, String nodeInfo, int range, boolean fullModelText, boolean calculateCorrespondences)
+	{
+		return doParse(sData,nodeInfo,range,fullModelText,calculateCorrespondences,true);
 	}
 
 	//Overloaded doParse that can take model/node data as a string instead of a file name
-	public static List<Sequence> doParse(List<Sequence> sData, String nodeInfo, int range, boolean fullModelText)
+	public static List<Sequence> doParse(List<Sequence> sData, String nodeInfo, int range, boolean fullModelText, boolean calculateCorrespondences, boolean saveNodeProbs)
 	{
 		Node current;
 		List<Double> mProbs = new Vector<Double>();
@@ -1046,41 +1145,47 @@ public class Alignment {
 
 			mlp = S.parseSequence(range);                             	      // parse this sequence
 
+			sData.get(i).appendProbabilities(mlp); 							  // save mlp
+		
 			// We also need to store the parse information somewhere!  All we have is a parse sequence.
 			// We need to store the max log probabilities too
 
-			mProbs = new Vector<Double>();
-			current = S.first;
-			while(current != null)
+			mProbs.clear();
+			if(saveNodeProbs)
 			{
-				mProbs.add(new Double(current.optimalMaxLogProb));
-//				System.out.println("Alignment.doParse optimalMaxLogProb for a node is "+current.optimalMaxLogProb);
-				current =  current.next;
+				current = S.first;
+				while(current != null)
+				{
+					mProbs.add(new Double(current.optimalMaxLogProb));
+					//				System.out.println("Alignment.doParse optimalMaxLogProb for a node is "+current.optimalMaxLogProb);
+					current =  current.next;
+				}
+				//	System.out.println("Alignment.doParse actual MLP is "+mlp);
+
+				sData.get(i).appendNodeProbabilities(mProbs);
+				sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 			}
-//			System.out.println("Alignment.doParse actual MLP is "+mlp);
 			
-			sData.get(i).appendProbabilities(mProbs);
-			sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
+			if (calculateCorrespondences) {
+				String correspondences = ((InitialNode)S.first).showCorrespondences(S.nucleotides);
+				correspondences = correspondences.replace("JAR3D_aligns_to", "aligns_to_JAR3D");
+				String SF = "Sequence_"+i;
+				correspondences = correspondences.replace("SSS",SF);
+				sData.get(i).correspondences = correspondences;
+			}
+		}				
 
-			String correspondences = ((InitialNode)S.first).showCorrespondences(S.nucleotides);
-
-			correspondences = correspondences.replace("JAR3D_aligns_to", "aligns_to_JAR3D");
-
-			String SF = "Sequence_"+i;
-			correspondences = correspondences.replace("SSS",SF);
-
-			sData.get(i).correspondences = correspondences;
+		if (calculateCorrespondences) {
+			for (int i = 1; i < sData.size(); i++)
+				{
+					sData.get(i).correspondences += "Sequence_"+i+" has_name "+sData.get(i).organism.replace(" ","_")+"\n";
+				}
+			for (int i = 1; i < sData.size(); i++)
+				{
+					sData.get(i).correspondences += "Sequence_"+i+" has_score "+sData.get(i).getMaxLogProbability(0)+"\n";
+				}
 		}
-		
-		for (int i = 1; i < sData.size(); i++)
-		{
-			sData.get(i).correspondences += "Sequence_"+i+" has_name "+sData.get(i).organism.replace(" ","_")+"\n";
-		}
 
-		for (int i = 1; i < sData.size(); i++)
-		{
-			sData.get(i).correspondences += "Sequence_"+i+" has_score "+sData.get(i).getMaxLogProbability(0)+"\n";
-		}
 		return sData;
 	}
 
@@ -1130,4 +1235,54 @@ public class Alignment {
 		return sData;
 	}
 
+
+	public static int[] getMinEditDistance(MotifGroup group, List<Sequence> sData, String type, int rotation, boolean interior){
+		//Calculate edit distances
+		Vector<Sequence> modsData = Alignment.parseFastaText(group.Sequences,0,0);
+		int[][] EditDistances;
+		if(type.equalsIgnoreCase("IL")){
+			EditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rotation,false,interior);
+		}else {
+			EditDistances = SimpleAlign.calcHLEditDistances(sData,modsData,false,interior);
+		}
+		int[] MinDist = new int[EditDistances.length];
+		for(int i = 0; i < EditDistances.length; i ++){
+			MinDist[i] = ArrayMath.min(EditDistances[i]);
+		}
+		return MinDist;
+	}
+	
+	public static boolean[] getCutoffs(MotifGroup group, double[] groupScores, int[] InteriorMinDist){
+		boolean[] cutoffs = new boolean[InteriorMinDist.length];
+		for(int i = 0; i < InteriorMinDist.length; i++){
+			if(groupScores[i]>=group.Cutoffs[0] && InteriorMinDist[i]<=group.Cutoffs[1]
+					&& group.Cutoffs[2]*InteriorMinDist[i]-group.Cutoffs[3]*groupScores[i]<=group.Cutoffs[4]){
+				cutoffs[i] = Boolean.TRUE;
+			}else if(InteriorMinDist[i]==0){
+				cutoffs[i] = Boolean.TRUE;
+			}else{
+				cutoffs[i] = Boolean.FALSE;
+			}
+		}
+		return cutoffs;
+	}
+
+	public static double[] getCutoffScores(MotifGroup group, double[] groupScores, int[] InteriorMinDist){
+		double[] cutoffscores = new double[InteriorMinDist.length];
+		for(int i = 0; i < InteriorMinDist.length; i++){
+			cutoffscores[i] = 100 * (group.Cutoffs[2] * InteriorMinDist[i] - group.Cutoffs[3] * groupScores[i] - group.Cutoffs[4]) / -group.Cutoffs[5];
+			if(cutoffscores[i] > 0 && (groupScores[i] < group.Cutoffs[0] || InteriorMinDist[i] > group.Cutoffs[1])){
+				cutoffscores[i] = 0;
+			}
+		}
+		return cutoffscores;
+	}
+	
+	public static double[] getDeficits(double best_score, double[] groupScores) {
+		double [] deficits =  new double[groupScores.length];
+		for(int i = 0; i < groupScores.length; i++) {
+			deficits[i] = Math.max(0, best_score - groupScores[i]);
+		}
+		return deficits;
+	}
 }

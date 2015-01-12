@@ -8,6 +8,11 @@
 % strand or on the right strand, it still consumes one base on the other
 % strand, even though that might not make sense.
 
+% Note:  There are three numbering schemes:
+% 1. Index from original file, so numbers could be very large.  a, b, aa, bb are on this scheme.
+% 2. Numbering along each strand, from 1 to N on each strand.  ss, tt, zs, zt, xs, yt, RightNotInter are on this scheme.
+% 3. Numbering the interacting bases in the cluster from 1 to M, regardless of strand.  rightnum, e, IBases are on this scheme.
+
 if exist('zxsx')
   disp('Cluster *****************************************************');
 end
@@ -36,7 +41,7 @@ Z = full(G(a:amax,bmin:b));            % interactions between left + right
 % ------------------------------------ determine extent of cluster interactions
 
 ssa = max(find(X(1,:)));               % depth from a on left
-ssb = max(find(Z(:,t)));               % depth from a on right
+ssb = max(find(Z(:,t)));               % nearest interaction to t 
 if isempty(ssa), ssa = 1; end
 if isempty(ssb), ssb = 1; end
 ss = max(ssa, ssb);
@@ -47,10 +52,10 @@ if isempty(tta), tta = t; end
 if isempty(ttb), ttb = t; end
 tt = min(tta, ttb);
 
-while sum(sum(Z(1:ss,1:tt-1))) > 0 || ...
-      sum(sum(Z(ss+1:s,tt:t))) > 0 || ...
-      sum(sum(X(1:ss,ss+1:s))) > 0 || ...
-      sum(sum(Y(tt:t,1:tt-1))) > 0,
+while sum(sum(Z(1:ss,1:(tt-1)))) > 0 || ...
+      sum(sum(Z((ss+1):s,tt:t))) > 0 || ...
+      sum(sum(X(1:ss,(ss+1):s))) > 0 || ...
+      sum(sum(Y(tt:t,1:(tt-1)))) > 0,
   ssa = max(find(sum(X(1:ss,:),1)));
   ssb = max(find(sum(Z(:,tt:t),2)));
   if isempty(ssa), ssa = 1; end
@@ -100,7 +105,7 @@ yt = find(sum(Y+Y',1));    % right with right
 Node(n).LeftNotInter = setdiff(1:length(Node(n).LeftIndex),union(zs,xs));
 Node(n).RightNotInter = setdiff(1:length(Node(n).RightIndex),union(zt,yt));
 
-if insertionconserved == 1,
+if insertionconserved == 1,  % treat non-interacting bases as part of the cluster
   zs = 1:ss;                 % all are thought of as interacting
   zt = 1:length(Y(1,:));
   xs = 1:ss;
@@ -116,7 +121,7 @@ rightinter = union(zt,yt);
 rightnum   = [];
 rightnum(rightinter) = 1:length(rightinter);
                           % sequential numbering of interacting bases
-rightnum(find(rightnum)) = rightnum(find(rightnum))+length(leftinter);
+rightnum(find(rightnum)) = rightnum(find(rightnum))+length(leftinter);  % shift to numbering for all bases in cluster
 
 % --------------- list insertion possibilities and corresponding probabilities
 
@@ -139,7 +144,7 @@ Node(n).P    = ones(17,1) * Node(n).PIns;   % transition probabilities - old
 % ------------- create a list of insertions according to what is observed here
 
 e = [Node(n).Left(1,:) Node(n).Left(1,end)+Node(n).Right(1,:)];
-                                        % indices of bases used, left to right
+                                            % indices of bases used, left to right
 
 d = diff(e);                                % diffs in positions used
 h = find(d>1);                              % where insertions occur
@@ -259,8 +264,9 @@ end
 
 for i = Node(n).RightNotInter,
   K = length(Node(n).IBases(:,1))+1;
-  Node(n).IBases(K,:) = [i i];
-  i1 = i + bb - 1;
+
+  Node(n).IBases(K,:) = [i i] + length(leftinter); % shift from right strand numbering to whole motif numbering
+  i1 = i + bb - 1;                        % index in original file
   Node(n).InterIndices(K,:) = [i1 i1];
   Node(n).InteractionComment{K} = [' // Right strand conserved insertion ' File.NT(i1).Base File.NT(i1).Number];
   M = eye(4);
@@ -269,7 +275,7 @@ for i = Node(n).RightNotInter,
   Node(n).SubsProb(:,:,K) = M;            % favor the observed base
 
   if Verbose > 0,
-    fprintf('    Right strand conserved insertion %c%4s at position %d\n', File.NT(i1).Base, File.NT(i1).Number, i);
+    fprintf('    Right strand conserved insertion %c%4s at right strand position %d\n', File.NT(i1).Base, File.NT(i1).Number, i);
   end
 
 end

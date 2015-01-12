@@ -48,6 +48,7 @@ public class webJAR3D {
 				Value = Double.parseDouble(ValueS);
 				modVals.add(Value);
 			}
+			in.close();
 		} catch(Exception e) {
 			System.out.println("Error reading file " + modDistFN + "\n"+e);
 		}
@@ -122,6 +123,7 @@ public class webJAR3D {
 				Value = Double.parseDouble(ValueS);
 				modVals.add(Value);
 			}
+			in.close();
 		} catch(Exception e) {
 			System.out.println("Error reading file " + modDistFN + "\n"+e);
 		}
@@ -199,6 +201,7 @@ public class webJAR3D {
 				forward.add(forwS);
 				reversed.add(revS);
 			}
+			in.close();
 		} catch(Exception e) {
 			System.out.println("Error reading file " + sigFN + "\n"+e);
 		}
@@ -263,80 +266,5 @@ public class webJAR3D {
 			}
 			return Motifs;
 		}
-	}
-	//getQuantiles for internal use by JAR3DMatlab or WebJAR3D functions,
-	//overloaded for new file system
-	public static double[] getQuantilesA(double[] Scores, MotifGroup group) {
-		int n = Scores.length;
-		double[] quantiles = new double[n];
-		Vector modDist = new Vector();
-		Vector modVals = new Vector();
-		
-		char fsep = File.separatorChar;
-
-			String lineS;
-			String ValueS;
-			String DistS;
-			double Value;
-			double Dist;
-			int BreakP;
-			
-			StringTokenizer st = new StringTokenizer(group.Distribution,"\n");
-
-			lineS = st.nextToken();
-			
-			while(st.hasMoreTokens())
-			{
-				BreakP = lineS.indexOf(" ");
-				ValueS = lineS.substring(0, BreakP);
-				DistS = lineS.substring(BreakP+1);
-				Dist = Double.parseDouble(DistS);
-				modDist.add(Dist);
-				Value = Double.parseDouble(ValueS);
-				modVals.add(Value);
-				lineS = st.nextToken();
-			}
-		
-		int DistLength = modVals.size();
-		
-		for(int i = 0; i < n; i++){
-			int found = 0;
-			int j = DistLength/2;
-			int step = j;
-			double current;
-			double next;
-			while(found==0){
-				if(j==DistLength-1) {
-					quantiles[i] = 1;
-					found = 1;
-				}
-				else if(j==0){
-					current = ((Double)modVals.get(j)).doubleValue();
-					if(Scores[i] == current || Scores[i] > current){
-						quantiles[i] = ((Double)modDist.get(j)).doubleValue();
-						found = 1;
-					}else{
-						quantiles[i] = 0;
-						found = 1;
-					}
-				}else{
-					current = ((Double)modVals.get(j)).doubleValue();
-					next = ((Double)modVals.get(j+1)).doubleValue();
-					if(Scores[i] == current || (Scores[i] > current && Scores[i] < next)){
-						quantiles[i] = ((Double)modDist.get(j)).doubleValue();
-						found = 1;
-					}else if(Scores[i] <current){
-						step = Math.max(step/2,1);
-						j = j - step;
-					}else {
-						step = Math.max(step/2,1);
-						j = j + step;
-					}
-				}
-			}
-		}
-		return quantiles;
-	}
-	
-	
+	}	
 }

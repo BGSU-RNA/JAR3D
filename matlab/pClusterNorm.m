@@ -15,8 +15,10 @@ function NormC = pClusterNorm(InterIndicesF,SubsProbF,LeftIndex,RightIndex)
             end
         end
     end
+
     SubsProb = SubsProbF(:,:,Inters);
     IBases = sort(unique(InterIndices(:)));
+
     Left = [];  Right = [];
     for i = 1:length(IBases),
         if ismember(IBases(i),LeftIndex);
@@ -29,6 +31,7 @@ function NormC = pClusterNorm(InterIndicesF,SubsProbF,LeftIndex,RightIndex)
     [numInter,dum] = size(InterIndices);
     Cols(1:length(Left)) = LeftIndex(Left);
     Cols(length(Left)+1:length(Left)+length(Right)) = RightIndex(Right);
+
     % System.out.println("ClusterNode.Normalize "+numIndices);
     if numInter == 1,
         psum = sum(sum(SubsProb(:,:,1)));
@@ -37,11 +40,12 @@ function NormC = pClusterNorm(InterIndicesF,SubsProbF,LeftIndex,RightIndex)
         for i = 1:4^numBases,
             [numInter,dum] = size(InterIndices);
             % score codes[] according to the various interactions
-            prob = 0;
+            logprob = 0;
+            prob = 1;
             for j = 1:numInter,
                 i1 = find(Cols == InterIndices(j,1));
                 i2 = find(Cols == InterIndices(j,2));
-                prob = prob+log(SubsProb(code(i1),code(i2),j));
+                prob = prob * SubsProb(code(i1),code(i2),j);
             end
             increm = 0;
             j = 1;
@@ -56,7 +60,7 @@ function NormC = pClusterNorm(InterIndicesF,SubsProbF,LeftIndex,RightIndex)
                     end
                 end
             end
-            psum = psum+exp(prob);
+            psum = psum + prob;
         end
     end
     total = 1;
@@ -64,6 +68,7 @@ function NormC = pClusterNorm(InterIndicesF,SubsProbF,LeftIndex,RightIndex)
         total = total*sum(sum(SubsProb(:,:,j)));
     end
     psum = psum*total;
+
     if numInterF-numInter == 0,
         NormC = psum;
     else

@@ -67,26 +67,12 @@ public interface LoopResult {
 	 */
 	public double meanScore();
 
-	/**
-	 * The mean percentile score of sequences in this loop.
-	 * 
-	 * @return The percentile.
-	 */
-	public double meanPercentile();
-
-	/**
+ 	/**
 	 * The median score of sequences in this loop.
 	 * 
 	 * @return The score.
 	 */
 	public double medianScore();
-
-	/**
-	 * The median percentile score of sequences in this loop.
-	 * 
-	 * @return The percentile.
-	 */
-	public double medianPercentile();
 
 	/**
 	 * Median interior edit distance between sequences in the loop and the sequences in the model.
@@ -117,13 +103,6 @@ public interface LoopResult {
 	public int bestRotation();
 
 	/**
-	 * Get the correspondences between the model and positions in this loop.
-	 * 
-	 * @return The correspondences.
-	 */
-	public String correspondences();
-
-	/**
 	 * A list of per sequence results. These are the results for each sequence in loop against the model used here.
 	 * 
 	 * @return A list of sequence level results.
@@ -136,4 +115,11 @@ public interface LoopResult {
 	 * @return A the percent of sequences that pass cutoff.
 	 */
 	public double meanCutoff();
+	
+	/**
+	 * The mean cutoff score. These are the results for each sequence in loop against the model used here.
+	 * 
+	 * @return A the percent of sequences that pass cutoff.
+	 */
+	public double meanCutoffScore();
 }

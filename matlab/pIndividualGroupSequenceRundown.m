@@ -2,13 +2,33 @@
 
 % Copy Text into a spreadsheet, then sort by columns B, S, and U to get a nice ordering
 
-function [Text,ROC,Confusion] = pIndividualGroupSequenceRundown(Params,OnlyStructured,OwnMotif,GroupData,MLPS,FASTA,ModelPath,SeqGroup,OwnEditDistance,CoreEditDistance,Percentile,Criterion,Verbose,CutoffScore,FullEditDistance,AvgCoreEditDistance,CutoffMet,MotifEquivalence)
+function [Text,ROC,Confusion,Correctness] = pIndividualGroupSequenceRundown(Params,OnlyStructured,OwnMotif,GroupData,MLPS,FASTA,ModelPath,SeqGroup,OwnCoreEditDistance,CoreEditDistance,Percentile,Criterion,Verbose,CutoffScore,FullEditDistance,AvgCoreEditDistance,CutoffMet,MotifEquivalence)
 
 CoreDistSL = Params.CoreDistSL;
 SizeOfGuessSet = Params.SizeOfGuessSet;
 UseMultiplicity = Params.UseMultiplicity;
 
 Confusion = zeros(length(GroupData),length(GroupData)+1);   % to count mis-classifications
+
+Correctness.Criterion = Criterion;
+Correctness.NumSeqs   = length(FASTA);
+Correctness.TotalMultiplicity = sum(cat(1,FASTA.Multiplicity));
+Correctness.AcceptedByMultiplicity = 0;
+Correctness.AcceptedByMultiplicityExclInteriorMatch = 0;
+Correctness.AcceptedByMultiplicityExclFullMatch = 0;
+Correctness.CorrectByMultiplicity = 0;
+Correctness.CorrectByMultiplicityExclFullMatch = 0;
+Correctness.CorrectByMultiplicityExclInteriorMatch = 0;
+Correctness.TotalMultiplicityExclFullMatch = 0;
+Correctness.TotalMultiplicityExclInteriorMatch = 0;
+Correctness.CorrectSequences = 0;
+Correctness.NumNT = GroupData(OwnMotif(1)).NumNT;
+Correctness.MeanSequenceLength = GroupData(OwnMotif(1)).MeanSequenceLength;
+Correctness.GroupNum = OwnMotif(1);
+Correctness.MotifID = GroupData(OwnMotif(1)).MotifID;
+Correctness.NumBasepairs = GroupData(OwnMotif(1)).NumBasepairs;
+Correctness.NumBPh = GroupData(OwnMotif(1)).NumBPh;
+Correctness.MostCommonSequence = FASTA(1).Sequence;
 
 if nargin < 17,
   Criterion = 3;
@@ -91,11 +111,13 @@ for gg = 1:length(grouporder),                 % run through sequence groups
       if OnlyStructured == 0 || GroupData(n).Structured > 0,
         alignmentnumrows = alignmentnumrows + FASTA(n).Multiplicity;
         
-        if OwnEditDistance(n) == 0,
+        if OwnCoreEditDistance(n) == 0,
           alignmentzeroedit = alignmentzeroedit + FASTA(n).Multiplicity;
         end
       end
     end
+
+    Correctness.PercentZeroEdit = alignmentzeroedit/alignmentnumrows;
 
     em = find(MotifEquivalence(mn,:) > 0);     % this model and all equivalent to it
 
@@ -226,6 +248,13 @@ for gg = 1:length(grouporder),                 % run through sequence groups
       score = 0;
 
       if OwnCutoffMet > 0,
+        Correctness.AcceptedByMultiplicity = Correctness.AcceptedByMultiplicity + FASTA(n).Multiplicity;
+        if OwnCoreEditDistance(n) > 0,
+          Correctness.AcceptedByMultiplicityExclInteriorMatch = Correctness.AcceptedByMultiplicityExclInteriorMatch + FASTA(n).Multiplicity;
+        end
+        if FullEditDistance(n,mn,1) > 0,
+          Correctness.AcceptedByMultiplicityExclFullMatch = Correctness.AcceptedByMultiplicityExclFullMatch + FASTA(n).Multiplicity;
+        end
         if Criterion == 7,
           score = 1;                                % does the sequence fit the correct model well enough?
         elseif numbetter + numequal < SizeOfGuessSet,
@@ -234,6 +263,22 @@ for gg = 1:length(grouporder),                 % run through sequence groups
           score = min(1,(SizeOfGuessSet - numbetter) / (numequal + 1));
         end
       end
+
+      if Params.CoreEditZeroSuccess > 0 && OwnCoreEditDistance(n) == 0,    % simply recognize these as being correct
+        OwnCutoffMet = 1;
+        score = 1;
+      end
+
+      Correctness.CorrectByMultiplicity = Correctness.CorrectByMultiplicity + FASTA(n).Multiplicity * score;
+      if OwnCoreEditDistance(n) > 0,
+        Correctness.TotalMultiplicityExclInteriorMatch = Correctness.TotalMultiplicityExclInteriorMatch + FASTA(n).Multiplicity;
+        Correctness.CorrectByMultiplicityExclInteriorMatch = Correctness.CorrectByMultiplicityExclInteriorMatch + FASTA(n).Multiplicity * score;
+      end
+      if FullEditDistance(n,mn,1) > 0,
+        Correctness.TotalMultiplicityExclFullMatch = Correctness.TotalMultiplicityExclFullMatch + FASTA(n).Multiplicity;
+        Correctness.CorrectByMultiplicityExclFullMatch = Correctness.CorrectByMultiplicityExclFullMatch + FASTA(n).Multiplicity * score;
+      end
+      Correctness.CorrectSequences = Correctness.CorrectSequences + score;
 
       ROC(ed+1,1) = ROC(ed+1,1) + Counter * score;  % record degree of success
       ROC(ed+1,2) = ROC(ed+1,2) + Counter;          % count this sequence by its edit distance to its own group
@@ -339,3 +384,11 @@ end
 if Params.NumSequencesToShow < Inf,
   pause
 end
+
+Correctness.PercentageCorrectSequences = Correctness.CorrectSequences / Correctness.NumSeqs;
+Correctness.PercentageCorrectMultiplicity = Correctness.CorrectByMultiplicity / Correctness.TotalMultiplicity;
+Correctness.PercentageCorrectExclFullMatch = Correctness.CorrectByMultiplicityExclFullMatch / Correctness.TotalMultiplicityExclFullMatch;
+Correctness.PercentageCorrectExclInteriorMatch = Correctness.CorrectByMultiplicityExclInteriorMatch / Correctness.TotalMultiplicityExclInteriorMatch;
+Correctness.PercentageAcceptedMultiplicity = Correctness.AcceptedByMultiplicity / Correctness.TotalMultiplicity;
+Correctness.PercentageAcceptedMultiplicityExclFullMatch = Correctness.AcceptedByMultiplicityExclFullMatch / Correctness.TotalMultiplicityExclFullMatch;
+Correctness.PercentageAcceptedMultiplicityExclInteriorMatch = Correctness.AcceptedByMultiplicityExclInteriorMatch / Correctness.TotalMultiplicityExclInteriorMatch;

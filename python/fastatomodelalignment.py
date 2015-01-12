@@ -14,14 +14,17 @@ from CorrespondenceUtilities import positionkeyforsortbynumber
 
 def fastatomodelalignment(libDirectory,motifID,alignmentfile,outputfile):
   # read correspondences from the fasta file to the model
-  InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModel, HasName, HasScore = readcorrespondencesfromfile(alignmentfile)
+  InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModel, HasName, HasScore, HasInteriorEdit, HasFullEdit, HasCutoffValue, HasCutoffScore, HasAlignmentScoreDeficit = readcorrespondencesfromfile(alignmentfile)
 
   print "Read alignment to model from " + alignmentfile
 
   FN = libDirectory + "\\" + motifID + "_correspondences.txt"
 
   # read correspondences for the given motif group; there are many such correspondences
-  InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModelDummy, ModelHasName, ModelHasScore = readcorrespondencesfromfile(FN)
+  InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModelDummy, ModelHasName, ModelHasScore, ModelInteriorEdit, ModelFullEdit, ModelCutoffValue, ModelCutoffScore, ModelDeficit = readcorrespondencesfromfile(FN)
+
+#  print HasScore
+#  print ModelHasName
 
   HasName.update(ModelHasName)
   HasScore.update(ModelHasScore)
@@ -61,9 +64,9 @@ def fastatomodelalignment(libDirectory,motifID,alignmentfile,outputfile):
   f.write("<h1>Alignment of " + alignmentfile +" to "+motifID+"</h1>\n")    
   f.write("<a href=\"http://rna.bgsu.edu/rna3dhub/motif/view/" + motifID + "\" target=\"_blank\">Motif atlas entry for " + motifID + "</a><br>")
   f.write("The correspondence between sequences from 3D structures and the motif group is shown in blue, JAR3D alignments of sequences to the motif group are shown in black, and sequences which are too long or too short to be aligned are indicated by : characters.")
-  f.write("<table>")    
-  f.write(alignmentheaderhtml(ModelToColumn,GroupToModel)+'\n')
-  f.write(alignmentrowshtml(DisplayColor,aligdata,HasName,HasScore))
+  f.write("<table>")
+  f.write(alignmentheaderhtml(ModelToColumn, GroupToModel)+'\n')
+  f.write(alignmentrowshtml(DisplayColor, aligdata, HasName, HasScore, HasInteriorEdit, HasFullEdit, HasCutoffValue, HasCutoffScore, HasAlignmentScoreDeficit))
   f.write("</table>")
  
   InteractionsFile = libDirectory + "\\" + motifID + "_interactions.txt"

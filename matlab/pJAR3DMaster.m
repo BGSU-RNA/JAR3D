@@ -2,11 +2,7 @@
 
 % -------------------------------------------------------------------- % choices for the user
 
-Release = ['IL' filesep '1.3'];
-Release = ['IL' filesep '1.12'];
-Release = ['IL' filesep '1.14'];
-Release = ['IL' filesep '1.13'];
-Release = ['IL' filesep '1.2'];
+Release = ['HL' filesep '1.17'];
 
 MotifLibraryLocation = 'C:\Users\zirbel\Documents\JAR3DMotifs\';
 OutputBase = pwd;                                                      % start Matlab in the directory containing IL and HL
@@ -29,7 +25,7 @@ pJAR3DDiagnostics(OutputBase,Release,Release,1)
 pGenerateRandomMotifSequences(OutputBase,Release)
 
 pJAR3DFalsePositiveStudy(OutputBase,Release,1)                         % 1 means to read FASTA files and parse and calculate edit distance; slow
-pJAR3DFalsePositiveStudy(OutputBase,Release,2)                         % 2 means to accumulate false positive data, which takes lots of RAM
+pJAR3DFalsePositiveStudy(OutputBase,Release,2)                         % 2 means to accumulate false positive data, which takes some RAM
 
 pSetModelSpecificCutoffs(OutputBase,Release,0)
 pJAR3DFalsePositiveStudy(OutputBase,Release,3)                         % 3 means to use model-specific cutoffs

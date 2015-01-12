@@ -49,6 +49,7 @@ public enum LoopType {
 	 * @return The matching LoopType.
 	 */
 	public static LoopType fromString(String type) {
+		System.out.println(type);
 		if (type.equalsIgnoreCase("IL") || type.equalsIgnoreCase("internal")) {
 			return INTERNAL;
 		}

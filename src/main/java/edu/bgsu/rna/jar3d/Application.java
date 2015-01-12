@@ -14,6 +14,7 @@ import edu.bgsu.rna.jar3d.loop.Loop;
 import edu.bgsu.rna.jar3d.loop.LoopType;
 import edu.bgsu.rna.jar3d.query.Query;
 import edu.bgsu.rna.jar3d.results.LoopResult;
+import edu.bgsu.rna.jar3d.results.SequenceResult;
 
 /**
  * An Application is simple way to load sequences and models, run the models over the sequences and save the results.
@@ -98,11 +99,12 @@ public class Application {
 	 * @param HLbase Base path to the HL models.
 	 * @return The results.
 	 * @throws QueryLoadingFailed
+	 * @throws SaveFailed 
 	 */
 	
-	public List<List<LoopResult>> runQuery(String queryId, String ILbase, String HLbase) throws QueryLoadingFailed {
+	public void runQuery(String queryId, String ILbase, String HLbase) throws QueryLoadingFailed, SaveFailed {
 		Query query = loader.load(queryId);
-		return runQuery(query, ILbase, HLbase);
+		this.runQuery(query, ILbase, HLbase);
 	}
 
 	/**
@@ -114,8 +116,21 @@ public class Application {
 	 */
 	public List<List<LoopResult>> runQuery(Query query, String base) {
 		List<List<LoopResult>> allResults = new ArrayList<List<LoopResult>>();
+		//Load Motif Group information
+		File f = new File(base);
+		String folder = f.getParent();
+
+		System.out.println("Looking for a list of motifs to use in "+base);
+		System.out.println("Looking for motifs in "+folder);
+
+		System.setProperty("user.dir", folder);
+
+		Vector<String> modelNames = Sequence.getModelNames(base, modelType, false);		
+		HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(base, modelType);
+
+		
 		for(Loop loop: query) {
-			List<LoopResult> results = motifParse(base, loop); 
+			List<LoopResult> results = motifParse(modelNames, groupData, loop); 
 			allResults.add(results);
 		}
 		return allResults;
@@ -128,23 +143,89 @@ public class Application {
 	 * @param HLbase The base path to the HL models
 	 * @param query The query to run.
 	 * @return The results.
+	 * @throws SaveFailed 
 	 */
 	
-	public List<List<LoopResult>> runQuery(Query query, String ILbase, String HLbase) {
-		List<List<LoopResult>> allResults = new ArrayList<List<LoopResult>>();
+	public void runQuery(Query query, String ILbase, String HLbase) throws SaveFailed {
+		//Load IL Motif Group information
+		File ilf = new File(ILbase);
+		String ilfolder = ilf.getParent();
+
+		System.out.println("Looking for a list of motifs to use in "+ILbase);
+		System.out.println("Looking for motifs in "+ilfolder);
+
+		System.setProperty("user.dir", ilfolder);
+
+		Vector<String> ILModelNames = Sequence.getModelNames(ILbase, modelType, false);		
+		HashMap<String,MotifGroup> ILGroupData = webJAR3D.loadMotifGroups(ILbase, modelType);
+
+		//Load HL Motif Group information
+		File hlf = new File(HLbase);
+		String hlfolder = hlf.getParent();
+
+		System.out.println("Looking for a list of motifs to use in "+HLbase);
+		System.out.println("Looking for motifs in "+hlfolder);
+
+		System.setProperty("user.dir", hlfolder);
+
+		Vector<String> HLModelNames = Sequence.getModelNames(HLbase, modelType, false);		
+		HashMap<String,MotifGroup> HLGroupData = webJAR3D.loadMotifGroups(HLbase, modelType);
+		
+		List<LoopResult> results;
+		
 		for(Loop loop: query) {
 			String type = loop.getLoopType().getShortName();
-			List<LoopResult> results;
 			if(type.equals("IL")){
-				results = motifParse(ILbase, loop); 
+				results = motifParse(ILModelNames, ILGroupData, loop); 
 			}else {
-				results = motifParse(HLbase, loop);
+				results = motifParse(HLModelNames, HLGroupData, loop);
 			}
-			allResults.add(results);
+			saver.save(results);
 		}
-		return allResults;
+		saver.cleanUp();
 	}
+	
+	/**
+	 * Run a loop query and return the results.
+	 * 
+	 * @param queryId Query to load.
+	 * @param loopNumber Which loop to run on.
+	 * @param folder Folder the model files are in.
+	 * @param model Name of the model to load.
+	 * @return The results.
+	 * @throws QueryLoadingFailed 
+	 * @throws SaveFailed 
+	 */
 
+	private void runQuery(String queryID, String loopNumber, String folder,
+			String model) throws QueryLoadingFailed, SaveFailed {
+		Query query = loader.load(queryID);
+		this.runQuery(query, loopNumber, folder, model);
+	}
+	
+	/**
+	 * Run a loop query and return the results.
+	 * 
+	 * @param queryId Query to load.
+	 * @param loopNumber Which loop to run on.
+	 * @param folder Folder the model files are in.
+	 * @param model Name of the model to load.
+	 * @return The results.
+	 * @throws SaveFailed 
+	 */
+
+	private void runQuery(Query query, String loopNumber, String folder,
+			String model) throws SaveFailed {
+		// Load Motif Group
+		MotifGroup Group = new MotifGroup(folder, modelType, model);
+		Loop loop = query.getLoops().get(Integer.parseInt(loopNumber));
+		List<SequenceResult> results;
+		
+		results = Alignment.doSingleDBQuery(loop, Group, model, rangeLimit);
+		
+		saver.saveSequenceResults(results,query);
+	}
+	
 	/**
 	 * Run a loop against a single loop and return the results. This will only score internal loops, all other loop
 	 * types will give empty results.
@@ -153,31 +234,14 @@ public class Application {
 	 * @param loop The loop.
 	 * @return Results of running the loop.
 	 */
-	private List<LoopResult> motifParse(String modellist, Loop loop) {
+	private List<LoopResult> motifParse(Vector<String> modelNames, HashMap<String,MotifGroup> groupData, Loop loop) {
 		List<LoopResult> result = new ArrayList<LoopResult>();
-
-		// String folder = base + File.separator + loop.getTypeString() + File.separator + version;
-		// 2013-11-07 CLZ user specifies complete path to file telling what models to use
-		
-		File f = new File(modellist);
-		String folder = f.getParent();
-		
-		System.out.println("Looking for a list of motifs to use in "+modellist);
-		System.out.println("Looking for motifs in "+folder);
-		
-		System.setProperty("user.dir", folder);
-
-		// 2013-11-05 CLZ The third argument on the next line makes the choice between structured or all models 
-		// 2013-11-05 CLZ But now that is ignored because the user specifies the path to the models
-		
-		Vector<String> modelNames = Sequence.getModelNames(modellist, modelType, false);		
-		HashMap<String,MotifGroup> groupData = webJAR3D.loadMotifGroups(modellist, modelType);
 
 		if (modelNames.size() == 0) {
 			System.out.println("Found " + modelNames.size() + " model files");
 		}
 
-//		System.out.println("Application.motifParse: " +loop.getLoopType());
+		System.out.println("Application.motifParse: " +loop.getLoopType());
 		
 /**
 		// 2013-11-05 CLZ Old code only ran for internal loops.  Others returned empty results and saving crashed.
@@ -205,7 +269,7 @@ public class Application {
 		}
 		saver.cleanUp();
 	}
-
+	
 	/**
 	 * Load a query, run the query and then save the results.
 	 * 
@@ -215,9 +279,8 @@ public class Application {
 	 * @throws QueryLoadingFailed
 	 */
 	public void runAndSave(String queryId, String base) throws SaveFailed, QueryLoadingFailed {
-		List<List<LoopResult>> results = this.runQuery(queryId, base);
 		saver.writeHeader();
-		saveResults(results);
+		List<List<LoopResult>> results = this.runQuery(queryId, base);
 	}
 	
 	/**
@@ -231,8 +294,24 @@ public class Application {
 	 */
 	
 	public void runAndSave(String queryId, String ILbase, String HLbase) throws SaveFailed, QueryLoadingFailed {
-		List<List<LoopResult>> results = this.runQuery(queryId, ILbase, HLbase);
 		saver.writeHeader();
-		saveResults(results);
+		this.runQuery(queryId, ILbase, HLbase);
 	}
+	
+	/**
+	 * Load a loop query, run the query and then save the results.
+	 * 
+	 * @param queryId Query to load.
+	 * @param loopNumber Which loop to run on.
+	 * @param folder Folder the model files are in.
+	 * @param model Name of the model to load.
+	 * @throws SaveFailed
+	 * @throws QueryLoadingFailed
+	 */
+	
+	public void runAndSave(String queryId, String loopNumber, String folder, String model) throws SaveFailed, QueryLoadingFailed {
+		saver.writeHeader();
+		this.runQuery(queryId, loopNumber, folder, model);
+	}
+
 }

@@ -21,19 +21,47 @@ public class JAR3DMatlab {
 	
 	public static String ModelCorrespondences(String fastaFileName, String modelPath, String modelName, int rotation)
 	{
-		String modelFileName = modelPath + "\\" + modelName + "_model.txt";
-		
 		List<Sequence> sequenceData = Alignment.loadFasta(fastaFileName);
+		
+		MotifGroup group = new MotifGroup(modelPath, modelName);
+		
+		String type = group.loopType;
 		
 		if (rotation > 0)
 			sequenceData = Alignment.reverse(sequenceData);
 		
-		sequenceData = Alignment.doParse(sequenceData, modelFileName, 15);
+		sequenceData = Alignment.doParse(sequenceData, group.Model, 999, true, true);
+		
+		double[] modelScores = new double[sequenceData.size()];
+		
+		//Add up model scores for each sequence, find mean score, compare regular and reversed scores
+	    for(int m = 1; m < sequenceData.size(); m++)
+	    {
+	    	double tempo = sequenceData.get(m).getMaxLogProbability(0);
+	    	modelScores[m-1] =  tempo;
+	    }
+	    
+	    double[] Deficits = Alignment.getDeficits(group.Best_Score, modelScores);
+	    
+	    int[] InteriorMinDist = Alignment.getMinEditDistance(group,sequenceData,type,rotation,true);
+		int[] FullMinDist = Alignment.getMinEditDistance(group,sequenceData,type,rotation,false);
+		
+		boolean[] cutoffs = Alignment.getCutoffs(group,modelScores,InteriorMinDist);
+		double[] cutoffscores = Alignment.getCutoffScores(group,modelScores,InteriorMinDist);
 
 //		Alignment.displayAlignmentFASTA(sequenceData);
 		
 		String correspondences = "";
-
+		
+		for (int i = 1; i < sequenceData.size(); i++)
+		{
+			sequenceData.get(i).correspondences += "Sequence_"+i+" has_alignment_score_deficit "+String.valueOf(Deficits[i-1])+"\n";
+			sequenceData.get(i).correspondences += "Sequence_"+i+" has_minimum_interior_edit_distance "+String.valueOf(InteriorMinDist[i-1])+"\n";
+			sequenceData.get(i).correspondences += "Sequence_"+i+" has_minimum_full_edit_distance "+String.valueOf(FullMinDist[i-1])+"\n";
+			sequenceData.get(i).correspondences += "Sequence_"+i+" has_cutoff_value "+String.valueOf(cutoffs[i-1])+"\n";
+			sequenceData.get(i).correspondences += "Sequence_"+i+" has_cutoff_score "+String.valueOf(cutoffscores[i-1])+"\n";
+		}
+		
 		for (int i = 1; i < sequenceData.size(); i++)
 		{
             correspondences += ((Sequence)sequenceData.get(i)).correspondences;
@@ -166,8 +194,8 @@ public class JAR3DMatlab {
 					alnm += pData.get(j).charAt(i);
 			}		
 			alnm += " "+((Sequence)sData.elementAt(j)).organism+" ";
-			for(int x = 0; x < ((Sequence)sData.elementAt(j)).getMaxLogProbabilitySize(); x++)
-				alnm += ((Sequence)sData.elementAt(j)).getMaxLogProbabilities(x).get(0);
+			for(int x = 0; x < ((Sequence)sData.elementAt(j)).getMaxNodeLogProbabilitySize(); x++)
+				alnm += ((Sequence)sData.elementAt(j)).getMaxNodeLogProbabilities(x).get(0);
 			alignmentVect.add(alnm);
 		}
 		return alignmentVect;	
@@ -267,6 +295,7 @@ public class JAR3DMatlab {
 				Value = Double.parseDouble(ValueS);
 				modVals.add(Value);
 			}
+			in.close();
 		} catch(Exception e) {
 			System.out.println("webJAR3D.getQuantilesFromFile: Error reading file " + quantileFileName + "\n" + e);
 		}

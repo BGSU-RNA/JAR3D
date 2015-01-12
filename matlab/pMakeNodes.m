@@ -135,27 +135,38 @@ load PairExemplars
 
 if nargin < 6,
 
-    E = abs(fix(File.Edge));                   % don't distinguish subcategories
-    G = E .* (E < 16) .* (E ~= 0);             % consider basepairing only,
+    E = abs(fix(File.Edge));                    % don't distinguish subcategories
+    G = E .* (E < 16) .* (E ~= 0);              % consider basepairing only,
     % including bifurcated, water-ins
 
+    CanonicalPairs = {'CG','GC','AU','UA','GU','UG'};
+    CanonicalcWW = sparse(zeros(N,N));
+
+    [i,j,k] = find(G == 1);                     % cWW basepairs
+    for ii = 1:length(i),
+        if ismember([File.NT(i(ii)).Base File.NT(j(ii)).Base],CanonicalPairs),
+            CanonicalcWW(i(ii),j(ii)) = 1;
+            CanonicalcWW(j(ii),i(ii)) = 1;
+        end
+    end 
+
     if usenear > 0,
-        G = G +  E .* (E > 100);                 % near basepairs too
+        G = G +  E .* (E > 100);                % near basepairs too
     end
 
     H = (G ~= 0) .* max(File.Crossing == 0, abs(G) == 1) ;
     % 1 for nested pairs, 0 otherwise
 
-    J = abs(G .* (File.Crossing >  0));        % long-range basepairs only
+    J = abs(G .* (File.Crossing >  0));         % long-range basepairs only
 
-    GG = G .* (abs(fix(G)) ~= 9);              % eliminate cSH pairs for hairpins
+    GG = G .* (abs(fix(G)) ~= 9);               % eliminate cSH pairs for hairpins
     GG = G;
     for i = 1:(length(GG(:,1))-1),
-        GG(i,i+1) = 0;                           % eliminate pairs btw adjacent
+        GG(i,i+1) = 0;                          % eliminate pairs btw adjacent
         GG(i+1,i) = 0;
     end
 
-    for a = 1:N,                             % loop through nucleotides
+    for a = 1:N,                                % loop through nucleotides
         k = find(G(a,:));                       % find indices of interacting bases
         [y,L] = sort(E(a,k));                   % sort by edge interaction category
         Interact{a}.Categ = abs(File.Edge(a,k(L)));   % store categories
@@ -187,6 +198,7 @@ if nargin < 6,
     Data.G = G;
     Data.H = H;
     Data.J = J;
+    Data.CanonicalcWW = CanonicalcWW;
 else
     Interact = Data.Interact;
     HasMotif = Data.HasMotif;
@@ -195,6 +207,7 @@ else
     G            = Data.G;
     H            = Data.H;
     J            = Data.J;
+    CanonicalcWW = Data.CanonicalcWW;
 end
 
 % ------------------------------------------ Set up initial values of counters
@@ -220,7 +233,6 @@ Node(n).nextnode  = n+1;                   % index of next node in tree
 Node(n).LeftIndex = a;                     % index of first base on left
 Node(n).RightIndex= B;                     % index of first base on right
 
-
 pMakeNodesProbeForInsertions;              % probe for insertions, each strand
 
 % ---------------------------------------------------------------------------
@@ -244,8 +256,8 @@ while (EndLoop == 0) && (a <= LastNTNumber), % while not the end of the loop,
     t = s+1;                             % next after that
     u = B;                               % end of current known loop
 
-    if (sum(sum(G(t:u,t:u)==1)) > 0) && (sum(sum(G(r:s,r:s)==1)) > 0),
-        % there are nested cWW pairs between r and s and between t and u
+    if (sum(sum(CanonicalcWW(t:u,t:u)==1)) > 0) && (sum(sum(CanonicalcWW(r:s,r:s)==1)) > 0),
+        % there are nested canonical cWW pairs between r and s and between t and u
         % use cWW pairs to avoid pairs between i and i+1 making junctions
 
         if Verbose > 1,

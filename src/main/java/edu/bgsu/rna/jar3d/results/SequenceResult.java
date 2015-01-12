@@ -46,13 +46,20 @@ public interface SequenceResult {
      * @return The query id.
      */
 	public String queryId();
+	
+	/**
+     * Get the correspondences for this sequences.
+     *
+     * @return The correspondences.
+     */
+	public String correspondences();
 
     /**
      * Get the sequence id of the sequence this belongs to.
      *
      * @return The sequence id.
      */
-	public String sequenceId();
+	public int sequenceId();
 
     /**
      * Get the motif Id of the motif that this was scored against.
@@ -67,13 +74,6 @@ public interface SequenceResult {
      * @return The score.
      */
 	public double score();
-
-    /**
-     * Get the percentile of this result.
-     *
-     * @return The percentile.
-     */
-	public double percentile();
 
     /**
      * Get the edit interior distance of this result.
@@ -116,4 +116,11 @@ public interface SequenceResult {
      * @return The loop result.
      */
 	public boolean cutoff();
+	
+	/**
+     * Get a double indicating if the cutoff score.
+     *
+     * @return The loop result.
+     */
+	public double cutoffscore();
 }

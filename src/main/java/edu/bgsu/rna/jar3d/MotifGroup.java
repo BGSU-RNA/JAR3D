@@ -14,11 +14,13 @@ public class MotifGroup implements java.io.Serializable{
 	String loopType;
 	String Sequences;		//Sequences seen in 3d structure - fasta format
 	String Model;			//Model data in text format
-	String Distribution;    //Distribution file in text format
     String[] Signature;
-    Double[] Cutoffs;
-//    int conserved;
-
+    double[] Cutoffs;
+    double Best_Score;
+    
+    public MotifGroup(String folder, String name) {
+    	this(folder, "", name);
+    }
     //Constructor that takes string folder, the full path to the folder with model 
     //and sequence folders, and the name of the group to load
     public MotifGroup(String folder, String modelType, String name) {
@@ -29,7 +31,6 @@ public class MotifGroup implements java.io.Serializable{
     	String modFolder = folder;
     	try{
     		String modelFile = modFolder+fsep+name+"_model.txt";
-    		String distFile = modFolder+fsep+name+"_distribution.txt";
     		String dataFile = modFolder+fsep+name+"_data.txt";
     		String seqFile = modFolder+fsep+name+".fasta";
     		String cutoffFile = modFolder+fsep+name+"_cutoffs.txt";
@@ -77,19 +78,6 @@ public class MotifGroup implements java.io.Serializable{
 //    		String conint = br.readLine();
 //   		conserved = Integer.parseInt(conint);
     		in.close();
-    		//Read distribution information
-    		fstream = new FileInputStream(distFile);
-    		in = new DataInputStream(fstream);
-    		br = new BufferedReader(new InputStreamReader(in));
-    		line = null;
-    		stringBuilder = new StringBuilder();
-    		ls = System.getProperty("line.separator");
-			while((line = br.readLine()) != null){
-				stringBuilder.append( line );
-    	        stringBuilder.append( ls );
-			}
-			Distribution = stringBuilder.toString();
-			in.close();
 			//Read in cutoff values
 			fstream = new FileInputStream(cutoffFile);
     		in = new DataInputStream(fstream);
@@ -97,8 +85,8 @@ public class MotifGroup implements java.io.Serializable{
     		line = br.readLine();
     		String[] Cutoffs_strings = line.split("\\t");
     		int n = Cutoffs_strings.length; 
-    		Cutoffs = new Double[n];
-    		for(int i = 0; i < n; i++){
+    		Cutoffs = new double[n-1];
+    		for(int i = 0; i < n-1; i++){
     			if(Cutoffs_strings[i].equalsIgnoreCase("Inf")){
     				Cutoffs[i] = Double.MAX_VALUE;
     			}else if(Cutoffs_strings[i].equalsIgnoreCase("-Inf")){
@@ -107,6 +95,8 @@ public class MotifGroup implements java.io.Serializable{
     				Cutoffs[i] = Double.valueOf(Cutoffs_strings[i]);
     			}
     		}
+    		Best_Score = Double.valueOf(Cutoffs_strings[n-1]);
+    		br.close();
     	}  catch (Exception e1) {
 			e1.printStackTrace();
 			System.out.println("MotifGroup.MotifGroup:  Could not read model files, check path and name");

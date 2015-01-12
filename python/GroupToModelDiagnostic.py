@@ -19,7 +19,7 @@ def onemodeldiagnostic(motifID,libDirectory,diagDirectory,prevHTML,nextHTML):
     FN = diagDirectory + "\\" + motifID + "_diagnostics.txt"
 
     # read correspondences for the given motif group; there are many such correspondences
-    InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModel, HasName, HasScore = readcorrespondencesfromfile(FN)
+    InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModel, HasName, HasScore, HasInteriorEdit, HasFullEdit, HasCutoffValue, HasCutoffScore, HasAlignmentScoreDeficit = readcorrespondencesfromfile(FN)
     
     print "Read diagnostics from " + FN
     
@@ -92,7 +92,7 @@ def onemodeldiagnostic(motifID,libDirectory,diagDirectory,prevHTML,nextHTML):
     f.write("<br>The correspondence between sequences from 3D structures and the motif group is shown in blue and the JAR3D alignment of the sequences to the motif group is shown in black.  Occasionally the two disagree, in which case the JAR3D alignment is shown in red.")
     f.write("<table>")    
     f.write(alignmentheaderhtml(ModelToColumn,GroupToModel)+'\n')
-    f.write(alignmentrowshtml(DisplayColor,aligdata,HasName,HasScore))
+    f.write(alignmentrowshtml(DisplayColor,aligdata,HasName,HasScore, HasInteriorEdit, HasFullEdit, HasCutoffValue, HasCutoffScore, HasAlignmentScoreDeficit))
     f.write("</table>")
    
     InteractionsFile = libDirectory + "\\" + motifID + "_interactions.txt"

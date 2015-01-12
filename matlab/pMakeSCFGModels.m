@@ -19,6 +19,7 @@ end
 % ----------------------------------- user controls
 
 MakeEmpiricalDistribution = 0; % no longer making percentile scores
+WriteNodeOutput = 0;           % write file telling the individual sequences output by each node.  Slow!
 
 switch Mode,
 case 1                      % normal mode to make models.  do not edit
@@ -267,10 +268,11 @@ for m = 1:length(Filenames),
  if isempty(Node),
 %    mkdir([MotifLibraryPath filesep 'trouble']);
 %    movefile([MotifLibraryPath filesep MotifName '.mat'],[MotifLibraryPath filesep 'trouble' filesep MotifName '.mat']); 
-    fprintf('@@@@@@@@@@@@ Motif %s could not be modeled for some reason\n', MotifName);
+    fprintf('@@@@@@@@@@@@ pMakeSCFGModels: Motif %s could not be modeled for some reason\n', MotifName);
     Filenames(m).modeled = 0;
 
  else
+
     Filenames(m).modeled = 1;
 
     Text = pNodeToSCFGModelText(Node,5);
@@ -631,7 +633,7 @@ for m = 1:length(Filenames),
     % ---------- write out correspondences for alignment diagnostics
 
     if WriteCorrespondences > 0,
-      corresp = edu.bgsu.rna.jar3d.JAR3DMatlab.ModelCorrespondences(FastaFile,ModelFile,MotifName,0);
+      corresp = edu.bgsu.rna.jar3d.JAR3DMatlab.ModelCorrespondences(FastaFile,ModelPath,MotifName,0);
       % ----------- The following lines prevent the program from being stopped
       % ----------- by a crazy Matlab bug.  It is intermittent, but after a call
       % ----------- to JAR3D, it is hell bent on saying

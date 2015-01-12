@@ -47,9 +47,13 @@ def readcorrespondencesfromtext(lines):
   GroupToModel = {}             # positions in motif group to nodes in JAR3D model
   ModelToColumn = {}            # nodes in JAR3D model to display columns
   HasName = {}                  # organism name in FASTA header
-  HasScore = {}                 # score of sequence against JAR3D model
-
   SequenceToModel = {}          # sequence position to node in JAR3D model
+  HasScore = {}                 # score of sequence against JAR3D model
+  HasInteriorEdit = {}          # minimum interior edit distance to 3D instances from the motif group
+  HasFullEdit = {}              # minimum full edit distance to 3D instances from the motif group
+  HasCutoffValue = {}           # cutoff value 'true' or 'false'
+  HasCutoffScore = {}           # cutoff score, 100 is perfect, 0 is accepted, negative means reject
+  HasAlignmentScoreDeficit = {} # alignment score deficit, how far below the best score among 3D instances in this group
 
   for line in lines:
     if re.search("corresponds_to_group",line):
@@ -76,8 +80,25 @@ def readcorrespondencesfromtext(lines):
     elif re.search("has_score",line):
         m = re.match("(.*) (.*) (.*)",line)
         HasScore[m.group(1)] = m.group(3)
+    elif re.search("has_minimum_interior_edit_distance",line):
+        m = re.match("(.*) (.*) (.*)",line)
+        HasInteriorEdit[m.group(1)] = m.group(3)
+    elif re.search("has_minimum_full_edit_distance",line):
+        m = re.match("(.*) (.*) (.*)",line)
+        HasFullEdit[m.group(1)] = m.group(3)
+    elif re.search("has_cutoff_value",line):
+        m = re.match("(.*) (.*) (.*)",line)
+        HasCutoffValue[m.group(1)] = m.group(3)
+    elif re.search("has_cutoff_score",line):
+        m = re.match("(.*) (.*) (.*)",line)
+        HasCutoffScore[m.group(1)] = m.group(3)
+    elif re.search("has_alignment_score_deficit",line):
+        m = re.match("(.*) (.*) (.*)",line)
+        HasAlignmentScoreDeficit[m.group(1)] = m.group(3)
 
-  return InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModel, HasName, HasScore
+
+
+  return InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModel, HasName, HasScore, HasInteriorEdit, HasFullEdit, HasCutoffValue, HasCutoffScore, HasAlignmentScoreDeficit
 
 def readcorrespondencesfromfile(filenamewithpath):
 
@@ -89,40 +110,18 @@ def readcorrespondencesfromfile(filenamewithpath):
     HasName = {}                  # header lines from FASTA file
     SequenceToModel = {}          # sequence position to node in JAR3D model
     HasScore = {}                 # score of sequence against JAR3D model
+    HasInteriorEdit = {}          # minimum interior edit distance to 3D instances from the motif group
+    HasFullEdit = {}              # minimum full edit distance to 3D instances from the motif group
+    HasCutoffValue = {}           # cutoff value 'true' or 'false'
+    HasCutoffScore = {}           # cutoff score, 100 is perfect, 0 is accepted, negative means reject
+    HasAlignmentScoreDeficit = {} # alignment score deficit, how far below the best score among 3D instances in this group
 
     with open(filenamewithpath,"r") as f:
       lines = f.readlines()
 
-    InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModel, HasName, HasScore = readcorrespondencesfromtext(lines)
+    InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModel, HasName, HasScore, HasInteriorEdit, HasFullEdit, HasCutoffValue, HasCutoffScore, HasAlignmentScoreDeficit = readcorrespondencesfromtext(lines)
 
-    return InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModel, HasName, HasScore
-
-def alignmentrowshtml(DisplayColor,aligdata,HasName,HasScore):
-
-  t = ""
-
-  for a in sorted(aligdata.iterkeys(),key = keyforsortbynumber):
-    if HasScore[a] == ".":
-      Score = 0
-      DisplayScore = ""
-    else:
-      Score = float(HasScore[a])
-      DisplayScore = "%0.4f" % Score
-
-    if Score > -1000:                                   # an arbitrary minimum score
-      t = t + '<tr><td><font color = "' + DisplayColor[a]+ '">'+a+' '+HasName[a]+'</td>'
-      for i in range(0,len(aligdata[a])):
-        t = t + '<td><font color = "' + DisplayColor[a] + '">'+aligdata[a][i]+'</td>'
-      t = t + '<td>' + DisplayScore + '</td>'
-      t = t + '</tr>\n'
-    else:
-      t = t + '<tr><td><font color = "' + DisplayColor[a]+ '">'+a+' '+HasName[a]+'</td>\n'
-      for i in range(0,len(aligdata[a])):
-        t = t + '<td>:</td>'
-      t = t + '<td>' + DisplayScore + '</td>'
-      t = t + '</tr>\n'
-
-  return t
+    return InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModel, HasName, HasScore, HasInteriorEdit, HasFullEdit, HasCutoffValue, HasCutoffScore, HasAlignmentScoreDeficit
 
 def alignmentheaderhtml(ModelToColumn,GroupToModel):
 
@@ -148,8 +147,51 @@ def alignmentheaderhtml(ModelToColumn,GroupToModel):
       t = t + 'I'
     t = t + '<br>' + PositionNumber[i+1] + '<br>'
     t = t + '</th>'
-  t = t + '<th><br><br>Alignment<br>score</th>'
+  t = t + '<th><br>In<br>acceptance<br>region</th>'
+  t = t + '<th><br><br>Cutoff<br>score</th>'
+  t = t + '<th><br>Full<br>edit<br>distance</th>'
+  t = t + '<th><br>Interior<br>edit<br>distance</th>'
+  t = t + '<th><br>Alignment<br>score<br>deficit</th>'
   t = t + '</tr>'
+
+  return t
+
+def alignmentrowshtml(DisplayColor,aligdata,HasName,HasScore, HasInteriorEdit, HasFullEdit, HasCutoffValue, HasCutoffScore, HasAlignmentScoreDeficit):
+
+  t = ""
+
+  for a in sorted(aligdata.iterkeys(),key = keyforsortbynumber):
+#    print HasScore
+    if HasScore[a] == ".":
+      Score = 0
+      DisplayScore = ""
+    else:
+      Score = float(HasScore[a])
+      DisplayScore = "%0.4f" % Score
+
+    if Score > -1000:                                   # an arbitrary minimum score
+      t = t + '<tr><td><font color = "' + DisplayColor[a]+ '">'+a+' '+HasName[a]+'</td>'
+      for i in range(0,len(aligdata[a])):
+        t = t + '<td><font color = "' + DisplayColor[a] + '">'+aligdata[a][i]+'</td>'
+      t = t + '<td align="right">' + HasCutoffValue.get(a,'') + '</td>'
+      x = HasCutoffScore.get(a,'')
+      CutoffScore = "%.0f" % float(x) if '.' in x else ''
+      t = t + '<td align="right">' + CutoffScore + '</td>'
+      t = t + '<td align="right">' + HasFullEdit.get(a,'') + '</td>'
+      t = t + '<td align="right">' + HasInteriorEdit.get(a,'') + '</td>'     # '' is the default
+      x = HasAlignmentScoreDeficit.get(a,'')
+      Deficit = "%.2f" % float(x) if '.' in x else ''
+      t = t + '<td align="right">' + Deficit + '</td>'     # '' is the default
+    else:
+      t = t + '<tr><td><font color = "' + DisplayColor[a]+ '">'+a+' '+HasName[a]+' (no alignment possible)</td>\n'
+      for i in range(0,len(aligdata[a])):
+        t = t + '<td></td>'
+      t = t + '<td align="right">' + HasCutoffValue.get(a,'') + '</td>'
+      t = t + '<td></td>'
+      t = t + '<td align="right">' + HasFullEdit.get(a,'') + '</td>'
+      t = t + '<td align="right">' + HasInteriorEdit.get(a,'') + '</td>'     # '' is the default
+      t = t + '<td></td>'     # '' is the default
+    t = t + '</tr>\n'
 
   return t
 
