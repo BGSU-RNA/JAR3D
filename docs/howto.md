@@ -81,15 +81,19 @@ Here is an explanation of each field:
 
 6. **medianScore** is the median alignment score against this model across all sequences
 
-7. **meanInteriorEditDistance** refers to the edit distance between sequences in the provided fasta file and known instances of the motif from 3D structure; interior means that flanking cWW pairs are not included in the calculation of the edit distance, only the interior nucleotides. For each sequence in the fasta file, the minimum interior edit distance across all known instances from 3D is computed, then this is averaged over the sequences in the fasta file to give the meanInteriorEditDistance. So this could be called the meanMinimumInteriorEditDistance.
+7. **meanDeficit** is the average alignment score deficit; for a single sequence, the deficit is the difference between the highest alignment score over all 3D instances of the motif and the score of the current sequence
 
-8. **medianInteriorEditDistance** is similar, but the median of the minimum edit distances is reported
+8. **medianDeficit** is the median alignment score deficit
 
-9. **meanFullEditDistance** is similar, but includes the sequence of the flanking cWW basepairs in the calculation of the edit distance
+9. **meanInteriorEditDistance** refers to the edit distance between sequences in the provided fasta file and known instances of the motif from 3D structure; interior means that flanking cWW pairs are not included in the calculation of the edit distance, only the interior nucleotides. For each sequence in the fasta file, the minimum interior edit distance across all known instances from 3D is computed, then this is averaged over the sequences in the fasta file to give the meanInteriorEditDistance. So this could be called the meanMinimumInteriorEditDistance.
 
-10. **medianFullEditDistance** uses the median of the minimum edit distances
+10. **medianInteriorEditDistance** is similar, but the median of the minimum edit distances is reported
 
-11. **rotation** is 0 for hairpin loops, 0 or 1 for internal loops, depending on whether the sequences matched the model better with the given strand order (rotation 0) or with the strands reversed (rotation 1)
+11. **meanFullEditDistance** is similar, but includes the sequence of the flanking cWW basepairs in the calculation of the edit distance
+
+12. **medianFullEditDistance** uses the median of the minimum edit distances
+
+13. **rotation** is 0 for hairpin loops, 0 or 1 for internal loops, depending on whether the sequences matched the model better with the given strand order (rotation 0) or with the strands reversed (rotation 1)
 
 ## Explanation of JAR3D sequence-specific output
 
@@ -113,11 +117,13 @@ Here is an explanation of each field on each line:
 
 6. **score** is the alignment score, the maximum log probability score returned by the CYK algorithm when the sequence is aligned to the SCFG/MRF model
 
-7. **interiorEditDistance**  is the minimum edit distance between the non-flanking bases of the input sequence and each of the sequences in the current motif group, known from 3D
+7. **deficit** is the difference between the highest alignment score over all 3D instances of the motif and the score of the current sequence
 
-8. **fullEditDistance** is similar, but includes the flanking cWW basepairs in the calculation of edit distance
+8. **interiorEditDistance**  is the minimum edit distance between the non-flanking bases of the input sequence and each of the sequences in the current motif group, known from 3D
 
-9. **rotation** is 0 for hairpin loops, 0 or 1 for internal loops, depending whether the sequences in the fasta file, as a whole, match the model better in the original strand order or with the strands reversed.
+9. **fullEditDistance** is similar, but includes the flanking cWW basepairs in the calculation of edit distance
+
+10. **rotation** is 0 for hairpin loops, 0 or 1 for internal loops, depending whether the sequences in the fasta file, as a whole, match the model better in the original strand order or with the strands reversed.
 
 ## Aligning sequences to a specific JAR3D motif group
 
