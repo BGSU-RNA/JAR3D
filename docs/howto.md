@@ -8,7 +8,7 @@
 
 ## Input file format
 
-Use [FASTA format](http://en.wikipedia.org/wiki/FASTA_format), alternating a header line starting with `>` and a line with one sequence of a hairpin or internal loop. The break between strands in IL should be indicated by the `*` character. Include flanking Watson-Crick basepairs *AU*, *GC*, and *GU* in the sequence, since this is how hairpins and internal loops are extracted from 3D structures.
+Use [FASTA format](http://en.wikipedia.org/wiki/FASTA_format), alternating a header line starting with `>` and a line with one sequence of a hairpin or internal loop. The break between strands in IL should be indicated by the `*` character. Include flanking Watson-Crick basepairs *AU*, *GC*, and *GU* in the sequence, since this is how hairpins and internal loops are extracted from 3D structures. The only allowed characters in each line are A, C, G, U, * and -.  Leave no blank lines.
 
 **Examples:**
 
