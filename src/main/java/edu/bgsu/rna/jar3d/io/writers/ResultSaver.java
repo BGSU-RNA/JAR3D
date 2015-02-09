@@ -23,5 +23,5 @@ public interface ResultSaver {
 	
 	public void markAllDone(String queryId) throws SaveFailed;
 
-	public void saveSequenceResults(List<SequenceResult> results, Query query) throws SaveFailed;
+	public void saveSequenceResults(List<SequenceResult> results, Query query, String Loop) throws SaveFailed;
 }

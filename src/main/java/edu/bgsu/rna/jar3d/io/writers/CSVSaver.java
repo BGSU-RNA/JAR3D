@@ -35,6 +35,8 @@ public class CSVSaver extends AbstractResultsSaver {
 		String motifId = results.modelId();
 		String meanScore = format(results.meanScore());
 		String medianScore = format(results.medianScore());
+		String meanDeficit = format(results.meanDeficit());
+		String medianDeficit = format(results.medianDeficit());
 		String meanInteriorEditDistance = format(results.meanInteriorEditDistance());
 		String medianInteriorEditDistance = format(results.medianInteriorEditDistance());
 		String meanFullEditDistance = format(results.meanFullEditDistance());
@@ -43,7 +45,7 @@ public class CSVSaver extends AbstractResultsSaver {
 		String meanCutoff = format(results.meanCutoff());
 		String meanCutoffScore = format(results.meanCutoffScore());
 		
-		String line = join(loopId, motifId, meanCutoff, meanCutoffScore, meanScore, medianScore,
+		String line = join(loopId, motifId, meanCutoff, meanCutoffScore, meanScore, medianScore, meanDeficit, medianDeficit, 
 				meanInteriorEditDistance, medianInteriorEditDistance, meanFullEditDistance, medianFullEditDistance, rotation);
 
 		try {
@@ -56,15 +58,16 @@ public class CSVSaver extends AbstractResultsSaver {
 
 	private void saveSequenceResults(String loopName, SequenceResult result) throws SaveFailed {
 		//need to replace commas so file can be read as a csv
-		String sequenceId = String.valueOf(result.sequenceId());
+		String identifier = result.sequence().getId();
 		String motifId = result.motifId();
 		String score = format(result.score());
+		String deficit = format(result.deficit());
 		String interiorEditDistance = Integer.valueOf(result.InteriorEditDistance()).toString();
 		String fullEditDistance = Integer.valueOf(result.FullEditDistance()).toString();
 		String rotated = format(result.bestRotation());
 		String cutoff = String.valueOf(result.cutoff());
 		String cutoffscore = String.valueOf(result.cutoffscore());
-		String line = join(loopName, sequenceId, motifId, cutoff, cutoffscore, score, interiorEditDistance, fullEditDistance, rotated);
+		String line = join(loopName, identifier, motifId, cutoff, cutoffscore, score, deficit, interiorEditDistance, fullEditDistance, rotated);
 		try {
 			sequenceWriter.write(line);
 			sequenceWriter.newLine();
@@ -112,11 +115,11 @@ public class CSVSaver extends AbstractResultsSaver {
 
 
 	public void writeHeader() throws SaveFailed {
-		String sequenceLine = join("filename", "sequenceId", "motifId", "passedCutoff", "meanCutoffScore", 
-				"score", "interiorEditDistance", "fullEditDistance", "rotation");
+		String sequenceLine = join("filename", "identifier", "motifId", "passedCutoff", "cutoffScore", 
+				"score", "deficit", "interiorEditDistance", "fullEditDistance", "rotation");
 		String loopLine = join("filename", "motifId", "%passedCutoff", "meanCutoffScore", "meanScore", "medianScore",
-				"meanInteriorEditDistance", "medianInteriorEditDistance", "meanFullEditDistance", 
-				"medianFullEditDistance", "rotation");
+				"meanDeficit", "medianDeficit", "meanInteriorEditDistance", "medianInteriorEditDistance", 
+				"meanFullEditDistance", "medianFullEditDistance", "rotation");
 		
 		try {
 			sequenceWriter.write(sequenceLine);
@@ -129,7 +132,7 @@ public class CSVSaver extends AbstractResultsSaver {
 
 	}
 
-	public void saveSequenceResults(List<SequenceResult> results, Query query)
+	public void saveSequenceResults(List<SequenceResult> results, Query query, String LoopID)
 			throws SaveFailed {
 		// TODO Auto-generated method stub
 		

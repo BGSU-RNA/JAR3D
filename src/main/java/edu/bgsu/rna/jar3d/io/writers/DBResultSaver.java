@@ -30,17 +30,23 @@ public class DBResultSaver extends AbstractResultsSaver {
     
     private PreparedStatement getSequenceResult;
     
+    private PreparedStatement updateCorrQuery;
+    
+    private PreparedStatement markCorrFailure;
+    
     private Timestamp now;
 	
 	public DBResultSaver(String username, String password, String dbConnection) throws SQLException {
         connection = DriverManager.getConnection(dbConnection, username, password);
         String loopResultSQL = "insert into jar3d_results_by_loop (query_id, loop_id, motif_id, cutoff_percent, mean_cutoff_score, meanscore, meaninterioreditdist, meanfulleditdist, medianscore, medianinterioreditdist, medianfulleditdist, signature, rotation, correspondences) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-        String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (query_id, seq_id, loop_id, cutoff, score, interioreditdist, fulleditdist, rotation, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (query_id, seq_id, loop_id, cutoff, score, interioreditdist, fulleditdist, rotation, cutoff_score, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         String correspondenceResultSQL = "insert into jar3d_node_position_results (result_instance_id, sequence_position, node, node_position, is_insertion) values(?, ?, ?, ?, ?)";
         String updateLoopSQL = "UPDATE jar3d_query_info SET status=1, time_completed=? WHERE query_id = ?;";
         String updateSequenceSQL = "UPDATE jar3d_query_sequences SET status=1, time_completed=? WHERE query_id = ? and seq_id = ? and loop_id = ?;";
         String failureSQL = "UPDATE jar3d_query_info SET status=-1, time_completed = ? WHERE query_id = ?;";
         String loopResultIDSQL = "SELECT * FROM jar3d_results_by_loop_instance WHERE query_id = ? AND seq_id = ? AND loop_id = ? AND motif_id = ?;";
+        String loopQuerySQL = "UPDATE jar3d_loop_results_queue SET status=1, time_finished = ? WHERE query_id = ? AND loop_id = ? AND motif_group = ?;";
+        String loopQueryFailSQL = "UPDATE jar3d_loop_results_queue SET status=-1, time_finished = ? WHERE query_id = ? AND loop_id = ? AND motif_group = ?;";
         insertLoopResult = connection.prepareStatement(loopResultSQL);
         insertSequenceResult = connection.prepareStatement(sequenceResultSQL);
         insertCorrespondenceResult = connection.prepareStatement(correspondenceResultSQL);
@@ -48,6 +54,9 @@ public class DBResultSaver extends AbstractResultsSaver {
         updateSequenceQuery = connection.prepareStatement(updateSequenceSQL);
         getSequenceResult = connection.prepareStatement(loopResultIDSQL);
         markLoopFailure = connection.prepareStatement(failureSQL);
+        updateCorrQuery = connection.prepareStatement(loopQuerySQL);
+        markCorrFailure = connection.prepareStatement(loopQueryFailSQL);
+        
         now = new Timestamp(System.currentTimeMillis());
 	}
 	
@@ -113,7 +122,7 @@ public class DBResultSaver extends AbstractResultsSaver {
 	 * @param result The results of analyzing a single sequence.
 	 * @throws SaveFailed If any problem occurs. s
 	 */
-	private void saveSequenceResult(SequenceResult result, Query query) throws SaveFailed {
+	private void saveSequenceResult(SequenceResult result, Query query, String loopID) throws SaveFailed {
 		int cutoff=0;
 		if(result.cutoff()){
 			cutoff=1;
@@ -121,17 +130,18 @@ public class DBResultSaver extends AbstractResultsSaver {
 		try {
 			insertSequenceResult.setString(1, query.getId());
 			insertSequenceResult.setInt(2, result.sequenceId());
-			insertSequenceResult.setInt(3, (int)result.loopId());
+			insertSequenceResult.setInt(3, Integer.parseInt(loopID));
 			insertSequenceResult.setInt(4, cutoff);
 			insertSequenceResult.setFloat(5, (float)Math.max(Math.min(result.score(), 9999),-9999));
 			insertSequenceResult.setInt(6, Math.max(Math.min(result.InteriorEditDistance(),9999),-9999));
 			insertSequenceResult.setInt(7, result.FullEditDistance());
 			insertSequenceResult.setInt(8, result.bestRotation());
-			insertSequenceResult.setString(9, result.motifId());
+			insertSequenceResult.setFloat(9, (float)Math.max(Math.min(result.cutoffscore(),9999),-9999));
+			insertSequenceResult.setString(10, result.motifId());
 			updateSequenceQuery.setTimestamp(1, now);
 			updateSequenceQuery.setString(2, query.getId());
 			updateSequenceQuery.setInt(3, result.sequenceId());
-			updateSequenceQuery.setInt(4, (int)result.loopId());
+			updateSequenceQuery.setInt(4, Integer.parseInt(loopID));
 		} catch (SQLException e) {
 			throw new SaveFailed("Could not generate save sequence sql.", e);
 		}
@@ -155,10 +165,31 @@ public class DBResultSaver extends AbstractResultsSaver {
 	 * @throws SaveFailed If any problem occurs. s
 	 */
 	
-	public void saveSequenceResults(List<SequenceResult> results, Query query) throws SaveFailed {
-		for(SequenceResult sequenceResult: results) {
-			saveSequenceResult(sequenceResult, query);
-			saveSequenceCorrespondences(sequenceResult, query);
+	public void saveSequenceResults(List<SequenceResult> results, Query query, String loopID) throws SaveFailed {
+		try{
+			for(SequenceResult sequenceResult: results) {
+				saveSequenceResult(sequenceResult, query, loopID);
+				saveSequenceCorrespondences(sequenceResult, query, loopID);
+			}
+		}catch(SaveFailed e){
+			try {
+				markCorrFailure.setTimestamp(1, now);
+				markCorrFailure.setString(2, query.getId());
+				markCorrFailure.setLong(3, Long.parseLong(loopID));
+				markCorrFailure.setString(4, results.get(0).motifId());
+				markCorrFailure.executeUpdate();
+			} catch(Exception e2) {
+				throw new SaveFailed("Could not mark failure of: " + query.getId(), e);
+			}
+		}
+		try {
+			updateCorrQuery.setTimestamp(1, now);
+			updateCorrQuery.setString(2, query.getId());
+			updateCorrQuery.setLong(3, Long.parseLong(loopID));
+			updateCorrQuery.setString(4, results.get(0).motifId());
+			updateCorrQuery.executeUpdate();
+		} catch(Exception e) {
+			throw new SaveFailed("Could not mark query as done: " + query.getId(), e);
 		}
 	}
 	
@@ -168,10 +199,10 @@ public class DBResultSaver extends AbstractResultsSaver {
 	 * @param result The results of analyzing a single sequence.
 	 * @throws SaveFailed If any problem occurs. s
 	 */
-	public void saveSequenceCorrespondences(SequenceResult result, Query query) throws SaveFailed {
+	public void saveSequenceCorrespondences(SequenceResult result, Query query, String loopID) throws SaveFailed {
 		String query_id = query.getId();
 		int seq_id = result.sequenceId();
-		long loop_id = result.loopId();
+		long loop_id = Long.parseLong(loopID);
 		String motif_id = result.motifId();
 		ResultSet seq_result;
 		int res_id;

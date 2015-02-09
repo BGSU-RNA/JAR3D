@@ -19,12 +19,16 @@ public final class BasicLoopResult implements LoopResult {
 	private double medianInteriorEditDistance;
 	
 	private double meanScore;
+	
+	private double meanDeficit;
 
 	private double meanFullEditDistance;
 	
 	private double medianFullEditDistance;
 
 	private double medianScore;
+	
+	private double medianDeficit;
 	
 	private double meanCutoff;
 	
@@ -58,6 +62,7 @@ public final class BasicLoopResult implements LoopResult {
 	public BasicLoopResult(String modelId, int rotation,
 			String signature, 
 			double medianScore, double meanScore,
+			double meanDeficit, double medianDeficit, 
 			double meanInteriorEditDistance, double medianInteriorEditDistance,
 			double meanFullEditDistance, double medianFullEditDistance,
 			double meanCutoff, double meanCutoffScore) {
@@ -67,6 +72,8 @@ public final class BasicLoopResult implements LoopResult {
 		this.signature = signature;
 		this.medianScore = medianScore;
 		this.meanScore = meanScore;
+		this.medianDeficit = medianDeficit;
+		this.meanDeficit = meanDeficit; 
 		this.meanInteriorEditDistance = meanInteriorEditDistance;
 		this.medianInteriorEditDistance = medianInteriorEditDistance;
 		this.meanFullEditDistance = meanFullEditDistance;
@@ -83,6 +90,7 @@ public final class BasicLoopResult implements LoopResult {
 	private void computeData() {
 		int numSeqs = sequenceResults.size();
 		double[] scores = new double[numSeqs];
+		double[] deficits = new double[numSeqs];
 		double[] cutoffscores = new double[numSeqs];
 		int[] fullEdDists = new int[numSeqs];
 		int[] interiorEdDists = new int[numSeqs];
@@ -93,6 +101,7 @@ public final class BasicLoopResult implements LoopResult {
 			SequenceResult seqR = sequenceResults.get(i);
 			seqR.setLoopResult(this);
 			scores[i] = seqR.score();
+			deficits[i] = seqR.deficit();
 			interiorEdDists[i] = seqR.InteriorEditDistance();
 			fullEdDists[i] = seqR.FullEditDistance();
 			cutoffs[i] = seqR.cutoff();
@@ -101,6 +110,8 @@ public final class BasicLoopResult implements LoopResult {
 
 		this.medianScore = ArrayMath.median(scores);
 		this.meanScore = ArrayMath.mean(scores);
+		this.medianDeficit = ArrayMath.median(deficits);
+		this.meanDeficit = ArrayMath.mean(deficits);
 		this.meanInteriorEditDistance = ArrayMath.mean(interiorEdDists);
 		this.medianInteriorEditDistance = ArrayMath.median(interiorEdDists);
 		this.meanFullEditDistance = ArrayMath.mean(fullEdDists);
@@ -171,5 +182,13 @@ public final class BasicLoopResult implements LoopResult {
 	
 	public double meanCutoffScore(){
 		return meanCutoffScore;
+	}
+	
+	public double meanDeficit(){
+		return meanDeficit;
+	}
+	
+	public double medianDeficit(){
+		return meanDeficit;
 	}
 }

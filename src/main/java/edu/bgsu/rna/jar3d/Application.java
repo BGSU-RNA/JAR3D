@@ -130,7 +130,7 @@ public class Application {
 
 		
 		for(Loop loop: query) {
-			List<LoopResult> results = motifParse(modelNames, groupData, loop); 
+			List<LoopResult> results = motifParse(modelNames, groupData, loop, true); 
 			allResults.add(results);
 		}
 		return allResults;
@@ -176,9 +176,9 @@ public class Application {
 		for(Loop loop: query) {
 			String type = loop.getLoopType().getShortName();
 			if(type.equals("IL")){
-				results = motifParse(ILModelNames, ILGroupData, loop); 
+				results = motifParse(ILModelNames, ILGroupData, loop, false); 
 			}else {
-				results = motifParse(HLModelNames, HLGroupData, loop);
+				results = motifParse(HLModelNames, HLGroupData, loop, false);
 			}
 			saver.save(results);
 		}
@@ -223,7 +223,7 @@ public class Application {
 		
 		results = Alignment.doSingleDBQuery(loop, Group, model, rangeLimit);
 		
-		saver.saveSequenceResults(results,query);
+		saver.saveSequenceResults(results,query,loopNumber);
 	}
 	
 	/**
@@ -234,7 +234,7 @@ public class Application {
 	 * @param loop The loop.
 	 * @return Results of running the loop.
 	 */
-	private List<LoopResult> motifParse(Vector<String> modelNames, HashMap<String,MotifGroup> groupData, Loop loop) {
+	private List<LoopResult> motifParse(Vector<String> modelNames, HashMap<String,MotifGroup> groupData, Loop loop, boolean saveSeqRes) {
 		List<LoopResult> result = new ArrayList<LoopResult>();
 
 		if (modelNames.size() == 0) {
@@ -252,7 +252,7 @@ public class Application {
 		}
 */
 		
-		result = Alignment.doLoopDBQuery(loop, modelNames, groupData, rangeLimit);
+		result = Alignment.doLoopDBQuery(loop, modelNames, groupData, rangeLimit, saveSeqRes);
 
 		return result;
 	}
@@ -278,9 +278,14 @@ public class Application {
 	 * @throws SaveFailed
 	 * @throws QueryLoadingFailed
 	 */
+	
 	public void runAndSave(String queryId, String base) throws SaveFailed, QueryLoadingFailed {
 		saver.writeHeader();
 		List<List<LoopResult>> results = this.runQuery(queryId, base);
+		for(List<LoopResult> res: results) {
+			saver.save(res);
+		}
+		saver.cleanUp();
 	}
 	
 	/**
