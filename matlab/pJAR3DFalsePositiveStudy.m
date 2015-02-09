@@ -422,7 +422,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
       CutoffScore = zeros(size(MLPS));
       for mm = 1:length(GroupData),
         for r = 1:Rotations,
-          Features = [MLPS(:,mm,r) CoreEditDistance(:,mm,r) Percentile(:,mm,r)];
+          Features = [MLPS(:,mm,r) CoreEditDistance(:,mm,r)];
           [CutoffMet(:,mm,r) CutoffScore(:,mm,r)] = pModelSpecificCutoff(GroupData(mm),Features,Params);
         end
       end
@@ -456,7 +456,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
       PP.CutoffType = 2;                              % generic cutoff, for comparison
       for mm = 1:length(GroupData),
         for r = 1:Rotations,
-          Features = [MLPS(:,mm,r) CoreEditDistance(:,mm,r) Percentile(:,mm,r)];
+          Features = [MLPS(:,mm,r) CoreEditDistance(:,mm,r)];
           GenericCutoffMet(:,mm,r) = pModelSpecificCutoff(GroupData(mm),Features,PP);
         end
       end
