@@ -1080,7 +1080,6 @@ public class Alignment {
 	    	{
 	    		modelScore = rmodelScore;
 	    		modelScores = rmodelScores;
-	    		sData = rsData;
 	    		reversed = 1;
 	    	}
 	    	else {
@@ -1105,7 +1104,12 @@ public class Alignment {
 	    
 	    List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
 		for(int m = 0; m < sData.size() - 1; m++) {
-			SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], deficits[m], InteriorMinDist[m], FullMinDist[m],reversed,cutoffs[m],cutoffscores[m],sData.get(m + 1).correspondences);
+			SequenceResult seqR;
+			if(reversed == 1){
+				seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], deficits[m], InteriorMinDist[m], FullMinDist[m],reversed,cutoffs[m],cutoffscores[m],rsData.get(m + 1).correspondences);
+			}else{
+				seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], deficits[m], InteriorMinDist[m], FullMinDist[m],reversed,cutoffs[m],cutoffscores[m],sData.get(m + 1).correspondences);
+			}
 			seqRes.add(seqR);
 		}
 		

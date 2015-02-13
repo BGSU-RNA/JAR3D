@@ -228,14 +228,14 @@ public class DBResultSaver extends AbstractResultsSaver {
 			String[] parts = line.split("_");
 			int seq_pos = Integer.parseInt(parts[3]);
 			int node = Integer.parseInt(parts[8]);
-			int node_pos = Integer.parseInt(parts[10]);
+			String node_pos = parts[10];
 			boolean insertion = false;
 			if(line.contains("Insertion")){insertion = true;}
 			try{
 				insertCorrespondenceResult.setInt(1, res_id);
 				insertCorrespondenceResult.setInt(2, seq_pos);
 				insertCorrespondenceResult.setInt(3, node);
-				insertCorrespondenceResult.setInt(4, node_pos);
+				insertCorrespondenceResult.setString(4, node_pos);
 				insertCorrespondenceResult.setBoolean(5, insertion);
 			}catch (SQLException e) {
 				throw new SaveFailed("Could not generate correpspondences SQL.", e);
