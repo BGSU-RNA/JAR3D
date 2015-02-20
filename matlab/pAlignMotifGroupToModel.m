@@ -22,20 +22,20 @@ for n = 1:length(Node),
     if n < length(Node),
       if Node(n+1).LeftLetter == '*',
         i = min(Node(n).LeftIndex);
-        T{r} = sprintf('%s_Position_%d_*_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i-1, ModelName, n, 1);
+        T{r} = sprintf('%s_Column_%d-*_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i-1, ModelName, n, 1);
         r = r + 1;
         i = Node(n).RightIndex;
-        T{r} = sprintf('%s_Position_*_%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i+1, ModelName, n, 2);
+        T{r} = sprintf('%s_Column_*-%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i+1, ModelName, n, 2);
         r = r + 1;
       else
         if length(Node(n).leftLengthDist) > 1,  % has a non-zero insertion probability
           i = min(Node(n).LeftIndex);
-          T{r} = sprintf('%s_Position_%d_%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i-1, i, ModelName, n, 1);
+          T{r} = sprintf('%s_Column_%d-%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i-1, i, ModelName, n, 1);
           r = r + 1;
         end
         if length(Node(n).rightLengthDist) > 1, % has a non-zero insertion probability
           i = Node(n).RightIndex;
-          T{r} = sprintf('%s_Position_%d_%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i, i+1, ModelName, n, 2);
+          T{r} = sprintf('%s_Column_%d-%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i, i+1, ModelName, n, 2);
           r = r + 1;
         end
       end
@@ -44,33 +44,33 @@ for n = 1:length(Node),
   if strcmp(Node(n).type,'Fixed'),
     if length(Node(n).leftLengthDist) > 1,
       i = Node(n).LeftIndex;
-      T{r} = sprintf('%s_Position_%d corresponds_to_JAR3D %s_Node_%d_Position_%d', MatFileName, i, ModelName, n, 1);
+      T{r} = sprintf('%s_Column_%d corresponds_to_JAR3D %s_Node_%d_Position_%d', MatFileName, i, ModelName, n, 1);
       r = r + 1;
     elseif length(Node(n).rightLengthDist) > 1,
       i = Node(n).RightIndex;
-      T{r} = sprintf('%s_Position_%d corresponds_to_JAR3D %s_Node_%d_Position_%d', MatFileName, i, ModelName, n, 2);
+      T{r} = sprintf('%s_Column_%d corresponds_to_JAR3D %s_Node_%d_Position_%d', MatFileName, i, ModelName, n, 2);
       r = r + 1;
     end
   end
   if strcmp(Node(n).type,'Basepair'),
     i = Node(n).LeftIndex;
-    T{r} = sprintf('%s_Position_%d corresponds_to_JAR3D %s_Node_%d_Position_%d', MatFileName, i, ModelName, n, 1);
+    T{r} = sprintf('%s_Column_%d corresponds_to_JAR3D %s_Node_%d_Position_%d', MatFileName, i, ModelName, n, 1);
     r = r + 1;
     if Node(n+1).LeftLetter == '*',
-      T{r} = sprintf('%s_Position_%d_*_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i, ModelName, n, 1);
+      T{r} = sprintf('%s_Column_%d-*_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i, ModelName, n, 1);
       r = r + 1;
     else
-      T{r} = sprintf('%s_Position_%d_%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i, i+1, ModelName, n, 1);
+      T{r} = sprintf('%s_Column_%d-%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i, i+1, ModelName, n, 1);
       r = r + 1;
     end
     i = Node(n).RightIndex;
-    T{r} = sprintf('%s_Position_%d corresponds_to_JAR3D %s_Node_%d_Position_%d', MatFileName, i, ModelName, n, 2);
+    T{r} = sprintf('%s_Column_%d corresponds_to_JAR3D %s_Node_%d_Position_%d', MatFileName, i, ModelName, n, 2);
     r = r + 1;
     if Node(n+1).LeftLetter == '*',
-      T{r} = sprintf('%s_Position_*_%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i, ModelName, n, 2);
+      T{r} = sprintf('%s_Column_*-%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i, ModelName, n, 2);
       r = r + 1;
     else
-      T{r} = sprintf('%s_Position_%d_%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i-1, i, ModelName, n, 2);
+      T{r} = sprintf('%s_Column_%d-%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i-1, i, ModelName, n, 2);
       r = r + 1;
     end
   end
@@ -78,10 +78,10 @@ for n = 1:length(Node),
     j = [Node(n).LeftIndex(Node(n).Left) Node(n).RightIndex(Node(n).Right)];
     for jj = 1:length(j),
       i = j(jj);
-      T{r} = sprintf('%s_Position_%d corresponds_to_JAR3D %s_Node_%d_Position_%d', MatFileName, i, ModelName, n, jj);
+      T{r} = sprintf('%s_Column_%d corresponds_to_JAR3D %s_Node_%d_Position_%d', MatFileName, i, ModelName, n, jj);
       r = r + 1;
       if jj ~= length(Node(n).Left) && jj < length(j),
-        T{r} = sprintf('%s_Position_%d_%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_%d_Insertion', MatFileName, i, i+1, ModelName, n, jj, jj+1);
+        T{r} = sprintf('%s_Column_%d-%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d-%d_Insertion', MatFileName, i, i+1, ModelName, n, jj, jj+1);
         r = r + 1;
       end
     end
@@ -90,10 +90,10 @@ for n = 1:length(Node),
     j = Node(n).MiddleIndex;
     for jj = 1:length(j),
       i = j(jj);
-      T{r} = sprintf('%s_Position_%d corresponds_to_JAR3D %s_Node_%d_Position_%d', MatFileName, i, ModelName, n, jj);
+      T{r} = sprintf('%s_Column_%d corresponds_to_JAR3D %s_Node_%d_Position_%d', MatFileName, i, ModelName, n, jj);
       r = r + 1;
       if jj < length(j),
-        T{r} = sprintf('%s_Position_%d_%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_%d_Insertion', MatFileName, i, i+1, ModelName, n, jj, jj+1);
+        T{r} = sprintf('%s_Column_%d-%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d-%d_Insertion', MatFileName, i, i+1, ModelName, n, jj, jj+1);
         r = r + 1;
       end
     end
