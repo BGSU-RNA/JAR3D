@@ -831,16 +831,20 @@ public class Alignment {
 		}
 		return scores;
 	}
-
 	public static List<LoopResult> doLoopDBQuery(Loop loop, List<String> modNames, HashMap<String, MotifGroup> groupData,
 			int range) {
+		return doLoopDBQuery(loop, modNames, groupData, range, false);
+	}
+
+	public static List<LoopResult> doLoopDBQuery(Loop loop, List<String> modNames, HashMap<String, MotifGroup> groupData,
+			int range, boolean saveSeqRes) {
 
 		List<Sequence> sData = loop.getSequences();
 		Query query = loop.getQuery();
 		
 		// 2013-11-05 CLZ Last argument cannot be null, must be something like "IL"
 		// 2013-11-05 CLZ Last argument seems to be reliably obtained from loop
-		List<LoopResult> results = doLoopDBQuery((int)loop.getId(), query, sData, modNames, groupData, range, loop, loop.getTypeString());
+		List<LoopResult> results = doLoopDBQuery((int)loop.getId(), query, sData, modNames, groupData, range, loop, loop.getTypeString(), saveSeqRes);
 
 		for(LoopResult result: results) {
 			result.setLoop(loop);
@@ -860,10 +864,17 @@ public class Alignment {
 		
 		return results;
 	}
+	
+	//Takes a JAR3D query and submits results to MySQL database
+		public static List<LoopResult> doLoopDBQuery(int loopID, Query query, List<Sequence> sData, List<String> modNames,
+				HashMap<String, MotifGroup> groupData, int range, Loop loop, String type) {
+			return doLoopDBQuery(loopID, query, sData, modNames,
+					groupData, range, loop, type, false);
+		}
 
 	//Takes a JAR3D query and submits results to MySQL database
 	public static List<LoopResult> doLoopDBQuery(int loopID, Query query, List<Sequence> sData, List<String> modNames,
-			HashMap<String, MotifGroup> groupData, int range, Loop loop, String type) {
+			HashMap<String, MotifGroup> groupData, int range, Loop loop, String type, Boolean saveSeqRes) {
 
 		// TODO 2013-11-07 CLZ generalize this so that it can apply to HL, IL, 3WJ, 4WJ, etc.
 		// Currently there is only space for rotations 0 and 1
@@ -974,34 +985,44 @@ public class Alignment {
 					groupScores[col-1] = rmodelScoreMat[index][col];
 				}
 			}
+			
+			double[] deficits = getDeficits(group.Best_Score, groupScores);
 
 			int[] InteriorMinDist = getMinEditDistance(group,sData,type,rotation,true);
 			int[] FullMinDist = getMinEditDistance(group,sData,type,rotation,false);
 			
 			boolean[] cutoffs = getCutoffs(group,groupScores,InteriorMinDist);
 			double[] cutoffscores = getCutoffScores(group,groupScores,InteriorMinDist);
-			
+
 			if (true) {
-/*				List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
-				for(int m = 0; m < sData.size() - 1; m++) {
-					SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], InteriorMinDist[m], FullMinDist[m],rotation,cutoffs[m],cutoffscores[m]);
-					seqRes.add(seqR);
+				LoopResult loopR;
+				if(saveSeqRes){
+					List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
+					for(int m = 0; m < sData.size() - 1; m++) {
+						SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], deficits[m], InteriorMinDist[m], FullMinDist[m],rotation,cutoffs[m],cutoffscores[m]);
+						seqRes.add(seqR);
+					}
+					loopR = new BasicLoopResult(groupName, rotation, sig, seqRes);
 				}
-*/				
-				double medianScore = ArrayMath.median(groupScores);
-				double meanScore = ArrayMath.mean(groupScores);
-				double meanInteriorEditDistance = ArrayMath.mean(InteriorMinDist);
-				double medianInteriorEditDistance = ArrayMath.median(InteriorMinDist);
-				double meanFullEditDistance = ArrayMath.mean(FullMinDist);
-				double medianFullEditDistance = ArrayMath.median(FullMinDist);
-				double meanCutoff = ArrayMath.mean(cutoffs);
-				double meanCutoffScore = ArrayMath.mean(cutoffscores);
-				
-				LoopResult loopR = new BasicLoopResult(groupName, rotation, sig,
-						medianScore, meanScore,
-						meanInteriorEditDistance, medianInteriorEditDistance,
-						meanFullEditDistance, medianFullEditDistance,
-						meanCutoff, meanCutoffScore);
+				else{
+					double medianScore = ArrayMath.median(groupScores);
+					double meanScore = ArrayMath.mean(groupScores);
+					double meanDeficit = ArrayMath.mean(deficits);
+					double medianDeficit = ArrayMath.median(deficits);
+					double meanInteriorEditDistance = ArrayMath.mean(InteriorMinDist);
+					double medianInteriorEditDistance = ArrayMath.median(InteriorMinDist);
+					double meanFullEditDistance = ArrayMath.mean(FullMinDist);
+					double medianFullEditDistance = ArrayMath.median(FullMinDist);
+					double meanCutoff = ArrayMath.mean(cutoffs);
+					double meanCutoffScore = ArrayMath.mean(cutoffscores);
+
+					loopR = new BasicLoopResult(groupName, rotation, sig,
+							medianScore, meanScore,
+							meanDeficit, medianDeficit,
+							meanInteriorEditDistance, medianInteriorEditDistance,
+							meanFullEditDistance, medianFullEditDistance,
+							meanCutoff, meanCutoffScore);
+				}
 				loopR.setLoop(loop);
 				loopRes.add(loopR);
 			}
@@ -1073,6 +1094,8 @@ public class Alignment {
 	    	groupScores[i-1] = modelScores[i];
 	    }
 	    
+	    double[] deficits = getDeficits(group.Best_Score, groupScores);
+	    
 	    int[] InteriorMinDist = getMinEditDistance(group,sData,type,reversed,true);
 		int[] FullMinDist = getMinEditDistance(group,sData,type,reversed,false);
 		
@@ -1081,7 +1104,12 @@ public class Alignment {
 	    
 	    List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
 		for(int m = 0; m < sData.size() - 1; m++) {
-			SequenceResult seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], InteriorMinDist[m], FullMinDist[m],reversed,cutoffs[m],cutoffscores[m],sData.get(m + 1).correspondences);
+			SequenceResult seqR;
+			if(reversed == 1){
+				seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], deficits[m], InteriorMinDist[m], FullMinDist[m],reversed,cutoffs[m],cutoffscores[m],rsData.get(m + 1).correspondences);
+			}else{
+				seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], deficits[m], InteriorMinDist[m], FullMinDist[m],reversed,cutoffs[m],cutoffscores[m],sData.get(m + 1).correspondences);
+			}
 			seqRes.add(seqR);
 		}
 		

@@ -12,6 +12,9 @@ public class BasicSequenceResult implements SequenceResult {
 
     /** Score of this result. */
 	private double score;
+	
+	/** Deficit score of this result */
+	private double deficit;
 
     /** Interior edit distance of this result. */
 	private int InteriorEditDistance;
@@ -48,7 +51,7 @@ public class BasicSequenceResult implements SequenceResult {
 	 * @param editDistance The edit distance.
 	 * @param rotation True if the sequence was rotated relative to the model.
 	 */
-	public BasicSequenceResult(LoopResult result, Sequence sequence, double score, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff, double cutoffscore, String correspondences) {
+	public BasicSequenceResult(LoopResult result, Sequence sequence, double score, double deficit, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff, double cutoffscore, String correspondences) {
 		this.result = result;
         this.sequence = sequence;
 		this.score = score;
@@ -58,6 +61,7 @@ public class BasicSequenceResult implements SequenceResult {
 		this.cutoff = cutoff;
 		this.cutoffscore = cutoffscore;
 		this.correspondences = correspondences;
+		this.deficit = deficit;
 	}
 
 	/**
@@ -69,8 +73,8 @@ public class BasicSequenceResult implements SequenceResult {
 	 * @param editDistance The edit distance.
 	 * @param rotation True if the sequence was rotated relative to the model.
 	 */
-	public BasicSequenceResult(Sequence sequence, double score, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff, double cutoffscore) {
-		this(null, sequence, score, InteriorEditDistance, FullEditDistance, rotation, cutoff,cutoffscore,"NA");
+	public BasicSequenceResult(Sequence sequence, double score, double deficit, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff, double cutoffscore) {
+		this(null, sequence, score, deficit, InteriorEditDistance, FullEditDistance, rotation, cutoff,cutoffscore,"NA");
 	}
 	
 	/**
@@ -82,12 +86,16 @@ public class BasicSequenceResult implements SequenceResult {
 	 * @param editDistance The edit distance.
 	 * @param rotation True if the sequence was rotated relative to the model.
 	 */
-	public BasicSequenceResult(Sequence sequence, double score, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff, double cutoffscore, String correspondences) {
-		this(null, sequence, score, InteriorEditDistance, FullEditDistance, rotation, cutoff,cutoffscore,correspondences);
+	public BasicSequenceResult(Sequence sequence, double score, double deficit, int InteriorEditDistance, int FullEditDistance, int rotation, boolean cutoff, double cutoffscore, String correspondences) {
+		this(null, sequence, score, deficit, InteriorEditDistance, FullEditDistance, rotation, cutoff,cutoffscore,correspondences);
 	}
 
 	public double score() {
 		return score;
+	}
+	
+	public double deficit() {
+		return deficit;
 	}
 
 	public int FullEditDistance() {

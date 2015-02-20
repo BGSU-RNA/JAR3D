@@ -405,7 +405,7 @@ public class HairpinNode extends BasicNode {
 				{
 					for (int k = i+1; k <= i+insert[l]; k++)
 					{
-						left += "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_" + (l+1) + "_" + (l+2) + "_Insertion" + "\n";
+						left += "SSS_Position_" + (k+1) + "_" + letters.charAt(k) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_" + (l+1) + "-" + (l+2) + "_Insertion" + "\n";
 					}
 					i += insert[l]+1;
 					left += "SSS_Position_" + (i+1) + "_" + letters.charAt(i) + " JAR3D_aligns_to " + "MMM_Node_" + number + "_Position_" + (l+2) + "\n";
