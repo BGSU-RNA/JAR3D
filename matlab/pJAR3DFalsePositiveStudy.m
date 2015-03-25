@@ -3,7 +3,11 @@
 
 % This program accumulates a large amount of data that is useful for exploring the behavior of randomly-generated sequences
 
-function [void] = pJAR3DFalsePositiveStudy(OutputBase,Release,Mode)
+function [void] = pJAR3DFalsePositiveStudy(OutputBase,Release,Mode,RandomSequenceMode)
+
+if nargin < 4,
+  RandomSequenceMode = 1;
+end
 
 switch Mode
 case 1                            % parse and calculate edit distance, which is slow
@@ -251,7 +255,15 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
 
   SVN = [loopType '_FalsePositiveRateTest_' num2str(seqfilenumber) '.fasta'];   % randomly-generated sequences
   SVN = [loopType '_RandomMotifSequences_' num2str(seqfilenumber) '.fasta'];   % randomly-generated sequences
-  SVN = [loopType '_RandomMotifSequencesNonCan_50_' num2str(seqfilenumber) '.fasta'];   % randomly-generated sequences
+
+  switch RandomSequenceMode
+  case 1
+    SVN = [loopType '_RandomMotifSequencesNonCan_50_' num2str(seqfilenumber) '.fasta'];   % randomly-generated sequences
+  case 2
+    SVN = [loopType '_RandomMotifSequencesUAOK_50_' num2str(seqfilenumber) '.fasta'];   % randomly-generated sequences
+  case 3
+    SVN = [loopType '_RandomMotifSequences_50_' num2str(seqfilenumber) '.fasta'];   % randomly-generated sequences
+  end
 
   % ---------------------------------------------------------------------
 
