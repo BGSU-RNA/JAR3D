@@ -121,7 +121,7 @@ for m = 1:length(Filenames),
       keep(m) = 1;
       Filenames(m).name = strrep(Filenames(m).name,'.mat','');
     end
-  end 
+  end
 end
 
 Filenames = Filenames(find(keep));
@@ -140,7 +140,7 @@ if ~(exist(OutputPath) == 7),        % if directory doesn't yet exist
 end
 
 if ~(exist(DiagnosticBase) == 7),
-  mkdir(DiagnosticBase);             
+  mkdir(DiagnosticBase);
 end
 
 if ~(exist(DiagnosticPath) == 7),
@@ -267,7 +267,7 @@ for m = 1:length(Filenames),
 
  if isempty(Node),
 %    mkdir([MotifLibraryPath filesep 'trouble']);
-%    movefile([MotifLibraryPath filesep MotifName '.mat'],[MotifLibraryPath filesep 'trouble' filesep MotifName '.mat']); 
+%    movefile([MotifLibraryPath filesep MotifName '.mat'],[MotifLibraryPath filesep 'trouble' filesep MotifName '.mat']);
     fprintf('@@@@@@@@@@@@ pMakeSCFGModels: Motif %s could not be modeled for some reason\n', MotifName);
     Filenames(m).modeled = 0;
 
@@ -319,12 +319,12 @@ for m = 1:length(Filenames),
 
     GroupData(m).MotifID = MotifName;
     switch loopType,
-    case 'HL'    
+    case 'HL'
       GroupData(m).Signature{1} = Search.Signature;
     case 'IL'
       GroupData(m).Signature{1} = Search.Signature;
       GroupData(m).Signature{2} = Search.RSignature;
-    end      
+    end
     GroupData(m).NumNT = N;
     E = abs(fix(triu(Search.Edge)));
     GroupData(m).NumBasepairs = full(sum(sum((E > 0) .* (E < 14))));
@@ -609,7 +609,7 @@ for m = 1:length(Filenames),
 
     % ---------- determine correspondences between motif, model, sequences
 
-    T2 = pAlignMotifGroupToModel(Search,Node,MotifName,MotifName); 
+    T2 = pAlignMotifGroupToModel(Search,Node,MotifName,MotifName);
 
     T6 = pColumnsForModel(Node,MotifName);
 
@@ -628,6 +628,12 @@ for m = 1:length(Filenames),
       T{r} = strrep(T{r},'has_name _','has_name ');
       fprintf(fid,'%s\n',T{r});
     end
+    fclose(fid);
+
+    % ---------- write temporary cutoff file
+
+    fid = fopen([ModelPath filesep GroupData(m).MotifID '_cutoffs.txt'],'w');
+    fprintf(fid,'%0.8f\t%d\t%0.8f\t%0.8f\t%0.8f\t%0.8f\t%0.8f\n', -1, 5, 3, 1, 16, 10, -1);
     fclose(fid);
 
     % ---------- write out correspondences for alignment diagnostics
