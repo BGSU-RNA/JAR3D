@@ -826,8 +826,13 @@ public class Alignment {
 		// add up model scores for each sequence
 		for(int m = 0; m < sData.size()-1; m++)
 		{
-				double tempo = sData.get(m+1).getMaxNodeLogProbabilityOf(0, 0);
+				// double tempo = sData.get(m+1).getMaxNodeLogProbabilityOf(0, 0);  // stopped working! same number for all m, even though fine in doParse
+				double tempo = sData.get(m+1).getMaxLogProbability(0);
 				scores[m] = tempo;
+		
+				System.out.println("getILScoresSingle:  getMaxNodeLogProbabilityOf: "+sData.get(m+1).getMaxNodeLogProbabilityOf(0, 0));
+				System.out.println("getILScoresSingle:  scores[m]:                  "+scores[m]);
+				System.out.println("getILScoresSingle:  getMaxLogProbability:       "+sData.get(m+1).getMaxLogProbability(0));
 		}
 		return scores;
 	}
@@ -1172,7 +1177,6 @@ public class Alignment {
 				S.itcFirst[j] = firstS.itc[j];
 
 			mlp = S.parseSequence(range);                             	      // parse this sequence
-
 			sData.get(i).appendProbabilities(mlp); 							  // save mlp
 		
 			// We also need to store the parse information somewhere!  All we have is a parse sequence.
@@ -1188,9 +1192,10 @@ public class Alignment {
 					//				System.out.println("Alignment.doParse optimalMaxLogProb for a node is "+current.optimalMaxLogProb);
 					current =  current.next;
 				}
-				//	System.out.println("Alignment.doParse actual MLP is "+mlp);
-
 				sData.get(i).appendNodeProbabilities(mProbs);
+					System.out.println("doParse: Alignment.doParse actual MLP is "+mlp);
+					System.out.println("doParse: mProbs[] is                     "+mProbs);
+					System.out.println("doParse: retrieve mProbs gives           "+sData.get(i).getMaxNodeLogProbabilityOf(0,0));
 				sData.get(i).parseData = ((InitialNode)S.first).showParse(S.nucleotides);
 			}
 			
@@ -1200,17 +1205,19 @@ public class Alignment {
 				String SF = "Sequence_"+i;
 				correspondences = correspondences.replace("SSS",SF);
 				sData.get(i).correspondences = correspondences;
+				sData.get(i).correspondences += "Sequence_"+i+" has_name "+sData.get(i).organism.replace(" ","_")+"\n";
+				sData.get(i).correspondences += "Sequence_"+i+" has_score "+sData.get(i).getMaxLogProbability(0)+"\n";
 			}
 		}				
 
 		if (calculateCorrespondences) {
 			for (int i = 1; i < sData.size(); i++)
 				{
-					sData.get(i).correspondences += "Sequence_"+i+" has_name "+sData.get(i).organism.replace(" ","_")+"\n";
+//					sData.get(i).correspondences += "Sequence_"+i+" has_name "+sData.get(i).organism.replace(" ","_")+"\n";
 				}
 			for (int i = 1; i < sData.size(); i++)
 				{
-					sData.get(i).correspondences += "Sequence_"+i+" has_score "+sData.get(i).getMaxLogProbability(0)+"\n";
+//					sData.get(i).correspondences += "Sequence_"+i+" has_score "+sData.get(i).getMaxLogProbability(0)+"\n";
 				}
 		}
 
@@ -1299,6 +1306,9 @@ public class Alignment {
 		double[] cutoffscores = new double[InteriorMinDist.length];
 		for(int i = 0; i < InteriorMinDist.length; i++){
 			cutoffscores[i] = 100 * (group.Cutoffs[2] * InteriorMinDist[i] - group.Cutoffs[3] * groupScores[i] - group.Cutoffs[4]) / -group.Cutoffs[5];
+			if(cutoffscores[i] > 100){
+				cutoffscores[i] = 100;
+			}
 			if(cutoffscores[i] > 0 && (groupScores[i] < group.Cutoffs[0] || InteriorMinDist[i] > group.Cutoffs[1])){
 				cutoffscores[i] = 0;
 			}
