@@ -20,8 +20,6 @@ try
 catch
 	fprintf('Not able to run the diagnostic in which sequences from 3D structures are aligned to their JAR3D models\n');
 end
-pJAR3DDiagnostics(OutputBase,Release,Release,1)
-
 pGenerateRandomMotifSequences(OutputBase,Release)
 
 pJAR3DFalsePositiveStudy(OutputBase,Release,1)                         % 1 means to read FASTA files and parse and calculate edit distance; slow
@@ -30,3 +28,4 @@ pJAR3DFalsePositiveStudy(OutputBase,Release,2)                         % 2 means
 pSetModelSpecificCutoffs(OutputBase,Release,0)
 pJAR3DFalsePositiveStudy(OutputBase,Release,3)                         % 3 means to use model-specific cutoffs
 
+pJAR3DDiagnostics(OutputBase,Release,Release,1)

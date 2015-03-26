@@ -26,7 +26,7 @@ Candidates = Search.Candidates;
 N = N - 1;
 
 if Direction ~= 0,
-  [y,p] = sort(Direction*double(Candidates(1,1:N)));    
+  [y,p] = sort(Direction*double(Candidates(1,1:N)));
                                     % put nucleotides in inc/decreasing order
 else
   p = 1:N;                          % do not re-order
@@ -104,10 +104,10 @@ for c = 1:L,                                      % loop through candidates
       MNum = 1;
     end
     r = r + 1;
-    AText{r} = sprintf('%s_Instance_%d_Position_%d_%s corresponds_to_sequence %s_Sequence_%d_Position_%d_%s', ModelName, c, n, NT.Base, ModelName, c, length(Text{t}), NT.Base);
+    AText{r} = sprintf('%s_Instance_%d_Column_%d_%s corresponds_to_sequence %s_Sequence_%d_Position_%d_%s', ModelName, c, n, NT.Base, ModelName, c, length(Text{t}), NT.Base);
     % Note:  The nucleotide IDs in the following line might not be formed correctly, especially for nucleotides from symmtery operations
-    BText{r} = sprintf('%s_Instance_%d_Position_%d_%s corresponds_to_PDB %s|%d|%s|%s|%s', ModelName, c, n, NT.Base, FN, MNum, NT.Chain, NT.Number, NT.Base);
-    CText{r} = sprintf('%s_Instance_%d_Position_%d_%s corresponds_to_group %s_Position_%d', ModelName, c, n, NT.Base, ModelName, n);
+    BText{r} = sprintf('%s_Instance_%d_Column_%d_%s corresponds_to_PDB %s|%d|%s|%s|%s', ModelName, c, n, NT.Base, FN, MNum, NT.Chain, NT.Number, NT.Base);
+    CText{r} = sprintf('%s_Instance_%d_Column_%d_%s corresponds_to_group %s_Column_%d', ModelName, c, n, NT.Base, ModelName, n);
 
     % ----------------------- add inserted bases between conserved positions
 
@@ -129,9 +129,13 @@ for c = 1:L,                                      % loop through candidates
               MNum = 1;
             end
             r = r + 1;
-            AText{r} = sprintf('%s_Instance_%d_Position_%d_%d_Insertion_%d_%s corresponds_to_sequence %s_Sequence_%d_Position_%d_%s', ModelName, c, n, n+1, ic, NT.Base, ModelName, c, length(Text{t}), NT.Base);
-            BText{r} = sprintf('%s_Instance_%d_Position_%d_%d_Insertion_%d_%s corresponds_to_PDB %s_%d_%s_%s_%s', ModelName, c, n, n+1, ic, NT.Base, FN, MNum, NT.Chain, NT.Number, NT.Base);
-            CText{r} = sprintf('%s_Instance_%d_Position_%d_%d_Insertion_%d_%s corresponds_to_group %s_Position_%d_%d_Insertion', ModelName, c, n, n+1, ic, NT.Base, ModelName, n, n+1);
+            AText{r} = sprintf('%s_Instance_%d_Column_%d-%d_Insertion_%d_%s corresponds_to_sequence %s_Sequence_%d_Position_%d_%s', ModelName, c, n, n+1, ic, NT.Base, ModelName, c, length(Text{t}), NT.Base);
+            if isfield(NT,'ID') && ~isempty(NT.ID),
+              BText{r} = sprintf('%s_Instance_%d_Column_%d-%d_Insertion_%d_%s corresponds_to_PDB %s_%d_%s_%s_%s', ModelName, c, n, n+1, ic, NT.Base, FN, MNum, NT.Chain, NT.Number, NT.Base);
+            else
+              BText{r} = sprintf('%s_Instance_%d_Column_%d-%d_Insertion_%d_%s corresponds_to_PDB %s_%d_%s_%s_%s', ModelName, c, n, n+1, ic, NT.Base, FN, MNum, NT.Chain, NT.Number, NT.Base);
+            end
+            CText{r} = sprintf('%s_Instance_%d_Column_%d-%d_Insertion_%d_%s corresponds_to_group %s_Column_%d-%d_Insertion', ModelName, c, n, n+1, ic, NT.Base, ModelName, n, n+1);
             ic = ic + 1;                            % increment insertion count
           end
         elseif Cand(c,n+1) - Cand(c,n) < -1,        % decreasing order
@@ -147,9 +151,13 @@ for c = 1:L,                                      % loop through candidates
               MNum = 1;
             end
             r = r + 1;
-            AText{r} = sprintf('%s_Instance_%d_Position_%d_%d_Insertion_%d_%s corresponds_to_sequence %s_Sequence_%d_Position_%d_%s', ModelName, c, n, n+1, ic, NT.Base, ModelName, c, length(Text{t}), NT.Base);
-            BText{r} = sprintf('%s_Instance_%d_Position_%d_%d_Insertion_%d_%s corresponds_to_PDB %s_%d_%s_%s_%s', ModelName, c, n, n+1, ic, NT.Base, FN, MNum, NT.Chain, NT.Number, NT.Base);
-            CText{r} = sprintf('%s_Instance_%d_Position_%d_%d_Insertion_%d_%s corresponds_to_group %s_Position_%d_%d_Insertion', ModelName, c, n, n+1, ic, NT.Base, ModelName, n, n+1);
+            AText{r} = sprintf('%s_Instance_%d_Column_%d-%d_Insertion_%d_%s corresponds_to_sequence %s_Sequence_%d_Position_%d_%s', ModelName, c, n, n+1, ic, NT.Base, ModelName, c, length(Text{t}), NT.Base);
+            if isfield(NT,'ID') && ~isempty(NT.ID),
+              BText{r} = sprintf('%s_Instance_%d_Column_%d-%d_Insertion_%d_%s corresponds_to_PDB %s_%d_%s_%s_%s', ModelName, c, n, n+1, ic, NT.Base, FN, MNum, NT.Chain, NT.Number, NT.Base);
+            else
+              BText{r} = sprintf('%s_Instance_%d_Column_%d-%d_Insertion_%d_%s corresponds_to_PDB %s_%d_%s_%s_%s', ModelName, c, n, n+1, ic, NT.Base, FN, MNum, NT.Chain, NT.Number, NT.Base);
+            end
+            CText{r} = sprintf('%s_Instance_%d_Column_%d-%d_Insertion_%d_%s corresponds_to_group %s_Column_%d-%d_Insertion', ModelName, c, n, n+1, ic, NT.Base, ModelName, n, n+1);
             ic = ic + 1;                            % increment insertion count
           end
         end
