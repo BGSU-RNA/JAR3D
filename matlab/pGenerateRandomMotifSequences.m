@@ -7,7 +7,6 @@ if nargin < 3,
 end
 
 numrepeats = 50;                      % number of repetitions of each combination of strand lengths
-numrepeats = 1;                      % number of repetitions of each combination of strand lengths
 
 loopType = Release(1:2);
 

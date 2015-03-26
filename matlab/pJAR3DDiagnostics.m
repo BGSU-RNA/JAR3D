@@ -7,6 +7,8 @@
 
 function [void] = pJAR3DDiagnostics(OutputBase,Release,SequenceSource,DiagnosticMode)
 
+fprintf('Running JAR3D diagnostics on release %s\n',Release);
+
 if nargin < 4,
   DiagnosticMode = 1;
 end
