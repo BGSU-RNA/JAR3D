@@ -33,7 +33,7 @@ case 1                      % normal mode to make models.  do not edit
   WriteModel = 1; % set to 1 to write the models that are made, 0 for testing
 
   WriteOwnScores = 1;
-case 2                      % debugging mode, feel free to edi
+case 2                      % debugging mode, feel free to edit
   SampleSize = 20000; % number of samples for empirical distn
   JAR3DSampleSize = 10000;  % maximum number of sequences to pass to JAR3D at a time
 
@@ -169,15 +169,10 @@ Temp.B = 9876;                             % only used for error catching
 % ----------------------------------- start log file
 
 LogFile = [ModelPath filesep 'log ' date '.txt'];
-delete(LogFile);
-clc
+
 diary(LogFile);
 
-if MakeEmpiricalDistribution > 0,
-  fprintf('Generating %d random sequences for each group\n', SampleSize);
-else
-  fprintf('Not generating random sequences\n');
-end
+fprintf('Evaulating models\n');
 
 fprintf('Normalization variable is %d\n', Param(8));
 
@@ -245,25 +240,6 @@ for m = 1:length(Filenames),
   HTMLMotifList = [ModelPath filesep 'all.html'];
 
   % ---------- load motif and determine size and number of instances
-
-  clear Search
-
-  load([MotifLibraryPath filesep MotifName '.mat']);
-
-  [L,N] = size(Search.Candidates);
-  N = N - 1;
-
-  Filenames(m).numinstances = L;
-  Filenames(m).numconserved = N;
-
-  % ---------- temporary fix of base-ribose annotations, until the
-  % ---------- RNA 3D motif atlas annotates them correctly
-
-  Search.File = zBaseRiboseInteractions(Search.File);
-
-  % ---------- make an SCFG model of the current model type, write to file
-
-  [Search,Node] = pMakeSingleJAR3DModel(Search,Param,Prior,loopType);
 
  if isempty(Node),
 %    mkdir([MotifLibraryPath filesep 'trouble']);
@@ -430,6 +406,10 @@ for m = 1:length(Filenames),
     fclose(fid);
     Filenames(m).signature = Search.Signature;
 
+
+
+
+
     % ---------- calculate scores of sequences against their own model
 
     if WriteOwnScores > 0,
@@ -439,12 +419,6 @@ for m = 1:length(Filenames),
       end
 
       OwnScores = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifParseSingle(OutputPath,FastaFile,ModelFile);
-
-OwnScores
-FastaFile
-ModelFile
-OutputPath
-
 
       % ----------- The following lines prevent the program from being stopped
       % ----------- by a crazy Matlab bug.  It is intermittent, but after a call
@@ -472,147 +446,6 @@ OutputPath
       fclose(fid);
     end
 
-    % ---------- set coefficients for mixed score
-
-    GroupData(m).DeficitCoeff = 1;
-    GroupData(m).CoreEditCoeff = 3;
-
-    % ---------- make an empirical distribution for random sequences against model
-
-    if MakeEmpiricalDistribution > 0,
-
-      if exist(RandomSequenceDataFile,'file') && GenerateNewSequences == 0,
-        load(RandomSequenceDataFile);
-      else
-        Scores = zeros(SampleSize,1);
-        [Sequences,LengthDist,RandomFASTA] = pMakeRandomSequencesWeighted(Node,loopType,SampleSize,TransitionFile,0);
-
-        save(LengthDistFile,'LengthDist');
-
-        fprintf('pMakeSCFGModels:  Random sequences: ')
-        for i = 1:10,
-          fprintf('%s  ',RandomFASTA(i).Sequence);
-        end
-        fprintf('\n');
-
-        loopNum = floor(SampleSize/JAR3DSampleSize);
-
-        fprintf('pMakeSCFGModels:  Parsing random sequences against their own model\n ')
-
-        for i = 1:loopNum,
-          SFN = [ModelPath filesep 'RS_' MotifName '_' int2str(i) '.fasta'];
-          zWriteFASTA(SFN,RandomFASTA((JAR3DSampleSize*(i-1)+1):(JAR3DSampleSize*i)));
-          subScores = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifParseSingle(OutputPath,SFN,ModelFile);
-
-          % ----------- The following lines prevent the program from being stopped
-          % ----------- by a crazy Matlab bug.  It is intermittent, but after a call
-          % ----------- to JAR3D, it is hell bent on saying
-          % ----------- "Dot name reference on non-scalar structure"
-          try
-            x = Temp.A + 1;
-             Temp.A
-          catch ME
-            Temp.B = 9876;
-          end
-
-          Scores(JAR3DSampleSize*(i-1)+1:JAR3DSampleSize*i) = subScores;
-          delete(SFN);
-        end
-
-        fprintf('Finding core edit distance of %4d randomly-generated sequences against %4d sequences from the motif group\n', length(RandomFASTA), length(ModelFASTA));
-
-        [D1,D2,D3] = pEditDistance(RandomFASTA,ModelFASTA,loopType,'core');
-
-        CoreEditDistance = min(D2,[],2);                      % edit distance in given strand order
-
-        save(RandomSequenceDataFile,'Scores','CoreEditDistance');
-      end
-
-%      i = find(CoreEditDistance > 0);                       % sequences with distinct edit distances from 3D instances
-%      fprintf('Found and removed %d sequences with core edit distance 0 to a 3D instance, leaving %d sequences\n',length(Scores)-length(i),length(i));
-%      CoreEditDistance = CoreEditDistance(i);
-%      Scores = Scores(i);
-
-      Deficit = max(GroupData(m).OwnScore) - Scores;
-      MixedScores = -(GroupData(m).DeficitCoeff * Deficit + GroupData(m).CoreEditCoeff * CoreEditDistance);
-
-      i = 1:min(2000,length(CoreEditDistance));
-
-      figure(2)
-      clf
-      plot(CoreEditDistance(i)+0.3*rand(size(CoreEditDistance(i))),Deficit(i),'k.');
-      hold on
-      plot(0,max(GroupData(m).OwnScore)-GroupData(m).OwnScore,'x','Color',[0.4 0.4 0.4],'MarkerSize',10,'LineWidth',3);   % sequences from 3D
-      ax = axis;
-      axis([0 ax(2) 0 ax(4)]);
-%      axis([0 max(ax([2 4])) 0 max(ax([2 4]))]);
-%        axis([0 5 0 20]);
-
-%        plot([0 5],[20 20-5*GroupData(m).CoreEditCoeff],'r');      % line with correct slope
-
-      NameForTitle = strrep(GroupData(m).MotifID,'_','\_');
-
-      xlabel('Minimum core edit distance');
-      ylabel('Alignment score deficit');
-      title(['Randomly-generated sequences compared to ' NameForTitle]);
-
-      print(gcf,'-dpng',[DiagnosticPath filesep MotifName '_randomsequencescatter.png']);
-
-%        pause
-
-
-      figure(3)
-      clf
-      hist(-MixedScores,30);
-      h = findobj(gca,'Type','patch');
-      set(h,'facecolor',[0.4 0.4 0.4]);
-      ax = axis;
-      axis([0 ax(2) 0 ax(4)]);
-
-      xlabel(['Deficit + ' num2str(GroupData(m).CoreEditCoeff) ' * CoreEdit']);
-      ylabel('Frequency');
-      title(['Distribution of randomly-generated sequences for ' NameForTitle]);
-
-      print(gcf,'-dpng',[DiagnosticPath filesep MotifName '_randomsequencehistogram.png']);
-
-      % -------------------------------------- calculate distribution
-
-      Values = unique(MixedScores);           % unique values of mixed score
-
-      N = histc(MixedScores,Values);          % number of occurrences of each unique mixed score
-
-      step = 1/length(MixedScores);           % increase in probability in empirical distribution for each datapoint
-      dist = zeros(length(Values),1);
-      dist(1) = N(1)*step;
-      for i = 2:length(Values)
-        dist(i) = dist(i-1) + N(i) * step;
-      end
-
-      i = find(dist >= 0.9);
-      Precision = 4;                          % number of decimal places in percentile values
-      dist(i) = round(dist(i)*(10^Precision))/(10^Precision);
-      i = find((dist < 0.9) .* (dist >= 0.8));
-      Precision = 3;                          % number of decimal places in percentile values
-      dist(i) = round(dist(i)*(10^Precision))/(10^Precision);
-      i = find(dist < 0.8);
-      Precision = 2;                          % number of decimal places in percentile values
-      dist(i) = round(dist(i)*(10^Precision))/(10^Precision);
-
-      prev = -10000;
-
-      fid = fopen(EmpDistFile,'w');
-      for i = 1:length(dist)
-        cur = dist(i);
-        if cur > prev,
-          fprintf(fid,'%f %.4f\n',Values(i),dist(i));
-        end
-        prev = cur;
-      end
-      fclose(fid);
-      clear dist Values MixedScores Sequences
-
-    end
-
     % ---------- determine correspondences between motif, model, sequences
 
     T2 = pAlignMotifGroupToModel(Search,Node,MotifName,MotifName);
@@ -636,34 +469,43 @@ OutputPath
     end
     fclose(fid);
 
-  end                         % if isempty(Node)
+    % ---------- write out correspondences for alignment diagnostics
+
+    if WriteCorrespondences > 0,
+      corresp = edu.bgsu.rna.jar3d.JAR3DMatlab.ModelCorrespondences(FastaFile,ModelPath,MotifName,0);
+      % ----------- The following lines prevent the program from being stopped
+      % ----------- by a crazy Matlab bug.  It is intermittent, but after a call
+      % ----------- to JAR3D, it is hell bent on saying
+      % ----------- "Dot name reference on non-scalar structure"
+      try
+        x = Temp.A + 1;
+        Temp.A
+      catch ME
+        Temp.B = 9876;
+      end
+
+      corresp = char(corresp);
+      correspcell = zStringSplit(corresp,char(10));
+      for i = 1:length(correspcell),
+        if length(correspcell{i}) > 5,
+          correspcell{i} = [GroupData(m).MotifID '_' correspcell{i}];          % prefix with motif ID for this particular diagnostic
+          correspcell{i} = strrep(correspcell{i},'___','');
+          correspcell{i} = strrep(correspcell{i},'__','');
+          correspcell{i} = strrep(correspcell{i},'has_name _','has_name ');
+        end
+      end
+
+      T = [T correspcell];
+
+      fid = fopen(DiagnosticFile,'w');
+      for r = 1:length(T),
+        fprintf(fid,'%s\n',T{r});
+      end
+      fclose(fid);
+
+    end
+  end                        % if isempty(Node)
 end                           % loop over filenames
-
-% ------------------------------------------------------- write lists of model files
-
-fid = fopen(AllFileList,'w');
-for m = 1:length(Filenames),
-  if Filenames(m).modeled == 1,
-    fprintf(fid,'%s\n',[Filenames(m).name '_model.txt']);
-  end
-end
-fclose(fid);
-
-fid = fopen(StructuredFileList,'w');
-for m = 1:length(Filenames),
-  if Filenames(m).modeled == 1 && GroupData(m).Structured > 0,
-    fprintf(fid,'%s\n',[Filenames(m).name '_model.txt']);
-  end
-end
-fclose(fid);
-
-fprintf('There are %d motif groups, of which %d are structured\n', length(find(cat(1,Filenames.modeled) > 0)), length(find(cat(1,GroupData.Structured)) > 0));
-
-% ------------------------------------------------------- save GroupData
-
-GroupData = GroupData(find(cat(1,Filenames.modeled) > 0));
-Filenames = Filenames(find(cat(1,Filenames.modeled) > 0));
-save([OutputPath filesep loopType '_GroupData.mat'],'GroupData');
 
 % ------------------------------------------------------- analyze motifs
 

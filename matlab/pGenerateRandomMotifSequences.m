@@ -6,7 +6,8 @@ if nargin < 3,
   Mode = 3;                           % no constraints on base combinations
 end
 
-numrepeats = 50;
+numrepeats = 50;                      % number of repetitions of each combination of strand lengths
+numrepeats = 1;                      % number of repetitions of each combination of strand lengths
 
 loopType = Release(1:2);
 
@@ -120,11 +121,11 @@ for v = 1:numfiles,
 	Sequences = pMakeRandomSequencesWeighted(seqlengths,loopType,length(seqlengths(:,1)),TransitionFile,Mode);
   switch Mode
   case 1
-    FN = [ModelPath filesep loopType '_RandomMotifSequencesNonCan_' num2str(numrepeats) '_' num2str(v) '.fasta'];
+    FN = [ModelPath filesep loopType '_RandomMotifSequencesNonCan_' num2str(v) '.fasta'];
   case 2
-    FN = [ModelPath filesep loopType '_RandomMotifSequencesUAOK_' num2str(numrepeats) '_' num2str(v) '.fasta'];
+    FN = [ModelPath filesep loopType '_RandomMotifSequencesUAOK_' num2str(v) '.fasta'];
   case 3
-    FN = [ModelPath filesep loopType '_RandomMotifSequences_' num2str(numrepeats) '_' num2str(v) '.fasta'];
+    FN = [ModelPath filesep loopType '_RandomMotifSequences_' num2str(v) '.fasta'];
   end
 	fid = fopen(FN,'w');
 	for s = 1:length(Sequences),
