@@ -1130,7 +1130,7 @@ public class Alignment {
 	
 	public static List<Sequence> doParse(List<Sequence> sData, String nodeInfo, int range, boolean fullModelText, boolean calculateCorrespondences)
 	{
-		return doParse(sData,nodeInfo,range,fullModelText,calculateCorrespondences,true);
+		return doParse(sData,nodeInfo,range,fullModelText,calculateCorrespondences,false);
 	}
 
 	//Overloaded doParse that can take model/node data as a string instead of a file name
