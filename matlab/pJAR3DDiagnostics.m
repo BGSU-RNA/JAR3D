@@ -7,6 +7,8 @@
 
 function [void] = pJAR3DDiagnostics(OutputBase,Release,SequenceSource,DiagnosticMode)
 
+fprintf('Running JAR3D diagnostics on release %s\n',Release);
+
 if nargin < 4,
   DiagnosticMode = 1;
 end
@@ -95,7 +97,7 @@ if ~(exist(OutputPath) == 7),        % if directory doesn't yet exist
 end
 
 if ~(exist(DiagnosticBase) == 7),
-  mkdir(DiagnosticBase);             
+  mkdir(DiagnosticBase);
 end
 
 if ~(exist(DiagnosticPath) == 7),
@@ -114,7 +116,7 @@ if ~(exist(InteractionPath) == 7),
   mkdir(InteractionPath);
 end
 
-% ---------------------------------------- 
+% ----------------------------------------
 
 fs = 14;                                 % font size for figures
 tfs = 13;
@@ -131,6 +133,57 @@ clear LeaveOneOut
 clear NumBetterScore
 clear OwnMLP
 clear OwnTotalProb
+
+% ---------------------------------- Align 3D sequences against model and write out correspondences
+
+for g = 1:length(GroupData),
+  MotifName = GroupData(g).MotifID;
+  FastaFile = [SequencePath filesep MotifName '.fasta'];
+  DiagnosticFile = [DiagnosticPath filesep MotifName '_diagnostics.txt'];
+  CorrespondenceFile = [ModelPath filesep MotifName '_correspondences.txt'];
+
+  T = {};
+  fid = fopen(CorrespondenceFile,'r');
+  L = fgetl(fid);
+  c = 1;
+  while ischar(L),
+    T{c} = L;
+    c = c + 1;
+    L = fgetl(fid);
+  end
+  fclose(fid);
+
+  corresp = edu.bgsu.rna.jar3d.JAR3DMatlab.ModelCorrespondences(FastaFile,ModelPath,MotifName,0);
+  % ----------- The following lines prevent the program from being stopped
+  % ----------- by a crazy Matlab bug.  It is intermittent, but after a call
+  % ----------- to JAR3D, it is hell bent on saying
+  % ----------- "Dot name reference on non-scalar structure"
+  try
+    x = Temp.A + 1;
+    Temp.A
+  catch ME
+    Temp.B = 9876;
+  end
+
+  corresp = char(corresp);
+  correspcell = zStringSplit(corresp,char(10));
+  for i = 1:length(correspcell),
+    if length(correspcell{i}) > 5,
+      correspcell{i} = [GroupData(g).MotifID '_' correspcell{i}];          % prefix with motif ID for this particular diagnostic
+      correspcell{i} = strrep(correspcell{i},'___','');
+      correspcell{i} = strrep(correspcell{i},'__','');
+      correspcell{i} = strrep(correspcell{i},'has_name _','has_name ');
+    end
+  end
+
+  T = [T correspcell];
+
+  fid = fopen(DiagnosticFile,'w');
+  for r = 1:length(T),
+    fprintf(fid,'%s\n',T{r});
+  end
+  fclose(fid);
+end
 
 % --------------------------------- Read sequence file names
 % --------------------------------- Store sequence files in FASTA
@@ -187,7 +240,7 @@ end
 fprintf('Overall maximum intragroup core edit distance is %2d\n', max1);
 
 % OwnMotif maps from sequence to MotifName index
-% SeqGroup maps from sequence to 1:L, where L is the number of sequence groups 
+% SeqGroup maps from sequence to 1:L, where L is the number of sequence groups
 %   Each different sequence group gets a different number
 % SeqNames maps from 1:L to a text string for the sequence group
 
@@ -323,7 +376,7 @@ Par.CutoffType = 3;
 for mm = 1:length(GroupData),
   for r = 1:Rotations,
     Features = [MLPS(:,mm,r) CoreEditDistance(:,mm,r) Percentile(:,mm,r)];
-    [CutoffMet(:,mm,r) CutoffScore(:,mm,r)] = pModelSpecificCutoff(GroupData(mm),Features,Params);
+    [CutoffMet(:,mm,r) CutoffScore(:,mm,r)] = pModelSpecificCutoff(GroupData(mm),Features,Par);
   end
 end
 
@@ -353,9 +406,8 @@ end
 for s = 1:NumSequences,
   j = find(OwnMotif == OwnMotif(s));     % sequences from the same group
   ExcessSeqLength(s) = SeqLength(s) - mode(SeqLength(j));
-  OwnDeficit(s) = max(OwnMLP(j)) - OwnMLP(s); 
+  OwnDeficit(s) = max(OwnMLP(j)) - OwnMLP(s);
 end
-
 
 % --------------------- Histogram Cutoff Score against own model
 

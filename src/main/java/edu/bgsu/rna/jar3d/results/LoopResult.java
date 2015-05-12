@@ -122,4 +122,18 @@ public interface LoopResult {
 	 * @return A the percent of sequences that pass cutoff.
 	 */
 	public double meanCutoffScore();
+	
+	/**
+     * Get a double indicating if the mean deficit score.
+     *
+     * @return The loop result.
+     */
+	public double meanDeficit();
+	
+	/**
+     * Get a double indicating if the median deficit score.
+     *
+     * @return The loop result.
+     */
+	public double medianDeficit();
 }

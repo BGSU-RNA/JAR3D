@@ -52,7 +52,7 @@ while continu > 0,
     for j = 1:(length(Node(n).LeftIndex)-1),
       T{r} = sprintf('Node_%d_Position_%d', n, k);
       r = r + 1;
-      T{r} = sprintf('Node_%d_Position_%d_%d_Insertion', n, k, k+1);
+      T{r} = sprintf('Node_%d_Position_%d-%d_Insertion', n, k, k+1);
       r = r + 1;
       k = k + 1;
     end
@@ -65,7 +65,7 @@ while continu > 0,
     for j = 1:(length(Node(n).RightIndex)-1),
       U{s} = sprintf('Node_%d_Position_%d', n, kk);
       s = s + 1;
-      U{s} = sprintf('Node_%d_Position_%d_%d_Insertion', n, kk-1, kk);
+      U{s} = sprintf('Node_%d_Position_%d-%d_Insertion', n, kk-1, kk);
       s = s + 1;
       kk = kk - 1;
     end
@@ -76,7 +76,7 @@ while continu > 0,
     for j = 1:(length(Node(n).MiddleIndex)-1),
       T{r} = sprintf('Node_%d_Position_%d', n, k);
       r = r + 1;
-      T{r} = sprintf('Node_%d_Position_%d_%d_Insertion', n, k, k+1);
+      T{r} = sprintf('Node_%d_Position_%d-%d_Insertion', n, k, k+1);
       r = r + 1;
       k = k + 1;
     end

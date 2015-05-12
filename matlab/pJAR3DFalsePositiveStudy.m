@@ -3,7 +3,11 @@
 
 % This program accumulates a large amount of data that is useful for exploring the behavior of randomly-generated sequences
 
-function [void] = pJAR3DFalsePositiveStudy(OutputBase,Release,Mode)
+function [void] = pJAR3DFalsePositiveStudy(OutputBase,Release,Mode,RandomSequenceMode)
+
+if nargin < 4,
+  RandomSequenceMode = 1;
+end
 
 switch Mode
 case 1                            % parse and calculate edit distance, which is slow
@@ -118,7 +122,7 @@ end
 Temp.A = 1234;                         % only used for error catching
 Temp.B = 9876;                         % only used for error catching
 
-% ---------------------------------------- 
+% ----------------------------------------
 
 fs = 14;                                 % font size for figures
 tfs = 13;                                % font size for text
@@ -251,7 +255,15 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
 
   SVN = [loopType '_FalsePositiveRateTest_' num2str(seqfilenumber) '.fasta'];   % randomly-generated sequences
   SVN = [loopType '_RandomMotifSequences_' num2str(seqfilenumber) '.fasta'];   % randomly-generated sequences
-  SVN = [loopType '_RandomMotifSequencesNonCan_50_' num2str(seqfilenumber) '.fasta'];   % randomly-generated sequences
+
+  switch RandomSequenceMode
+  case 1
+    SVN = [loopType '_RandomMotifSequencesNonCan_' num2str(seqfilenumber) '.fasta'];   % randomly-generated sequences
+  case 2
+    SVN = [loopType '_RandomMotifSequencesUAOK_' num2str(seqfilenumber) '.fasta'];   % randomly-generated sequences
+  case 3
+    SVN = [loopType '_RandomMotifSequences_' num2str(seqfilenumber) '.fasta'];   % randomly-generated sequences
+  end
 
   % ---------------------------------------------------------------------
 
@@ -413,7 +425,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
 
   NumSequences = length(FASTA);
 
-  if length(FASTA) > 0,  
+  if length(FASTA) > 0,
     if Skip == 0 && Mode > 1,
 
       % --------------------- Evaluate whether each sequence meets the cutoff for each model
@@ -781,7 +793,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
 
             mm = allmm(1);
             rm = allrm(1);
-            
+
             if Params.Verbose > 0,
   		        fprintf('%s', FASTA(n).Sequence);
               fprintf(' %d ', CutoffMet(n,mm,rm));

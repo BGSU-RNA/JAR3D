@@ -123,4 +123,11 @@ public interface SequenceResult {
      * @return The loop result.
      */
 	public double cutoffscore();
+
+	/**
+     * Get a double indicating if the deficit score.
+     *
+     * @return The loop result.
+     */
+	public double deficit();
 }

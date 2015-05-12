@@ -30,7 +30,7 @@ public class DBLoader implements QueryLoader {
     public DBLoader(String username, String password, String dbConnection) throws SQLException {
         connection = DriverManager.getConnection(dbConnection, username, password);
         String querySql = "SELECT group_set, model_type, structured_models_only FROM `jar3d_query_info` WHERE query_id = ?;";
-        String loopSql = "SELECT seq_id, loop_id, loop_sequence, loop_type FROM `jar3d_query_sequences` WHERE query_id = ? and loop_id = ? and status = 0;";
+        String loopSql = "SELECT seq_id, loop_id, loop_sequence, loop_type FROM `jar3d_query_sequences` WHERE query_id = ? and loop_id = ?;";
         String updateInfo = "UPDATE jar3d_query_info SET status=2 WHERE query_id = ?;";
         sqlForQueryInfo = connection.prepareStatement(querySql);
         sqlForLoops = connection.prepareStatement(loopSql);
@@ -58,7 +58,7 @@ public class DBLoader implements QueryLoader {
     }
 
     private List<Loop> loadLoops(String queryId) throws SQLException, QueryLoadingFailed {
-        String loopCountSql = "SELECT MAX(loop_id) AS max FROM `jar3d_query_sequences` where query_id = ? and status = 0;";
+        String loopCountSql = "SELECT MAX(loop_id) AS max FROM `jar3d_query_sequences` where query_id = ?;";
         PreparedStatement sqlForLoopCount = connection.prepareStatement(loopCountSql);
         sqlForLoopCount.setString(1, queryId);
         

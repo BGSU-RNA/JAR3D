@@ -2,16 +2,16 @@
 
 % BetterEmpDist('IL_225_05_cWW-cWW-cSH','IL',100)
 
-function [Text,D,FASTA] = pMakeRandomSequencesWeighted(Node,loopType,sampsize,TransitionFile,AvoidCanonical)
+function [Text,D,FASTA] = pMakeRandomSequencesWeighted(Node,loopType,sampsize,TransitionFile,Mode)
 
 if nargin < 5,
-    AvoidCanonical = 0;
+  Mode = 3;                       % no constraints on base combinations
 end
 
 [s,t] = size(Node);
 
 if s == sampsize,
-    dim = Node';                   % first argument is the desired sequence lengths
+    dim = Node';                  % first argument is the desired sequence lengths
 else
     D = pModelLengthDist(Node);
     cWW_M = zeros(6,1);           %CG,GC,AU,UA,GU,UG
@@ -48,10 +48,13 @@ cWW = ['CG','GC','AU','UA','GU','UG'];
 Text{N} = '';                                   % allocate space for all sequences
 FASTA(N).Header = '';
 
-if AvoidCanonical > 0,
-    Canonical = ['CG'; 'GC'; 'AU'; 'UA'; 'GU'; 'UG'];
-else
-    Canonical = '';
+switch Mode
+case 1
+    RemoveCombinations = ['CG'; 'GC'; 'AU'; 'UA'; 'GU'; 'UG'];
+case 2
+    RemoveCombinations = ['CG'; 'GC'; 'AU'; 'GU'; 'UG'];
+case 3
+    RemoveCombinations = '';
 end
 
 letter = 'ACGU';
@@ -99,7 +102,7 @@ if strands == 2,
         end
 
         if LL > 2 && RL > 2,
-            while ismember([s(1) t(end)],Canonical,'rows') || ismember([s(end) t(1)],Canonical,'rows'),
+            while ismember([s(1) t(end)],RemoveCombinations,'rows') || ismember([t(1) s(end)],RemoveCombinations,'rows'),
                 retry = retry + 1;
                 if LL == 2,
                     s = [];
@@ -155,7 +158,7 @@ else
         s = GenerateStrand(LL,mrand(i,1),transition_M);
 
         if LL > 2,
-            while ismember([s(1) s(end)],Canonical,'rows'),
+            while ismember([s(1) s(end)],RemoveCombinations,'rows'),
                 retry = retry + 1;
                 s = GenerateStrand(LL,mrand(i,1),transition_M);
             end
@@ -172,8 +175,8 @@ else
     end
 end
 
-if AvoidCanonical > 0,
-    fprintf('Generating %d sequences required %d additional attempts to avoid canonical pairs\n',N,retry);
+if Mode ~= 3,
+    fprintf('Generating %d sequences required %d additional attempts to avoid the specified pairs\n',N,retry);
 end
 
 function [s] = GenerateStrand(LL,m,transition_M);

@@ -25,7 +25,7 @@ case 1                                        % no cutoff
 		MixedScore = GroupData.CoreEditCoeff * Features(:,2) + GroupData.DeficitCoeff * (max(GroupData.OwnScore) - Features(:,1));
 		CutoffScore =  100*(MixedScore - GroupData.DeficitEditCutoff)/(-GroupData.DeficitEditCutoff);
 		CutoffScore = CutoffScore .* ((CutoffScore < 0) + (CutoffScore > 0) .* (Features(:,1) >= GroupData.MinScore) .* (Features(:,2) <= GroupData.CoreEditCutoff));
-	else	
+	else
 		CutoffScore = zeros(size(Met));
 	end
 
@@ -39,8 +39,8 @@ case 2                                        % generic cutoffs only
 	if isfield(GroupData,'DeficitEditCutoff'),
 		MixedScore = GroupData.CoreEditCoeff * Features(:,2) + GroupData.DeficitCoeff * (max(GroupData.OwnScore) - Features(:,1));
 		CutoffScore =  100*(MixedScore - GroupData.DeficitEditCutoff)/(-GroupData.DeficitEditCutoff);
-		CutoffScore = CutoffScore .* ((CutoffScore < 0) + (CutoffScore > 0) .* (Features(:,1) >= GroupData.MinScore) .* (Features(:,2) <= GroupData.CoreEditCutoff));
-	else	
+		CutoffScore = CutoffScore .* ((CutoffScore < 0) .* (Features(:,2) > 0) + (CutoffScore > 0) .* (Features(:,1) >= GroupData.MinScore) .* (Features(:,2) <= GroupData.CoreEditCutoff));
+	else
 		CutoffScore = zeros(size(Met));
 	end
 
@@ -48,11 +48,13 @@ case 3                                        % model-specific cutoff
 
 	MixedScore = GroupData.CoreEditCoeff * Features(:,2) + GroupData.DeficitCoeff * (max(GroupData.OwnScore) - Features(:,1));
 	CutoffScore =  100*(MixedScore - GroupData.DeficitEditCutoff)/(-GroupData.DeficitEditCutoff);
-	CutoffScore = CutoffScore .* ((CutoffScore < 0) + (CutoffScore > 0) .* (Features(:,1) >= GroupData.MinScore) .* (Features(:,2) <= GroupData.CoreEditCutoff));
+	CutoffScore = CutoffScore .* ((CutoffScore < 0) .* (Features(:,2) > 0) + (CutoffScore > 0) .* (Features(:,1) >= GroupData.MinScore) .* (Features(:,2) <= GroupData.CoreEditCutoff));
 	CutoffScore = max(-999,CutoffScore);                      % no need to go further than this
 
 	Met = (CutoffScore > 0) + (Features(:,2) == 0);           % core edit distance 0 means it's a match
 	Met = min(1,Met);
 
 end
+
+CutoffScore = min(100,CutoffScore);
 
