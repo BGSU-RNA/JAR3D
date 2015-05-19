@@ -110,7 +110,7 @@ for iii = 1:length(GroupData),
 	end
 
 	GroupData(motifnum)
-	
+
 	CurrentMotif = GroupData(motifnum).MotifID;
 
 	% -------------------------- filter out poor alignment data
@@ -417,7 +417,7 @@ for iii = 1:length(GroupData),
 		    MixedScoreCutoff = max(20,quantile(RandomMixedScores,0.02));  % find the cutoff which gets the true negative rate roughly equal to 98%
 	  		GroupData(motifnum).CutoffMethod = 8;
 			end
- 
+
 	  elseif sum(Source == 2) == 0,                         % no random sequences meet the generic cutoffs
 	  	MixedScoreCutoff = 35;                                        % impose essentially no model-specific cutoff
 	  	fprintf('No random sequence matches, so essentially no model-specific cutoff imposed\n');
