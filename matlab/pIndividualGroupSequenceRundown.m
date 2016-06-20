@@ -108,9 +108,9 @@ for gg = 1:length(grouporder),                 % run through sequence groups
 
     for k = 1:length(s),
       n = s(k);
-      if OnlyStructured == 0 || GroupData(n).Structured > 0,
+      if OnlyStructured == 0 || GroupData(mn).Structured > 0,
         alignmentnumrows = alignmentnumrows + FASTA(n).Multiplicity;
-        
+
         if OwnCoreEditDistance(n) == 0,
           alignmentzeroedit = alignmentzeroedit + FASTA(n).Multiplicity;
         end
@@ -228,7 +228,7 @@ for gg = 1:length(grouporder),                 % run through sequence groups
         [y,i] = sort(-m(bettermodel));                    % sort best to worst
         bettermodel = bettermodel(i);                     % re-order
       end
-      
+
       if SizeOfGuessSet == 1,
         if OwnCutoffMet > 0 && numbetter == 0,
           if numequal > 0,
@@ -362,7 +362,7 @@ for gg = 1:length(grouporder),                 % run through sequence groups
       end
     end
 
-    if Verbose == 1 && length(bestmodels) > 0,
+    if 0 > 1 && Verbose == 1 && length(bestmodels) > 0,
       [b,t,i] = zUniqueRows(bestmodels');
       fprintf('\n');
       for k = 1:length(b),
@@ -373,11 +373,14 @@ for gg = 1:length(grouporder),                 % run through sequence groups
           end
         else
           fprintf('There was no match for                          %4d sequences (%4.1f%%)', t(k), 100*t(k)/sum(t));
-        end  
+        end
         fprintf('\n');
       end
       fprintf('\n');
     end
+
+
+
   end
 end
 
