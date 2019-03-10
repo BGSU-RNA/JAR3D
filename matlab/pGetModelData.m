@@ -2,11 +2,15 @@
 
 function [GroupData, MotifEquivalence] = pGetModelData(OutputPath,loopType)
 
-load([OutputPath filesep loopType '_GroupData.mat'],'GroupData');
+fprintf('pGetModelData\n');
+filename = [OutputPath filesep loopType '_GroupData.mat'];
+load(filename,'GroupData');
+fprintf('Loaded GroupData from %s\n',filename);
 
 try
-  load([OutputPath filesep loopType '_GroupData_with_full_cutoffs.mat'],'GroupData');
-  fprintf('Loaded GroupData with model-specific cutoffs\n');
+  filename = [OutputPath filesep loopType '_GroupData_with_full_cutoffs.mat'];
+  load(filename,'GroupData');
+  fprintf('Loaded GroupData with model-specific cutoffs from %s\n',filename);
 end
 
 keep = ones(1,length(GroupData));
@@ -108,22 +112,22 @@ for m = 1:NumModels,
 
   a = fgetl(fid);
   a = regexprep(a,'[a-z,A-Z]','');
-  GroupData(m).NumBasepairs = str2num(a);  
+  GroupData(m).NumBasepairs = str2num(a);
   a = fgetl(fid);
   a = regexprep(a,'[a-z,A-Z]','');
-  GroupData(m).NumStacks = str2num(a);  
+  GroupData(m).NumStacks = str2num(a);
   a = fgetl(fid);
   a = regexprep(a,' base-phosphate','');
-  GroupData(m).NumBPh = str2num(a);  
+  GroupData(m).NumBPh = str2num(a);
   a = fgetl(fid);
   a = regexprep(a,' base-ribose','');
-  GroupData(m).NumBR = str2num(a);  
+  GroupData(m).NumBR = str2num(a);
   a = fgetl(fid);
   a = regexprep(a,'[a-z,A-Z]','');
-  GroupData(m).NumInstances = str2num(a);  
+  GroupData(m).NumInstances = str2num(a);
   a = fgetl(fid);
   a = regexprep(a,'[a-z,A-Z]','');
-  GroupData(m).Truncate = str2num(a);  
+  GroupData(m).Truncate = str2num(a);
 
   fclose(fid);
 
@@ -139,7 +143,7 @@ for m = 1:NumModels,
   end
   fclose(fid);
 
-  if  GroupData(m).NumBPh > 0 || GroupData(m).NumBR > 0,  
+  if  GroupData(m).NumBPh > 0 || GroupData(m).NumBR > 0,
     Structured(m) = 1;
     GroupData(m).Structured = 1;
   elseif GroupData(m).NumBasepairs > 2 && strcmp(loopType,'IL'),

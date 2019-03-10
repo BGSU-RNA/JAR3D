@@ -13,6 +13,7 @@ Confusion = zeros(length(GroupData),length(GroupData)+1);   % to count mis-class
 Correctness.Criterion = Criterion;
 Correctness.NumSeqs   = length(FASTA);
 Correctness.TotalMultiplicity = sum(cat(1,FASTA.Multiplicity));
+Correctness.AcceptedSequences = 0;
 Correctness.AcceptedByMultiplicity = 0;
 Correctness.AcceptedByMultiplicityExclInteriorMatch = 0;
 Correctness.AcceptedByMultiplicityExclFullMatch = 0;
@@ -29,6 +30,7 @@ Correctness.MotifID = GroupData(OwnMotif(1)).MotifID;
 Correctness.NumBasepairs = GroupData(OwnMotif(1)).NumBasepairs;
 Correctness.NumBPh = GroupData(OwnMotif(1)).NumBPh;
 Correctness.MostCommonSequence = FASTA(1).Sequence;
+Correctness.NumInstances = GroupData(OwnMotif(1)).NumInstances;
 
 if nargin < 17,
   Criterion = 3;
@@ -248,6 +250,7 @@ for gg = 1:length(grouporder),                 % run through sequence groups
       score = 0;
 
       if OwnCutoffMet > 0,
+        Correctness.AcceptedSequences = Correctness.AcceptedSequences + 1;
         Correctness.AcceptedByMultiplicity = Correctness.AcceptedByMultiplicity + FASTA(n).Multiplicity;
         if OwnCoreEditDistance(n) > 0,
           Correctness.AcceptedByMultiplicityExclInteriorMatch = Correctness.AcceptedByMultiplicityExclInteriorMatch + FASTA(n).Multiplicity;
@@ -395,3 +398,5 @@ Correctness.PercentageCorrectExclInteriorMatch = Correctness.CorrectByMultiplici
 Correctness.PercentageAcceptedMultiplicity = Correctness.AcceptedByMultiplicity / Correctness.TotalMultiplicity;
 Correctness.PercentageAcceptedMultiplicityExclFullMatch = Correctness.AcceptedByMultiplicityExclFullMatch / Correctness.TotalMultiplicityExclFullMatch;
 Correctness.PercentageAcceptedMultiplicityExclInteriorMatch = Correctness.AcceptedByMultiplicityExclInteriorMatch / Correctness.TotalMultiplicityExclInteriorMatch;
+Correctness.OfAcceptedPercentageCorrectlyMatched = Correctness.CorrectSequences / Correctness.AcceptedSequences;
+Correctness.OfAcceptedPercentageCorrectlyMatchedMultiplicity = Correctness.CorrectByMultiplicity / Correctness.AcceptedByMultiplicity;

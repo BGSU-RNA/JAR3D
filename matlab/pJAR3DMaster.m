@@ -4,7 +4,7 @@
 
 Release = ['HL' filesep '1.17'];
 
-MotifLibraryLocation = 'C:\Users\zirbel\Documents\JAR3DMotifs\';
+MotifLibraryLocation = 'C:\Users\zirbel\Documents\Motifs\';
 OutputBase = pwd;                                                      % start Matlab in the directory containing IL and HL
 JAR3Dpath = 'C:\Users\zirbel\Documents\GitHub\JAR3D\target\classes';   % location of class files for Java programs; needed for scoring sequences
 Pythonpath = 'C:\Users\zirbel\Documents\GitHub\JAR3D\python';          % location of python programs in the JAR3D release

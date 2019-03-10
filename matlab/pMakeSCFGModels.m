@@ -110,6 +110,9 @@ end
 
 % --------------------------------- read .mat filenames, select right ones
 
+MotifLibraryPath
+pause
+
 Filenames = dir(MotifLibraryPath);
 
 keep = [];                               % of all models, which to keep
@@ -125,6 +128,9 @@ for m = 1:length(Filenames),
 end
 
 Filenames = Filenames(find(keep));
+
+Filenames
+pause
 
 % ----------------------------------- set paths, make directories if needed
 
