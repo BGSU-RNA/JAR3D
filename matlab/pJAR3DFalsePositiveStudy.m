@@ -322,6 +322,8 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
     clear CoreEditDistance
     clear FullEditDistance
 
+    disp(['Timestamp ' datestr(now)])
+    starttime = cputime;
     fprintf('Finding core edit distance of %4d sequences against %4d models\n', NumSequences, length(GroupData));
     for m = 1:length(GroupData),
       ModelFASTA = zReadFASTA([ModelPath filesep GroupData(m).MotifID '.fasta']);
@@ -334,7 +336,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
       end
 
       if mod(m,50) == 0,
-        fprintf('Checked edit distance for %4d models so far\n', m);
+        fprintf('Checked edit distance for %4d models so far, total time %8.4f minutes\n', m, length(GroupData)*(cputime-starttime)/(60*m);
       end
     end
 
@@ -351,7 +353,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
         end
 
         if mod(m,50) == 0,
-          fprintf('Checked edit distance for %4d models so far\n', m);
+          fprintf('Checked edit distance for %4d models so far, total time %8.4f minutes\n', m, length(GroupData)*(cputime-starttime)/(60*m);
         end
       end
     else
@@ -398,7 +400,7 @@ for seqfilenumber = 1:numfiles,                           % loop through files o
       end
 
       if mod(m,50) == 0,
-        fprintf('Parsed against %4d models so far\n', m);
+        fprintf('Parsed against %4d models so far, total time %8.4f minutes\n', m, length(GroupData)*(cputime-starttime)/(60*m);
       end
     end
 

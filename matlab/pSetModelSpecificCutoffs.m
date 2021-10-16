@@ -53,7 +53,7 @@ end
 
 Release = strrep(Release,'/',filesep);
 Release = strrep(Release,'\',filesep);
-OutputPath = [OutputBase filesep Release];
+OutputPath = [OutputBase Release];
 MotifRelease = Release(4:end);
 
 loopType = Release(1:2);

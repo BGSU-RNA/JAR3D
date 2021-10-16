@@ -19,7 +19,7 @@ for m = 1:length(Filenames),
   if isempty(Node),
 %    mkdir([MotifLibraryPath filesep 'trouble']);
 %    movefile([MotifLibraryPath filesep MotifName '.mat'],[MotifLibraryPath filesep 'trouble' filesep MotifName '.mat']); 
-    fprintf('@@@@@@@@@@@@ pCalculateTransitions: Motif %s could not be modeled\n', MotifName);
+    fprintf('@@@@@@@@@@@@ pCalculateTransitions: Motif %s has no Node and so could not be modeled\n', MotifName);
   else
     [Text,T3,T4,T5] = xFASTACandidates(Search.File,Search,1,MotifName);
 
