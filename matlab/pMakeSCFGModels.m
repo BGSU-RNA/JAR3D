@@ -16,6 +16,8 @@ if nargin < 4,
   Mode = 1;    % make normal models
 end
 
+DiagnosticsMode = 1;           % make normal models
+
 % ----------------------------------- user controls
 
 MakeEmpiricalDistribution = 0; % no longer making percentile scores
@@ -175,8 +177,6 @@ diary(LogFile);
 
 if MakeEmpiricalDistribution > 0,
   fprintf('Generating %d random sequences for each group\n', SampleSize);
-else
-  fprintf('Not generating random sequences\n');
 end
 
 fprintf('Normalization variable is %d\n', Param(8));
@@ -436,14 +436,16 @@ for m = 1:length(Filenames),
 
       if Verbose > 0,
         fprintf('pMakeSCFGModels: Calculating scores of sequences against their own model\n');
+
+        fprintf('pMakeSCFGModels: FastaFile:  %s\n', FastaFile);
+        fprintf('pMakeSCFGModels: ModelFile:  %s\n', ModelFile);
+        fprintf('pMakeSCFGModels: OutputPath: %s\n', OutputPath);
+
       end
 
       OwnScores = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifParseSingle(OutputPath,FastaFile,ModelFile);
 
-OwnScores
-FastaFile
-ModelFile
-OutputPath
+      OwnScores
 
 
       % ----------- The following lines prevent the program from being stopped
@@ -456,7 +458,7 @@ OutputPath
 
       try
         x = Temp.A + 1;
-         Temp.A
+        %Temp.A
       catch ME
         Temp.B = 9876;
       end

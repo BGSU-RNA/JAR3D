@@ -50,10 +50,10 @@ if a ~= b,                                % two different bases
       fprintf('pConsensusPairSubstitution: File %4s has %s%4s and %s%4s making %4s\n', File(f(c)).Filename, NT1.Base, NT1.Number, NT2.Base, NT2.Number, zEdgeText(g));
     end
 
-    if ismember([a b],Noncanonical,'rows'),
+%    if ismember([a b],Noncanonical,'rows'),
 %      fprintf('pConsensusPairSubstitution: File %4s has %s%4s and %s%4s making %4s\n', File(f(c)).Filename, NT1.Base, NT1.Number, NT2.Base, NT2.Number, zEdgeText(g));
 %      pause
-    end
+%    end
 
     g = fix(g);                           % actual interaction
 

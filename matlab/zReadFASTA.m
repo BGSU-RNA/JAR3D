@@ -3,9 +3,6 @@
 % Data(n).Aligned is the sequence, with gaps
 % Data(n).Sequence is the sequence with all gaps stripped out
 
-% FASTA = zReadFASTA('Alignments\16S_Bacterial_Stombaugh_et_al_Sup_Mat_S2.fasta');
-% FASTA = zReadFASTA('Alignments\Greengenes_Ecoli_Tth_16S_2_sequences.fasta');
-
 function [Data] = zReadFASTA(Filename, RemoveJAR3DSymbols, Verbose, KeepSequence)
 
 if nargin < 2,
@@ -87,6 +84,6 @@ if fid > 0
 
 else
 
-  fprintf('Could not open file %s\n', Filename);
+  fprintf('zReadFASTA: Could not open file %s\n', Filename);
 
 end
