@@ -16,6 +16,8 @@ if nargin < 4,
   Mode = 1;    % make normal models
 end
 
+DiagnosticMode = 1;  % normal mode
+
 % ----------------------------------- user controls
 
 MakeEmpiricalDistribution = 0; % no longer making percentile scores
@@ -110,8 +112,7 @@ end
 
 % --------------------------------- read .mat filenames, select right ones
 
-MotifLibraryPath
-pause
+fprintf("Looking for motifs in %s\n", MotifLibraryPath)
 
 Filenames = dir(MotifLibraryPath);
 
@@ -129,8 +130,7 @@ end
 
 Filenames = Filenames(find(keep));
 
-Filenames
-pause
+fprintf('Found %d files\n',length(Filenames))
 
 % ----------------------------------- set paths, make directories if needed
 
@@ -174,15 +174,12 @@ Temp.B = 9876;                             % only used for error catching
 
 % ----------------------------------- start log file
 
-LogFile = [ModelPath filesep 'log ' date '.txt'];
+LogFile = [OutputPath filesep 'log ' date '.txt'];
 delete(LogFile);
-clc
 diary(LogFile);
 
 if MakeEmpiricalDistribution > 0,
-  fprintf('Generating %d random sequences for each group\n', SampleSize);
-else
-  fprintf('Not generating random sequences\n');
+  fprintf('Generating %d random sequences for each group to calculate percentiles\n', SampleSize);
 end
 
 fprintf('Normalization variable is %d\n', Param(8));
@@ -193,9 +190,7 @@ load PairExemplars
 
 pIsoScore2(1,1,4,ExemplarIDI,Param(8))
 
-fprintf('pIsoScore2(1,1,4,2) normalization:\n');
-
-sum(sum(pIsoScore2(1,1,4,ExemplarIDI,Param(8))))
+fprintf('pIsoScore2(1,1,4,2) normalization: %8.6f\n', sum(sum(pIsoScore2(1,1,4,ExemplarIDI,Param(8)))));
 
 fprintf('Parameter vector is \n');
 Param
@@ -220,18 +215,14 @@ BPhcount = 0;                       % number of conserved BPh so far
 BRcount  = 0;                       % number of conserved BR so far
 
 clear OwnScoreStats
-tic
 for m = 1:length(Filenames),
-  toc
-  tic
   MotifName = Filenames(m).name;
 
-  fprintf('\n');
   disp(['Timestamp ' datestr(now)])
 
   % ---------- set names of files
 
-  fprintf('pMakeSCFGModels: Analyzing motif group %s\n', MotifName);
+  fprintf('pMakeSCFGModels: Analyzing motif group %s, %d of %d\n', MotifName, i, length(Filenames));
 
   FastaFile = [SequencePath filesep MotifName '.fasta'];
   FastaFileNoGap = [SequencePath filesep MotifName '_nogap.fasta'];
@@ -441,16 +432,15 @@ for m = 1:length(Filenames),
     if WriteOwnScores > 0,
 
       if Verbose > 0,
+        fprintf('pMakeSCFGModels: FastaFile:  %s\n', FastaFile);
+        fprintf('pMakeSCFGModels: ModelFile:  %s\n', ModelFile);
+        fprintf('pMakeSCFGModels: OutputPath: %s\n', OutputPath);
         fprintf('pMakeSCFGModels: Calculating scores of sequences against their own model\n');
       end
 
       OwnScores = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifParseSingle(OutputPath,FastaFile,ModelFile);
 
-OwnScores
-FastaFile
-ModelFile
-OutputPath
-
+      OwnScores
 
       % ----------- The following lines prevent the program from being stopped
       % ----------- by a crazy Matlab bug.  It is intermittent, but after a call
@@ -462,7 +452,7 @@ OutputPath
 
       try
         x = Temp.A + 1;
-         Temp.A
+         Temp.A;
       catch ME
         Temp.B = 9876;
       end
@@ -516,7 +506,7 @@ OutputPath
           % ----------- "Dot name reference on non-scalar structure"
           try
             x = Temp.A + 1;
-             Temp.A
+             Temp.A;
           catch ME
             Temp.B = 9876;
           end
