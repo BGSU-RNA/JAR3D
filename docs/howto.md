@@ -2,9 +2,9 @@
 
 ## Installation
 
-1. The executable version of JAR3D, named using the scheme `jar3d_DATE.jar`, can be downloaded from http://rna.bgsu.edu/data/jar3d/models/. Use the most current *DATE* if more than one is available.
+1. The executable version of JAR3D, named using the scheme `jar3d_DATE.jar`, can be downloaded from http://rna.bgsu.edu/data/jar3d/models/. Use the most current *DATE* if more than one is available.  Jar files from 2015 were tested with Java version 8.
 
-2. The model files for hairpin loops (HL) and internal loops (IL) for each release of the [RNA 3D Motif Atlas](http://rna.bgsu.edu/motifs) are found in directories at the same URL.
+2. The most current model files for hairpin loops (HL) and internal loops (IL) for each release of the [RNA 3D Motif Atlas](http://rna.bgsu.edu/motifs) are found in directories at the same URL.
 
 ## Input file format
 
