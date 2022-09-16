@@ -22,3 +22,4 @@ The installation instructions and user manual can be found in this repository in
 ## Data files and jar files
 
 Data files for each release of the motif atlas and Java executable .jar files are available in the models folder in this repository.
+They are also available at http://rna.bgsu.edu/data/jar3d/models/
