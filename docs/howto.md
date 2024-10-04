@@ -2,13 +2,13 @@
 
 ## Installation
 
-1. The executable version of JAR3D, named using the scheme `jar3d_DATE.jar`, can be downloaded from http://rna.bgsu.edu/data/jar3d/models/. Use the most current *DATE* if more than one is available.  Jar files from 2015 were tested with Java version 8.
+1. The executable version of JAR3D, named using the scheme `jar3d_DATE.jar`, can be downloaded from https://rna.bgsu.edu/data/jar3d/models/. Use the most current *DATE* if more than one is available.  Jar files from 2015 were tested with Java version 8.
 
-2. The most current model files for hairpin loops (HL) and internal loops (IL) for each release of the [RNA 3D Motif Atlas](http://rna.bgsu.edu/motifs) are found in directories at the same URL.
+2. The most current model files for hairpin loops (HL) and internal loops (IL) for each release of the [RNA 3D Motif Atlas](https://rna.bgsu.edu/rna3dhub/motifs) are found in directories at the same URL.
 
 ## Input file format
 
-Use [FASTA format](http://en.wikipedia.org/wiki/FASTA_format), alternating a header line starting with `>` and a line with one sequence of a hairpin or internal loop. The break between strands in IL should be indicated by the `*` character. Include flanking Watson-Crick basepairs *AU*, *GC*, and *GU* in the sequence, since this is how hairpins and internal loops are extracted from 3D structures. The only allowed characters in each line are A, C, G, U, * and -.  Leave no blank lines.
+Use [FASTA format](https://en.wikipedia.org/wiki/FASTA_format), alternating a header line starting with `>` and a line with one sequence of a hairpin or internal loop. The break between strands in IL should be indicated by the `*` character. Include flanking Watson-Crick basepairs *AU*, *GC*, and *GU* in the sequence, since this is how hairpins and internal loops are extracted from 3D structures. The only allowed characters in each line are A, C, G, U, * and -.  Leave no blank lines.
 
 **Examples:**
 
@@ -180,7 +180,7 @@ Install Python 2.7 and follow the instructions in Section F.6.
 
 ### Compiling the Java code to score sequences against SCFG/MRF models
 
-This is not necessary for most users. Requires the Java Development Kit and [Maven](http://maven.apache.org/). The project is built using maven so this is done through the command line with:
+This is not necessary for most users. Requires the Java Development Kit and [Maven](https://maven.apache.org/). The project is built using maven so this is done through the command line with:
 
 ```
 cd jar3d
@@ -194,7 +194,7 @@ Users interested in creating their own main class will need to edit the *pom.xml
 
 This is not necessary for most users. In order to run the Matlab code to build SCFG/MRF models for each motif group yourself:
 
-1. download and unzip the Matlab binary files for the desired release of the RNA 3D Motif Atlas from http://rna.bgsu.edu/data/jar3d/motifs/ and put them in a directory which we will call `JAR3DMOTIFDIRECTORY`.
+1. download and unzip the Matlab binary files for the desired release of the RNA 3D Motif Atlas from https://rna.bgsu.edu/data/jar3d/motifs/ and put them in a directory which we will call `JAR3DMOTIFDIRECTORY`.
 
 2. Start Matlab and set the working directory to where you would like the models to be written; they will be written to subfolders with names such as *IL/1.13*.
 
