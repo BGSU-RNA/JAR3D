@@ -194,7 +194,7 @@ Users interested in creating their own main class will need to edit the *pom.xml
 
 This is not necessary for most users. In order to run the Matlab code to build SCFG/MRF models for each motif group yourself:
 
-1. download and unzip the Matlab binary files for the desired release of the RNA 3D Motif Atlas from https://rna.bgsu.edu/data/jar3d/motifs/ and put them in a directory which we will call `JAR3DMOTIFDIRECTORY`.
+1. download and unzip the Matlab binary files for the desired release of the RNA 3D Motif Atlas from https://rna.bgsu.edu/data/jar3d/models/ and put them in a directory which we will call `JAR3DMOTIFDIRECTORY`.
 
 2. Start Matlab and set the working directory to where you would like the models to be written; they will be written to subfolders with names such as *IL/1.13*.
 
