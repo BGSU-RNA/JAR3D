@@ -1,4 +1,7 @@
-% pEditDistanceIL(a,b) treats a and b as internal loop sequences, ungapped, with * to separate the strands.  It returns several measures of edit distance.
+% deprecated
+
+% pEditDistanceIL(a,b) treats a and b as internal loop sequences, ungapped,
+% with * to separate the strands.  It returns several measures of edit distance.
 % location == full
 % d(1) = overall edit distance, minimum over both rotations
 % d(2) = overall edit distance, original rotation
@@ -12,16 +15,16 @@ function [d] = pEditDistanceIL(a,b,location)
 
 d = zeros(1,3);                           % initial value
 
-if nargin < 3,
+if nargin < 3
   location = 'full';
 end
 
 i = strfind(a,'*');
 j = strfind(b,'*');
 
-if length(i) ~= 1 || length(j) ~= 1,
+if length(i) ~= 1 || length(j) ~= 1
   d = Inf * ones(1,3);
-elseif strcmpi(location,'full'),
+elseif strcmpi(location,'full')
   p = a(1:(i-1));                             % first sequence, first strand
   q = a((i+1):end);                           % first sequence, second strand
   r = b(1:(j-1));                             % second sequence, first strand
@@ -41,7 +44,7 @@ else
   d(1) = min(d(2),d(3));                      % minimum core distance
 end
 
-if 0 > 1,
+if 0 > 1
   w = p([1 end]);                             % first, first, flank
   x = q([1 end]);                             % first, second, flank
   y = r([1 end]);                             % second, first, flank
