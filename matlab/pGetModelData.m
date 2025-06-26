@@ -2,8 +2,9 @@
 
 function [GroupData, MotifEquivalence] = pGetModelData(OutputPath,loopType)
 
-fprintf('pGetModelData\n');
 filename = [OutputPath filesep loopType '_GroupData.mat'];
+fprintf('pGetModelData: loading %s\n',filename);
+
 load(filename,'GroupData');
 fprintf('Loaded GroupData from %s\n',filename);
 
@@ -25,12 +26,17 @@ MotifEquivalence = zeros(length(GroupData),length(GroupData));
 MotifNotEquiv    = zeros(length(GroupData),length(GroupData));
 FN = [OutputPath filesep 'lib' filesep 'equivalent_motifs.txt'];
 
-switch loopType,
+switch loopType
 case 'IL'
   Rotations = 1;
 case 'HL'
   Rotations = 0;
 end
+
+if loopType(1) == 'J'
+  Rotations = str2num(replace(loopType,'J',''));
+end
+
 
 for m = 1:length(GroupData),
   MotifNames{m,1} = GroupData(m).MotifID;

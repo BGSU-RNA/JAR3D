@@ -12,17 +12,25 @@ Verbose = Param(1);
 [L,N] = size(Search.Candidates);        % L = num instances; N = num NT
 N = N - 1;                              % number of nucleotides
 
-Noncanonical = [];
-switch loopType,
-case 'HL'
-  if N >= 4,
-    Noncanonical = [2 N-1];
-  end
-case 'IL'
-  if Search.Truncate > 2 && N - Search.Truncate > 2,  % number of nucleotides on each strand
-    Noncanonical = [[2 N-1]; [Search.Truncate-1 Search.Truncate+2]];
-  end
+% apparently Noncanonical is not actually being used
+% if we do want to use it, we should check the new code below
+Noncanonical = ones(1,N);
+Noncanonical(1) = 0;
+Noncanonical(N) = 0;
+for k = 1:length(Search.chainbreak)
+    Noncanonical(Search.chainbreak{k}) = 0;
+    Noncanonical(Search.chainbreak{k}+1) = 0;
 end
+% switch loopType
+% case 'HL'
+%   if N >= 4
+%     Noncanonical = [2 N-1];
+%   end
+% case 'IL'
+%   if Search.Truncate > 2 && N - Search.Truncate > 2  % number of nucleotides on each strand
+%     Noncanonical = [[2 N-1]; [Search.Truncate-1 Search.Truncate+2]];
+%   end
+% end
 
 if nargin < 9,
     UseCandidate = 1:L;                     % Use all instances
@@ -79,7 +87,7 @@ for n = 1:length(Node),
             % ----------------------------- fixed base on the left
             letter = zeros(size(Prior));                     % record which bases occur
 
-            if length(Node(n).leftLengthDist) > 1,           % fixed base on left
+            if length(Node(n).leftLengthDist) > 1            % fixed base on left
                 a = Node(n).LeftIndex;                       % index within file
                 for c = 1:L,                                 % loop through candidates
                     ff = Search.Candidates(UseCandidate(c),N+1); % file number
@@ -92,11 +100,16 @@ for n = 1:length(Node),
 
                 Pr = Prior;
 
-                for e = 1:3,                                        % loop through edges
-                    if Param(10) > 0 && sum(Search.BPh(a,:)==e) > 0,
+                % disp('pUpdateModelWithSSF line 103')
+                % Search
+                % Node(n)
+                % a
+
+                for e = 1:3                                        % loop through edges
+                    if Param(10) > 0 && sum(Search.BPh(a,:)==e) > 0
                         Pr = Pr / Param(10);                  % weaken the prior distribution
 %                        fprintf('pUpdateModelWithSSF: Fixed node gets new distribution on the left from BPh made by base %d using edge %d\n',a,e);
-                    elseif Param(11) > 0 && sum(Search.BR(a,:)==e) > 0,
+                    elseif Param(11) > 0 && sum(Search.BR(a,:)==e) > 0
                         Pr = Pr / Param(11);                  % weaken the prior distribution
 %                        fprintf('pUpdateModelWithSSF: Fixed node gets new distribution on the left from BR made by base %d using edge %d\n',a,e);
                     end

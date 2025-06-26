@@ -101,27 +101,29 @@ end
 
 % --------------------------------- Determine number of rotations
 
-switch loopType,
-case 'JL'
-  Rotations = 3;                      % three rotations, for 3-way junctions
-case 'IL'
-  Rotations = 2;                      % two rotations are computed
-case 'HL'
-  Rotations = 1;                      % only one "rotation"
+switch loopType
+  case 'HL'
+    Rotations = 1;                      % only one "rotation"
+  case 'IL'
+    Rotations = 2;                      % two rotations are computed
+end
+
+if loopType(1) == 'J'
+  Rotations = str2num(replace(loopType,'J',''));
 end
 
 % --------------------------------- read .mat filenames, select right ones
 
-fprintf("Looking for motifs in %s\n", MotifLibraryPath)
+fprintf("pMakeSCFGModels: Looking for motifs in %s\n", MotifLibraryPath)
 
 Filenames = dir(MotifLibraryPath);
 
 keep = [];                               % of all models, which to keep
 
-for m = 1:length(Filenames),
+for m = 1:length(Filenames)
   Filenames(m).modeled = 0;
-  if (length(Filenames(m).name) > 2),
-    if (Filenames(m).name(1:2) == loopType),
+  if (length(Filenames(m).name) > 2)
+    if (upper(Filenames(m).name(1:2)) == upper(loopType))
       keep(m) = 1;
       Filenames(m).name = strrep(Filenames(m).name,'.mat','');
     end
@@ -130,7 +132,13 @@ end
 
 Filenames = Filenames(find(keep));
 
-fprintf('Found %d files\n',length(Filenames))
+if length(Filenames) == 0
+  fprintf('pMakeSCFGModels: No motif .mat files found in %s\n', MotifLibraryPath)
+  return
+end
+
+fprintf('pMakeSCFGModels: Found %d files\n',length(Filenames))
+
 
 % ----------------------------------- set paths, make directories if needed
 
@@ -174,32 +182,30 @@ Temp.B = 9876;                             % only used for error catching
 
 % ----------------------------------- start log file
 
-LogFile = [OutputPath filesep 'log ' date '.txt'];
-delete(LogFile);
-diary(LogFile);
+%LogFile = [OutputPath filesep 'log ' date '.txt'];
+%delete(LogFile);
+%diary(LogFile);
 
 if MakeEmpiricalDistribution > 0,
   fprintf('Generating %d random sequences for each group to calculate percentiles\n', SampleSize);
 end
 
-fprintf('Normalization variable is %d\n', Param(8));
-
-fprintf('pIsoScore2(1,1,4,2) is:\n');
+fprintf('pMakeSCFGModels: Normalization variable is %d\n', Param(8));
 
 load PairExemplars
 
-pIsoScore2(1,1,4,ExemplarIDI,Param(8))
+% fprintf('pMakeSCFGModels: pIsoScore2(1,1,4,2) is:\n');
+% pIsoScore2(1,1,4,ExemplarIDI,Param(8))
+% fprintf('pMakeSCFGModels: pIsoScore2(1,1,4,2) normalization: %8.6f\n', sum(sum(pIsoScore2(1,1,4,ExemplarIDI,Param(8)))));
 
-fprintf('pIsoScore2(1,1,4,2) normalization: %8.6f\n', sum(sum(pIsoScore2(1,1,4,ExemplarIDI,Param(8)))));
-
-fprintf('Parameter vector is \n');
+fprintf('pMakeSCFGModels: Parameter vector is \n');
 Param
 
 % ------------------------------------- Gather sequence transition data
 
 TransitionFile = [OutputPath filesep 'transitions.mat'];
 
-if ~(exist(TransitionFile) == 2),
+if ~(exist(TransitionFile) == 2)
   fprintf('No transitions.mat file found, calculating transition probabilities\n');
   pCalculateTransitions;
 else
@@ -215,14 +221,19 @@ BPhcount = 0;                       % number of conserved BPh so far
 BRcount  = 0;                       % number of conserved BR so far
 
 clear OwnScoreStats
-for m = 1:length(Filenames),
+
+% loop over motif groups and their .mat files
+
+% temporary start at 64
+
+for m = 1:length(Filenames)
   MotifName = Filenames(m).name;
 
   disp(['Timestamp ' datestr(now)])
 
   % ---------- set names of files
 
-  fprintf('pMakeSCFGModels: Analyzing motif group %s, %d of %d\n', MotifName, i, length(Filenames));
+  fprintf('pMakeSCFGModels: Making JAR3D model for motif group %s, number %d of %d\n', MotifName, m, length(Filenames));
 
   FastaFile = [SequencePath filesep MotifName '.fasta'];
   FastaFileNoGap = [SequencePath filesep MotifName '_nogap.fasta'];
@@ -245,7 +256,43 @@ for m = 1:length(Filenames),
 
   clear Search
 
-  load([MotifLibraryPath filesep MotifName '.mat']);
+  load([MotifLibraryPath filesep MotifName '.mat'], 'Search');
+
+  % set some variables that might not have been created yet
+  % best place to make sure we know where the strands end
+  if isfield(Search,'chainbreak') && ~isfield(Search,'Truncate')
+    Truncate = zeros(length(Search.chainbreak),1);
+    % check if Search.chainbreak is a cell array
+    if iscell(Search.chainbreak)
+      for i = 1:length(Search.chainbreak)
+        % this code uses the index of the nucleotide after the break
+        Truncate(i) = str2double(Search.chainbreak{i})+1;
+      end
+    else
+      for i = 1:length(Search.chainbreak)
+        % this code uses the index of the nucleotide after the break
+        Truncate(i) = Search.chainbreak(i)+1;
+      end
+    end
+    Search.Truncate = Truncate;
+  end
+
+  if ~isfield(Search,'NumFixed')
+    % actually, the signature is a bad way to count the number of fixed nodes
+    Search.NumFixed = 0;
+    % count number of F, L, R characters in Search.Signature
+    % Search.NumFixed = Search.NumFixed + sum(Search.Signature == 'F');
+    % Search.NumFixed = Search.NumFixed + sum(Search.Signature == 'L');
+    % Search.NumFixed = Search.NumFixed + sum(Search.Signature == 'R');
+    % fprintf('pMakeSCFGModels: Signature is %s, NumFixed is %d\n', Search.Signature, Search.NumFixed);
+  end
+
+  if m == 1
+    fprintf('pMakeSCFGModels: Loaded %s, looks like:', [MotifLibraryPath filesep MotifName '.mat']);
+    Search
+    Search.File
+    Search.File(1)
+  end
 
   [L,N] = size(Search.Candidates);
   N = N - 1;
@@ -259,28 +306,44 @@ for m = 1:length(Filenames),
   Search.File = zBaseRiboseInteractions(Search.File);
 
   % ---------- make an SCFG model of the current model type, write to file
-
   [Search,Node] = pMakeSingleJAR3DModel(Search,Param,Prior,loopType);
 
- if isempty(Node),
+  % temporarily focus on just one motif group zzz
+  % if strcmp(MotifName,'IL_15698.3')
+  %   fprintf('pMakeSCFGModels is stopping here\n');
+  %   print(crash);
+  % end
+
+  % if strcmp(MotifName,'IL_63596.11')
+  %   fprintf('pMakeSCFGModels is stopping here\n');
+  %   print(crash);
+  % end
+
+
+  if isempty(Node)
 %    mkdir([MotifLibraryPath filesep 'trouble']);
 %    movefile([MotifLibraryPath filesep MotifName '.mat'],[MotifLibraryPath filesep 'trouble' filesep MotifName '.mat']);
     fprintf('@@@@@@@@@@@@ pMakeSCFGModels: Motif %s could not be modeled for some reason\n', MotifName);
     Filenames(m).modeled = 0;
 
- else
+  else
 
     Filenames(m).modeled = 1;
 
     Text = pNodeToSCFGModelText(Node,5);
 
-    if WriteModel > 0,
+    if WriteModel > 0
       fid = fopen(ModelFile,'w');
-      for i = 1:length(Text),
+      for i = 1:length(Text)
         fprintf(fid,'%s\n', Text{i});
       end
       fclose(fid);
     end
+
+    % ---------- count the number of fixed positions
+    NumFixed = length(strfind(Text,'FixedNode'));
+    NumFixed = NumFixed + length(strfind(Text,'conserved insertion'));
+    Search.NumFixed = NumFixed;
 
     % ---------- extract sequences of instances into .fasta file
 
@@ -321,12 +384,14 @@ for m = 1:length(Filenames),
     case 'IL'
       GroupData(m).Signature{1} = Search.Signature;
       GroupData(m).Signature{2} = Search.RSignature;
+    otherwise
+      GroupData(m).Signature{1} = Search.Signature;
     end
     GroupData(m).NumNT = N;
     E = abs(fix(triu(Search.Edge)));
     GroupData(m).NumBasepairs = full(sum(sum((E > 0) .* (E < 14))));
 
-    if GroupData(m).NumBasepairs > Rotations,
+    if GroupData(m).NumBasepairs > Rotations
       GroupData(m).Structured = 1;            % consider this motif to be "structured"
     else
       GroupData(m).Structured = 0;
@@ -343,12 +408,13 @@ for m = 1:length(Filenames),
     GroupData(m).NumBR  = full(sum(sum(BR > 0)));
     GroupData(m).NumInstances = length(Search.Candidates(:,1));
     GroupData(m).Truncate = Search.Truncate;
-
-    si = strrep(GroupData(m).Signature{1},'L','R');
-    GroupData(m).NumFixed = length(strfind(si,'-R-'));
+    GroupData(m).NumFixed = Search.NumFixed;
 
     % --------------------------------------- write out base-backbone interactions
 
+    if Verbose > 0
+      fprintf('pMakeSCFGModels: Writing base-backbone interactions\n');
+    end
     for a = 1:N,
       for b = 1:N,
         if a~= b && Search.BPh(a,b) > 0,
@@ -405,6 +471,7 @@ for m = 1:length(Filenames),
 
     % ---------- Write motif data file
 
+    fprintf('pMakeSCFGModels: Writing motif data file %s\n', DataFile);
     fid = fopen(DataFile,'w');
     if strcmp(loopType,'IL'),
       fprintf(fid,'%s %s\n', Search.Signature, Search.RSignature);
@@ -435,9 +502,9 @@ for m = 1:length(Filenames),
         fprintf('pMakeSCFGModels: FastaFile:  %s\n', FastaFile);
         fprintf('pMakeSCFGModels: ModelFile:  %s\n', ModelFile);
         fprintf('pMakeSCFGModels: OutputPath: %s\n', OutputPath);
-        fprintf('pMakeSCFGModels: Calculating scores of sequences against their own model\n');
       end
 
+      fprintf('pMakeSCFGModels: Calculating scores of sequences against their own model\n');
       OwnScores = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifParseSingle(OutputPath,FastaFile,ModelFile);
 
       OwnScores
@@ -554,9 +621,6 @@ for m = 1:length(Filenames),
 
       print(gcf,'-dpng',[DiagnosticPath filesep MotifName '_randomsequencescatter.png']);
 
-%        pause
-
-
       figure(3)
       clf
       hist(-MixedScores,30);
@@ -638,16 +702,16 @@ end                           % loop over filenames
 % ------------------------------------------------------- write lists of model files
 
 fid = fopen(AllFileList,'w');
-for m = 1:length(Filenames),
-  if Filenames(m).modeled == 1,
+for m = 1:length(Filenames)
+  if Filenames(m).modeled == 1
     fprintf(fid,'%s\n',[Filenames(m).name '_model.txt']);
   end
 end
 fclose(fid);
 
 fid = fopen(StructuredFileList,'w');
-for m = 1:length(Filenames),
-  if Filenames(m).modeled == 1 && GroupData(m).Structured > 0,
+for m = 1:length(Filenames)
+  if Filenames(m).modeled == 1 && GroupData(m).Structured > 0
     fprintf(fid,'%s\n',[Filenames(m).name '_model.txt']);
   end
 end
@@ -689,11 +753,9 @@ for m = 1:length(Filenames),
 end
 fclose(fid);
 
-diary off
-
 % -------------------------- show statistics about own scores
 
-if Verbose > 0,
+if Verbose > 0
   fprintf('pMakeSCFGModels: Statistics on own scores\n');
 
   for m = 1:length(OwnScoreStats),

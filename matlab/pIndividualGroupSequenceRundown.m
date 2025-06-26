@@ -1,4 +1,5 @@
-% pIndividualGroupSequenceRundown analyzes the alignment of individual sequences to probabilistic models and reports on the models that the sequence fits best
+% pIndividualGroupSequenceRundown analyzes the alignment of individual sequences to
+% probabilistic models and reports on the models that the sequence fits best
 
 % Copy Text into a spreadsheet, then sort by columns B, S, and U to get a nice ordering
 
@@ -32,26 +33,27 @@ Correctness.NumBPh = GroupData(OwnMotif(1)).NumBPh;
 Correctness.MostCommonSequence = FASTA(1).Sequence;
 Correctness.NumInstances = GroupData(OwnMotif(1)).NumInstances;
 
-if nargin < 17,
+if nargin < 17
   Criterion = 3;
 end
 
-Score = 10000*(FullEditDistance == 0);  % full sequence matches always win
+Score = 10000*(FullEditDistance == 0);  % full sequence match overwhelms any other score
 
-switch Criterion,
-case 1,                                  % alignment score
+switch Criterion
+case 1                                  % alignment score
   Score = Score + MLPS;
-case 2,                                  % edit distance, ties broken by alignment score
+  Score = MLPS;                         % no credit for exact sequence matches
+case 2                                  % edit distance, ties broken by alignment score
   Score = Score - CoreEditDistance + MLPS/1000;
-case 3,                                  % plain edit distance, choose randomly
+case 3                                  % plain edit distance, choose randomly
   Score = Score - CoreEditDistance;
-case 4,                                  % average edit distance to known instances
+case 4                                  % average edit distance to known instances
   Score = Score + MLPS - CoreEditDistance;
-case 5,                                  % total probability
-  Score = Score + CutoffScore;             % temporarily not really total probabilty
-case 6,                                  % percentile score
+case 5
+  Score = Score + CutoffScore;          % cutoff score
+case 6                                  % percentile score
   Score = Score + Percentile + MLPS/1000000;    % use MLPS to break ties but not affect the decision more than that
-case 7,                                  % just check to see if the cutoff is met, don't really score by Score
+case 7                                  % just check to see if the cutoff is met, don't really score by Score
   Score = Score + MLPS;
 end
 
@@ -67,19 +69,19 @@ ROC(2,2) = 0;                              % avoid plotting problems
 
 NumBetterModelsToShow = 5;
 
-if Verbose == 1,
-  if OnlyStructured == 1,
+if Verbose == 1
+  if OnlyStructured == 1
     fprintf('Structured individual-group diagnostic\n');
   else
     fprintf('Individual-group diagnostic, all groups\n');
   end
-  fprintf('Listing groups by interaction signature\n');
+    fprintf('Listing groups by interaction signature\n');
 end
 
 %fprintf('Listing all sequences in all groups for which at least one sequence scores better against another model or has percentile worse than 0.2 against its own model\n');
 
-if OnlyStructured == 1,
-  str = find(cat(1,GroupData.Structured) == 1);  % structured internal loops
+if OnlyStructured == 1
+  str = find(cat(1,GroupData.Structured) == 1);  % structured loops
 else
   str = 1:length(GroupData);
 end
@@ -102,18 +104,18 @@ for gg = 1:length(grouporder),                 % run through sequence groups
 
   s = find(SeqGroup == g);                     % sequences in this group
 
-  if length(s) > 0,
+  if length(s) > 0
     mn = OwnMotif(s(1));                                % correct model number
 
     alignmentnumrows = 0;
     alignmentzeroedit = 0;
 
-    for k = 1:length(s),
+    for k = 1:length(s)
       n = s(k);
-      if OnlyStructured == 0 || GroupData(mn).Structured > 0,
+      if OnlyStructured == 0 || GroupData(mn).Structured > 0
         alignmentnumrows = alignmentnumrows + FASTA(n).Multiplicity;
 
-        if OwnCoreEditDistance(n) == 0,
+        if OwnCoreEditDistance(n) == 0
           alignmentzeroedit = alignmentzeroedit + FASTA(n).Multiplicity;
         end
       end
@@ -123,7 +125,7 @@ for gg = 1:length(grouporder),                 % run through sequence groups
 
     em = find(MotifEquivalence(mn,:) > 0);     % this model and all equivalent to it
 
-    if Verbose == 1,
+    if Verbose == 1
       fprintf('Group %3d is from %s which you can see at %s\n', g, GroupData(mn).MotifID, ['http://rna.bgsu.edu/rna3dhub/motif/view/' GroupData(mn).MotifID]);
 
       if GroupData(mn).Structured == 1,
@@ -145,12 +147,12 @@ for gg = 1:length(grouporder),                 % run through sequence groups
 
     % ------------------------------- order sequence matches approximately best to worst
 
-    if length(s) > 1,
+    if length(s) > 1
       clear OrderMatrix
-      for k = 1:length(s),
+      for k = 1:length(s)
         n = s(k);                                         % sequence number
         [m,r] = max(Score(n,:,:),[],3);                   % maximum over rotations
-        bettermodel = str(find(m(str) >= Score(n,mn,1))); % model numbers of better models
+        bettermodel = str(find(m(str) > Score(n,mn,1)));  % model numbers of strictly better models
         bettermodel = setdiff(bettermodel,mn);            % take out own model
 
         OrderMatrix(k,1) = length(bettermodel);
@@ -164,10 +166,10 @@ for gg = 1:length(grouporder),                 % run through sequence groups
 
     bestmodels = [];                                      % keep track for evaluation of voting as a classification technique
 
-    for k = 1:min(length(s),Params.NumSequencesToShow),   % loop through sequences
+    for k = 1:min(length(s),Params.NumSequencesToShow)    % loop through sequences
       n = s(k);                                           % sequence number
 
-      if UseMultiplicity > 0,
+      if UseMultiplicity > 0
         Counter = FASTA(n).Multiplicity;                  % use multiplicity of this variant
       else
         Counter = 1;                                      % simply count sequences
@@ -182,17 +184,18 @@ for gg = 1:length(grouporder),                 % run through sequence groups
 
       LocalScore = Score(n,:,:);
 
-      SL = length(strrep(FASTA(n).Sequence,'*',''));
+      % give a boost to exact sequence matches here
+      % SL = length(strrep(FASTA(n).Sequence,'*',''));
 
-      if SL >= CoreDistSL,
-        LocalScore = LocalScore + 1000*(CoreEditDistance(n,:,:) == 0);  % core sequence matches
-      end
+      % if SL >= CoreDistSL
+      %   LocalScore = LocalScore + 1000*(CoreEditDistance(n,:,:) == 0);  % core sequence matches
+      % end
 
       [m,r] = max(LocalScore,[],3);                       % maximum score over rotations
 
       OwnCutoffMet = max(CutoffMet(n,em,1));              % 1 if any cutoffs are met
 
-      if OwnCutoffMet > CutoffMet(n,mn,1) && Verbose == 1,
+      if OwnCutoffMet > CutoffMet(n,mn,1) && Verbose == 1
         fprintf('Equivalent motif meets cutoff but not original one\n');
       end
 
@@ -209,14 +212,14 @@ for gg = 1:length(grouporder),                 % run through sequence groups
       bettermodel = [];                         % keep track of better models
       equalmodel = [];
 
-      for w = 1:length(str),                    % loop through desired models
+      for w = 1:length(str)                     % loop through desired models
         cmn = str(w);                           % current model number
-        if cmn ~= mn,
-          if CutoffMet(n,cmn,r(cmn)) > 0,
-            if m(cmn) > OwnScore,                 % better score
+        if cmn ~= mn
+          if CutoffMet(n,cmn,r(cmn)) > 0        % only counting other models if the sequence meets their cutoff, which makes sense
+            if m(cmn) > OwnScore                % better score
               bettermodel = [bettermodel cmn];
             end
-            if m(cmn) == OwnScore && MotifEquivalence(mn,cmn) <= 0, % different model scores the same
+            if m(cmn) == OwnScore && MotifEquivalence(mn,cmn) <= 0  % different model scores the same
               equalmodel = [equalmodel cmn];
             end
           end
@@ -226,14 +229,14 @@ for gg = 1:length(grouporder),                 % run through sequence groups
       numbetter = length(bettermodel);
       numequal  = length(equalmodel);
 
-      if numbetter > 0,
+      if numbetter > 0
         [y,i] = sort(-m(bettermodel));                    % sort best to worst
         bettermodel = bettermodel(i);                     % re-order
       end
 
-      if SizeOfGuessSet == 1,
-        if OwnCutoffMet > 0 && numbetter == 0,
-          if numequal > 0,
+      if SizeOfGuessSet == 1
+        if OwnCutoffMet > 0 && numbetter == 0
+          if numequal > 0
             Confusion(mn,mn) = Confusion(mn,mn) + 1/(1+numequal);  % tie
             Confusion(mn,equalmodel) = Confusion(mn,numequal) + 1/(1+numequal);
           else
@@ -249,7 +252,7 @@ for gg = 1:length(grouporder),                 % run through sequence groups
 
       score = 0;
 
-      if OwnCutoffMet > 0,
+      if OwnCutoffMet > 0
         Correctness.AcceptedSequences = Correctness.AcceptedSequences + 1;
         Correctness.AcceptedByMultiplicity = Correctness.AcceptedByMultiplicity + FASTA(n).Multiplicity;
         if OwnCoreEditDistance(n) > 0,
@@ -288,7 +291,7 @@ for gg = 1:length(grouporder),                 % run through sequence groups
 
       maxscore = max(GroupData(mn).OwnScore);
 
-      if Verbose == 1,
+      if Verbose == 1
         fprintf('Better: %3d Equal: %3d ',numbetter,numequal);
         fprintf('Score %4.2f', score);
         fprintf(' %20s', FASTA(n).Sequence);
@@ -311,10 +314,13 @@ for gg = 1:length(grouporder),                 % run through sequence groups
         li = strfind(FASTA(n).Header,loopType);
         sp = strfind(FASTA(n).Header,' ');
 
-        Text{seqnum} = [Text{seqnum} FASTA(n).Header(li(2):(li(2)+9)) char(9)];
+        FASTA(n).Header
+
+        % trying to find a loop id? zzz  but it's not in the header
+        Text{seqnum} = [Text{seqnum} FASTA(n).Header(li(1):(li(1)+9)) char(9)];
         Text{seqnum} = [Text{seqnum} FASTA(n).Sequence char(9)];
 
-        Text{seqnum} = [Text{seqnum} 'http://rna.bgsu.edu/rna3dhub/motif/view/' GroupData(mn).MotifID char(9)];
+        Text{seqnum} = [Text{seqnum} 'https://rna.bgsu.edu/rna3dhub/motif/view/' GroupData(mn).MotifID char(9)];
         Text{seqnum} = [Text{seqnum} GroupData(mn).Signature{1} char(9)];
         Text{seqnum} = [Text{seqnum} sprintf('%0.2f', MLPS(n,mn,1)) char(9)];
         Text{seqnum} = [Text{seqnum} sprintf('%0.2f', 100*Percentile(n,mn,r(mn))) char(9)];
@@ -322,7 +328,7 @@ for gg = 1:length(grouporder),                 % run through sequence groups
 
         Text{seqnum} = [Text{seqnum} num2str(numbetter) char(9)];
 
-        if numbetter > 0,
+        if numbetter > 0
           fprintf(' scores better against %3d groups: ', numbetter);
           for b = 1:min(NumBetterModelsToShow,numbetter),
             bmn = bettermodel(b);

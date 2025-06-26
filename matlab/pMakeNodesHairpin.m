@@ -11,13 +11,13 @@ Node(n).RightLetter = '';
 Node(n).P           = ones(17,1);
 Node(n).PIns        = 1;
 
-if TertiaryFreeNode == 0 || Extension < 2,  % this stem has long-range inter
+if TertiaryFreeNode == 0 || Extension < 2   % this stem has long-range inter
                                             % or we are using regular hairpins
   Node(n).subtype     = 'XXXX';             % revise this later!
 
   % ----------------------------------------- model interactions
   [i,j] = find(triu(G(MI,MI)));
-  for k = 1:length(i),
+  for k = 1:length(i)
     Node(n).IBases(k,:) = [i(k) j(k)];      % these bases interact
     i1 = i(k) + a - 1;                      % index of first base
     i2 = j(k) + a - 1;                      % index of second base
@@ -32,7 +32,7 @@ if TertiaryFreeNode == 0 || Extension < 2,  % this stem has long-range inter
     [K,KK] = size(Node(n).IBases);
     K = K + 1;
 
-    Node(n).IBases(K,:) = [i i]; 
+    Node(n).IBases(K,:) = [i i];
     i1 = i + a - 1;                        % index in original file
     Node(n).InterIndices(K,:) = [i1 i1];
     Node(n).InteractionComment{K} = [' // Hairpin conserved non-basepairing position ' File.NT(i1).Base File.NT(i1).Number];
@@ -40,7 +40,7 @@ if TertiaryFreeNode == 0 || Extension < 2,  % this stem has long-range inter
     M(File.NT(i1).Code,File.NT(i1).Code) = 4;
     Node(n).SubsProb(:,:,K) = M / sum(sum(M));            % favor the observed base
 
-    if Verbose > 0,
+    if Verbose > 0
       fprintf('    Right strand conserved insertion %c%4s at right strand position %d\n', File.NT(i1).Base, File.NT(i1).Number, i);
     end
 
@@ -48,7 +48,7 @@ if TertiaryFreeNode == 0 || Extension < 2,  % this stem has long-range inter
 
   Node(n).Comment = [ ' // Hairpin node ' File.NT(a).Base File.NT(a).Number ':' File.NT(B).Base File.NT(B).Number];
 
-  if Verbose > 0,
+  if Verbose > 0
     fprintf('%3d Hairpin   %s:%s %s\n', n, File.NT(a).Number, File.NT(B).Number, cat(2,File.NT(MI).Base));
   end
 
@@ -61,7 +61,7 @@ else                                        % no long-range interactions
   % other program
 
   % --------------------------------------- % interaction between 1 and 3
-  
+
   Node(n).IBases      = [1 3];              % fixed bases 1 and 3 interact
 
   Node(n).InteractionComment{1} = [' // Hairpin on extensible stem ' File.NT(a).Number ' - ' File.NT(B).Number ' ' cat(2,File.NT(MI).Base)];
@@ -80,7 +80,7 @@ else                                        % no long-range interactions
   if Normalize == 1,
     Node(n).Insertion(1).LetterDist = [1 1 1 1]/4;
   else
-    Node(n).Insertion(1).LetterDist = [1 1 1 1];  
+    Node(n).Insertion(1).LetterDist = [1 1 1 1];
   end
   Node(n).InsertionComment{1} = ' // Insertion in vague hairpin';
 
@@ -105,30 +105,32 @@ if Verbose > 1,
   j = j(ii);
   e = e(ii);
 
-  if length(i) > 0,
+  if length(i) > 0
     fprintf('Hairpin has these long-range interactions: ===================\n');
-    for z = 1:length(i),
+    for z = 1:length(i)
       NT1 = File.NT(i(z));
       NT2 = File.NT(j(z));
       fprintf('Pair %s %s%5s_%s - %s%5s_%s %s\n', File.Filename, NT1.Base,NT1.Number,NT1.Chain,NT2.Base,NT2.Number,NT2.Chain, zEdgeText(File.Edge(i(z),j(z))));
     end
-  else
+  elseif Verbose > 1
     fprintf('Hairpin has no long-range interactions ***********************\n');
   end
 
   c = cat(1,File.NT(1:length(File.NT)).Center); % nucleotide centers
   cent = mean(c);
 
-  fprintf('Distance from center of molecule: %8.4f\n', norm(cent-File.NT(a).Center));
+  if Verbose > 1
+    fprintf('Distance from center of molecule: %8.4f\n', norm(cent-File.NT(a).Center));
+  end
 
-  if Verbose > 2,
+  if Verbose > 2
     fprintf('Press any key to continue\n');
     pause
   end
 end
 %Calculate normalization constant
 Node(n).InterIndices = Node(n).MiddleIndex(Node(n).IBases);
-if ~isempty(Node(n).InterIndices),
+if ~isempty(Node(n).InterIndices)
     Left = Node(n).MiddleIndex(1:length(Node(n).MiddleIndex)-1);
     Node(n).NormCons = pClusterNorm(Node(n).InterIndices,Node(n).SubsProb,Left,Node(n).RightIndex);
 else
