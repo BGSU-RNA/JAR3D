@@ -1,3 +1,5 @@
+% use the probabilities in x to generate a matrix with M rows and N columns
+
 function [r] = rando(x,M,N)
 
 n = length(x);
