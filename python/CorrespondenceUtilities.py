@@ -140,11 +140,11 @@ def readcorrespondencesfromfile(filenamewithpath):
 def alignmentheaderhtml(ModelToColumn,GroupToModel):
 
   ColumnHeader = [''] * len(ModelToColumn)
-  for a in ModelToColumn.iterkeys():
+  for a in ModelToColumn.keys():
     ColumnHeader[int(ModelToColumn[a])-1] = a
 
   PositionNumber = [''] * (len(ModelToColumn)+1)
-  for a in GroupToModel.iterkeys():
+  for a in GroupToModel.keys():
     colnum = ModelToColumn[GroupToModel[a]]
     m = re.search("Column_([0-9]+)$",a)
     if m is not None:
@@ -174,8 +174,7 @@ def alignmentrowshtml(DisplayColor,aligdata,HasName,HasScore, HasInteriorEdit, H
 
   t = ""
 
-  for a in sorted(aligdata.iterkeys(),key = keyforsortbynumber):
-#    print HasScore
+  for a in sorted(aligdata.keys(),key = keyforsortbynumber):
     if HasScore[a] == ".":
       Score = 0
       DisplayScore = ""
@@ -216,22 +215,22 @@ def alignsequencesandinstancesfromtext(MotifCorrespondenceText,SequenceCorrespon
 
   motifalig = {}
 
-  for a in InstanceToGroup.iterkeys():
+  for a in InstanceToGroup.keys():
     m = re.search("(Instance_[0-9]+)",a)
     motifalig[m.group(1)] = [''] * len(ModelToColumn)     # start empty
 
-  for a in sorted(InstanceToGroup.iterkeys()):
+  for a in sorted(InstanceToGroup.keys()):
     m = re.search("(Instance_[0-9]+)",a)
     t = int(ModelToColumn[GroupToModel[InstanceToGroup[a]]])
     motifalig[m.group(1)][t-1] += a[len(a)-1]
 
   sequencealig = {}
 
-  for a in SequenceToModel.iterkeys():
+  for a in SequenceToModel.keys():
     m = re.search("(Sequence_[0-9]+)",a)
     sequencealig[m.group(1)] = [''] * len(ModelToColumn)  # start empty
 
-  for a in sorted(SequenceToModel.iterkeys()):
+  for a in sorted(SequenceToModel.keys()):
     m = re.search("(Sequence_[0-9]+)",a)
     t = int(ModelToColumn[SequenceToModel[a]])
     sequencealig[m.group(1)][t-1] += a[len(a)-1]
@@ -242,7 +241,7 @@ def alignsequencesandinstancesfromtext(MotifCorrespondenceText,SequenceCorrespon
   header['positions'] = [''] * len(ModelToColumn)
   header['insertions'] = [''] * len(ModelToColumn)
 
-  for a in ModelToColumn.iterkeys():
+  for a in ModelToColumn.keys():
     header['columnname'][int(ModelToColumn[a])-1] = a
 
   for i in range(0,len(ModelToColumn)):
@@ -252,7 +251,7 @@ def alignsequencesandinstancesfromtext(MotifCorrespondenceText,SequenceCorrespon
     if re.search("Insertion",header['columnname'][i]):
       header['insertions'][i] = 'Insertion'
 
-  for a in GroupToModel.iterkeys():
+  for a in GroupToModel.keys():
     m = re.search("Column_([0-9]+)$",a)
     if m is not None:
       colnum = ModelToColumn[GroupToModel[a]]
@@ -265,12 +264,12 @@ def alignsequencesandinstancesfromfiles(MotifCorrespondenceFile,SequenceCorrespo
   with open(MotifCorrespondenceFile,"r") as f:
     MotifLines = f.readlines()
 
-  print "Read motif correspondence file " + MotifCorrespondenceFile
+  print("Read motif correspondence file " + MotifCorrespondenceFile)
 
   with open(SequenceCorrespondenceFile,"r") as f:
     SequenceLines = f.readlines()
 
-  print "Read sequence correspondence file " + SequenceCorrespondenceFile
+  print("Read sequence correspondence file " + SequenceCorrespondenceFile)
 
   header, motifalig, sequencealig = alignsequencesandinstancesfromtext(MotifLines,SequenceLines)
 
@@ -287,11 +286,11 @@ def alignsequencesandinstancesfromfileshtml(MotifCorrespondenceFile,SequenceCorr
 
     DisplayColor = {}
 
-    for i in InstanceToPDB.iterkeys():
+    for i in InstanceToPDB.keys():
       a = re.search("(Instance_[0-9]+)",i)
       DisplayColor[a.group(1)] = 'black'            # default display color
 
-    for i in SequenceToModel.iterkeys():
+    for i in SequenceToModel.keys():
       a = re.search("(Sequence_[0-9]+)",i)
       DisplayColor[a.group(1)] = 'black'            # default display color
 
@@ -299,24 +298,24 @@ def alignsequencesandinstancesfromfileshtml(MotifCorrespondenceFile,SequenceCorr
 
     aligdata = {}                                      # new dictionary
 
-    for a in InstanceToGroup.iterkeys():
+    for a in InstanceToGroup.keys():
       m = re.search("(Instance_[0-9]+)",a)
       aligdata[m.group(1)] = []
 
-    for a in SequenceToModel.iterkeys():
+    for a in SequenceToModel.keys():
       m = re.search("(Sequence_[0-9]+)",a)
       aligdata[m.group(1)] = []
 
-    for a in aligdata.iterkeys():
+    for a in aligdata.keys():
       for j in range(0,len(ModelToColumn)):
         aligdata[a].append('')                        # clumsy but effective
                                                       # sorting by key should keep insertions in order
-    for a in sorted(InstanceToGroup.iterkeys()):
+    for a in sorted(InstanceToGroup.keys()):
       m = re.search("(Instance_[0-9]+)",a)
       t = int(ModelToColumn[GroupToModel[InstanceToGroup[a]]])
       aligdata[m.group(1)][t-1] += a[len(a)-1]
 
-    for a in sorted(SequenceToModel.iterkeys()):
+    for a in sorted(SequenceToModel.keys()):
       m = re.search("(Sequence_[0-9]+)",a)
       t = int(ModelToColumn[SequenceToModel[a]])
       aligdata[m.group(1)][t-1] += a[len(a)-1]
@@ -333,12 +332,11 @@ def alignsequencesandinstancesfromfileshtml(MotifCorrespondenceFile,SequenceCorr
 
 if __name__ == "__main__":
 #  alignsequencesandinstancesfromfiles(sys.argv[1],sys.argv[2])
-#  print t
 
   header, motifalig, sequencealig = alignsequencesandinstancesfromfiles(sys.argv[1],sys.argv[2])
-  print "Result from alignsequencesandinstancesfromfiles: "
-  print header
-  print motifalig
-  print sequencealig
+  print("Result from alignsequencesandinstancesfromfiles: ")
+  print(header)
+  print(motifalig)
+  print(sequencealig)
 
 
