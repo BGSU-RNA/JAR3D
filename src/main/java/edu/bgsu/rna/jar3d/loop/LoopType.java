@@ -8,10 +8,10 @@ import edu.bgsu.rna.jar3d.Sequence;
 public enum LoopType {
 
 	/** Type for all internal loops. */
-	INTERNAL("internal", "IL", 2), 
+	INTERNAL("internal", "IL", 2),
 
 	/** Type for all hairpin loops. */
-	HAIRPIN("hairpin", "HL", 1), 
+	HAIRPIN("hairpin", "HL", 1),
 
 	/** Type for junction loops. */
 	JUNCTION("junction", "JL", 3),
@@ -30,7 +30,7 @@ public enum LoopType {
 
 	/**
 	 * Create a new LoopType.
-	 * 
+	 *
 	 * @param longName The long name.
 	 * @param shortName The short name.
 	 * @param strands The number of strands.
@@ -42,9 +42,9 @@ public enum LoopType {
 	}
 
 	/**
-	 * Get the correct loop type from the given string. The string may be either a short or long name. If nothing 
-	 * matches the given loop type then UNKNOWN is returned. 
-	 * 
+	 * Get the correct loop type from the given string. The string may be either a short or long name. If nothing
+	 * matches the given loop type then UNKNOWN is returned.
+	 *
 	 * @param type The type
 	 * @return The matching LoopType.
 	 */
@@ -56,16 +56,16 @@ public enum LoopType {
 		if (type.equalsIgnoreCase("HL") || type.equalsIgnoreCase("hairpin")) {
 			return HAIRPIN;
 		}
-		if (type.equalsIgnoreCase("JL") || type.equalsIgnoreCase("junction")) {
+		if (type.startsWith("J") || type.equalsIgnoreCase("junction")) {
 			return JUNCTION;
 		}
 		return UNKNOWN;
 	}
 
 	/**
-	 * Infer the loop type from a Sequence. If the sequence has no * then it is a hairpin. If it has one * then it is 
+	 * Infer the loop type from a Sequence. If the sequence has no * then it is a hairpin. If it has one * then it is
 	 * an internal loop. Otherwise it is a junction loop.
-	 * 
+	 *
 	 * @param sequence
 	 * @return The loop type.
 	 */
@@ -84,7 +84,7 @@ public enum LoopType {
 
 	/**
 	 * Get the long name of this loop.
-	 * 
+	 *
 	 * @return The long name.
 	 */
 	public String getLongName() {
@@ -93,7 +93,7 @@ public enum LoopType {
 
 	/**
 	 * Get the short name of this loop.
-	 * 
+	 *
 	 * @return The short name.
 	 */
 	public String getShortName() {
@@ -102,7 +102,7 @@ public enum LoopType {
 
 	/**
 	 * Get the number of strands in this loop.
-	 * 
+	 *
 	 * @return The number of strands.
 	 */
 	public int getStrandCount() {
@@ -111,7 +111,7 @@ public enum LoopType {
 
 	/**
 	 * Return a string representation of the loop. The short name is used as a representation.
-	 * 
+	 *
 	 * @return A string of this loop.
 	 */
 	@Override
