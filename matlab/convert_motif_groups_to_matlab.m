@@ -12,6 +12,7 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 	end
 
 	% read the json file into text
+	[MotifLibraryLocation Input filesep 'release.json']
 	json = fileread([MotifLibraryLocation Input filesep 'release.json']);
 
 	% replace ||||P_1 with empty string because motif atlas keeps them but Matlab does not
@@ -32,7 +33,9 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 
     % get all pdb ids, and set up empty motif structure for each motif group
 	for i = 1:length(motif_list)
-		loop_ids = fieldnames(motif_list(i).alignment);
+		i
+		motif_list{i}
+		loop_ids = fieldnames(motif_list{i}.alignment);
 		for j = 1:numel(loop_ids)
 			loop_id = loop_ids{j};
 			fields = split(loop_ids{j},'_');
@@ -44,8 +47,8 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
             pdb_id_to_motif_and_loop(pdb_id) = [pdb_id_to_motif_and_loop(pdb_id); [i j]];
         end
 
-		num_instances = length(motif_list(i).alignment);
-		num_positions = length(motif_list(i).alignment.(loop_ids{1}));
+		num_instances = length(motif_list{i}.alignment);
+		num_positions = length(motif_list{i}.alignment.(loop_ids{1}));
 
 		% this is the structure we need to produce, although not all of these fields
 		% Candidates: [278×7 uint16]
@@ -55,12 +58,12 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 		% Signature: 'cWW-cWW-cWW'
 
 		motif_structure{i} = struct();
-        motif_structure{i}.motid_id = motif_list(i).motif_id;
+        motif_structure{i}.motid_id = motif_list{i}.motif_id;
         motif_structure{i}.Candidates = zeros(num_instances,num_positions+1,'uint16');
 		motif_structure{i}.consensusEdge = zeros(num_positions,num_positions);
-		motif_structure{i}.bp_signature = motif_list(i).bp_signature;  % text string
-		motif_structure{i}.Signature = motif_list(i).bp_signature;  % text string
-		motif_structure{i}.chainbreak = motif_list(i).chainbreak;
+		motif_structure{i}.bp_signature = motif_list{i}.bp_signature;  % text string
+		motif_structure{i}.Signature = motif_list{i}.bp_signature;  % text string
+		motif_structure{i}.chainbreak = motif_list{i}.chainbreak;
 
 		% create Truncate variable needed later
 		Truncate = zeros(length(motif_structure{i}.chainbreak),1);
@@ -79,18 +82,18 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 
         % some functions look for information in a Query field
         motif_structure{i}.Query = struct();
-        motif_structure{i}.Query.Name = motif_list(i).motif_id;
+        motif_structure{i}.Query.Name = motif_list{i}.motif_id;
         motif_structure{i}.MaxDiffMat = ones(1,num_positions);
-        for k = 1:length(motif_list(i).chainbreak)
-            cb = motif_list(i).chainbreak{k};
+        for k = 1:length(motif_list{i}.chainbreak)
+            cb = motif_list{i}.chainbreak{k};
             % pretty sure that you put Inf to indicate a chain break after position cb
             % this is used in xFASTACandidates.m
             motif_structure{i}.MaxDiffMat(cb) = Inf;
         end
 
-        GroupData(i).MotifID = motif_list(i).motif_id;
+        GroupData(i).MotifID = motif_list{i}.motif_id;
         % GroupData(i).Signature = cell();
-        % GroupData(i).Signature{1} = motif_list(i).signature;
+        % GroupData(i).Signature{1} = motif_list{i}.signature;
         % GroupData(i).NumNT = num_positions;
         % GroupData(i).NumInstances = num_instances;
         % GroupData(i).Structured = 1;   % just set it this way, maybe that's OK
@@ -154,8 +157,8 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 
 		% loop over motif_list many times, even though inefficient
 		for i = 1:length(motif_list)
-			% motif_list(i).motif_id
-			loop_ids = fieldnames(motif_list(i).alignment);
+			% motif_list{i}.motif_id
+			loop_ids = fieldnames(motif_list{i}.alignment);
 
 			% loop over loop_ids in the motif group
 			for j = 1:numel(loop_ids)
@@ -164,7 +167,7 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 				pdb_id = fields{2};
 
 				if strcmp(pdb_id,pdb_id_loaded)
-					fprintf('%s %s %s %s\n',motif_list(i).motif_id,loop_id,pdb_id,pdb_id_loaded)
+					fprintf('%s %s %s %s\n',motif_list{i}.motif_id,loop_id,pdb_id,pdb_id_loaded)
 
 					% indices of core and bulged positions in the overall File.NT
 					all_unit_ids = strsplit(loop_id_to_unit_ids(loop_id),",");
@@ -211,7 +214,7 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 
 					% get indices of each unit id relative to the subfile to save in candidates
 					% unit_ids in core positions in this loop
-					unit_ids = motif_list(i).alignment.(loop_id);
+					unit_ids = motif_list{i}.alignment.(loop_id);
 					candidate_indices = zeros(1,length(unit_ids)+1);
 					for k = 1:length(unit_ids)
 						candidate_indices(k) = map_unit_id_to_index(sf_unit_id_to_index,unit_ids{k});
@@ -226,8 +229,8 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
                     % even if they do not have good enough geometry to be annotated.
                     % first and last nucleotides make a cWW pair in every loop
                     sf.Edge(candidate_indices(1),candidate_indices(end-1)) = 1;
-                    for k = 1:length(motif_list(i).chainbreak)
-                        cb = motif_list(i).chainbreak{k};
+                    for k = 1:length(motif_list{i}.chainbreak)
+                        cb = motif_list{i}.chainbreak{k};
                         sf.Edge(cb,cb+1) = 1;
                     end
 					% add a row to the candidate list
@@ -247,8 +250,8 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 	fprintf('Saving motif group .mat files\n')
 	for i = 1:length(motif_list)
 		% save the motif group
-        fprintf('Saving %s\n',motif_list(i).motif_id)
-		fn = [MotifLibraryPath filesep motif_list(i).motif_id '.mat'];
+        fprintf('Saving %s\n',motif_list{i}.motif_id)
+		fn = [MotifLibraryPath filesep motif_list{i}.motif_id '.mat'];
 		Search = motif_structure{i};
 		save(fn,'Search','-v7.3');
 	end
