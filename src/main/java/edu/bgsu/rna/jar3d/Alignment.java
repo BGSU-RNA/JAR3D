@@ -303,12 +303,7 @@ public class Alignment {
 
 
 	/**
-	 * This method initiates parsing.  It loops through all Sequence objects in sData.
-	 * It adds node data just once, to a new Sequence object called S.  Then it adds the organism and letters from each Sequence object.
-	 * Then it runs the parseSequence method of the Sequence class.
-	 * It runs through all nodes to store max log probability information
-	 * Finally, it calls the showParse method of the first node of the model, which accumulates a very, very wide version of the
-	 * alignments in row-column format.  Many columns of the alignment then need to get removed later.
+	 * This method initiates parsing.
 	 * @param sData
 	 * @param nodeFileName
 	 * @param range
@@ -618,8 +613,7 @@ public class Alignment {
 		return scores;
 	}
 
-	public static double[] getSortedILAlignment(List<Sequence> sData, List<String> modNames, int range)
-	{
+	public static double[] getSortedILAlignment(List<Sequence> sData, List<String> modNames, int range) 	{
 		Vector<String> pData = new Vector<String>();                           // parse data
 		double[] modelSums = new double[modNames.size()];      // sum of alignment scores
 		double[] rmodelSums = new double[modNames.size()];     // sum with sequences reversed
@@ -952,9 +946,6 @@ public class Alignment {
 			maxRotation = Integer.parseInt(type.substring(1)) - 1;
 		}
 
-		double[][] modelSums = new double[modNames.size()][maxRotation+1];      // sum of alignment scores
-		double[][][] modelScoreMat = new double[modNames.size()][maxRotation+1][sData.size()];
-
 		List<Sequence>[] rotatedData = new Vector[maxRotation+1];  // Array of Vector<Sequence>
 		int[] bestRotation = new int[modNames.size()];             // 0 for HL, 0 or 1 for IL, etc.
 		double[] scores = new double[modNames.size()];
@@ -978,32 +969,19 @@ public class Alignment {
 			}
 		}
 
-	    // Add up model scores for each sequence
+	    // Record model scores for each sequence, sum over sequences
+		double[][] modelRotationScoreSum = new double[modNames.size()][maxRotation+1];      // sum of alignment scores
+		double[][][] modelRotationSequenceScore = new double[modNames.size()][maxRotation+1][sData.size()];
+
 		for (int r = 0; r <= maxRotation; r++) {
 			for (int m = 0; m < modNames.size(); m++) {
 				for (int s = 1; s < sData.size(); s++) {
 					double tempo = rotatedData[r].get(s).getMaxLogProbability(m);
-					modelSums[m][r] += tempo;
-					modelScoreMat[m][r][s] = tempo;
+					modelRotationScoreSum[m][r] += tempo;
+					modelRotationSequenceScore[m][r][s] = tempo;
 				}
 			}
 		}
-
-		// old code ... m is sequence ... x is model ... confusing!
-		// for(int m = 0; m < sData.size(); m++)
-	    // {
-	    // 	for(int x = 0; x < sData.get(m).getMaxLogProbabilitySize(); x++)
-	    // 	{
-	    // 		double tempo = sData.get(m).getMaxLogProbability(x);
-	    // 		modelSums[x] += tempo;
-	    // 		modelScoreMat[x][m] = tempo;
-	    // 		if(type.equalsIgnoreCase("IL")){
-	    // 			tempo = rsData.get(m).getMaxLogProbability(x);
-	    // 			rmodelSums[x] += tempo;
-	    // 			rmodelScoreMat[x][m] = tempo;
-	    // 		}
-	    // 	}
-	    // }
 
 		// for each group find the best rotation
 	    for (int m = 0; m < modNames.size(); m++) {
@@ -1011,40 +989,16 @@ public class Alignment {
 			bestRotation[m] = 0;
 			for (int r = 0; r <= maxRotation; r++) {
 				// number of sequences is sData.size()-1, 0th place is empty to leave space for headers
-				double tempScore = modelSums[m][r]/(sData.size()-1);
+				double tempScore = modelRotationScoreSum[m][r]/(sData.size()-1);
 				if (tempScore > scores[m]) {
 					scores[m] = tempScore;
 					bestRotation[m] = r;
 				}
 			}
-
-			System.out.println(String.format("Alignment: groupName %s best rotation %d",modNames.get(m),bestRotation[m]));
-
+			System.out.println(String.format("Alignment: groupName %s best rotation %d score %8.2f",modNames.get(m),bestRotation[m],scores[m]));
 		}
 
-		// for (int g = 0; g < modelSums.length; g++) {
-	    // 	modelScores[g] = (modelSums[g]/(sData.size()-1));
-	    // 	scores[2*g]   = Math.max(modelScores[g],-9999);
-	    // 	if(type.equalsIgnoreCase("IL")){
-	    // 		rmodelScores[g] = (rmodelSums[g]/(sData.size()-1));
-	    // 		scores[2*g+1] = Math.max(rmodelScores[g],-9999);
-	    // 	}
-	    // 	if(type.equalsIgnoreCase("IL")){
-	    // 		if(rmodelScores[g] > modelScores[g])          // choose between forward and reversed for each model
-	    // 		{
-	    // 			modelScores[g] = rmodelScores[g];
-	    // 			shortModNames.set(g, shortModNames.get(g)+" reversed");
-	    // 			reversed[g] = 1;
-	    // 		}
-	    // 		else {
-	    // 			reversed[g] = 0;
-	    // 		}
-	    // 	}else{
-	    // 		reversed[g] = 0;
-	    // 	}
-	    // }
-
-		// re-sort models & their totals
+		// re-sort models & their totals ... doesn't seem to be used anymore
 		// weird indexing array to keep track of the order things should be in
 		// it starts out as [0 1 2 3 4 5]
 		// then gets re-sorted according to modelScores
@@ -1069,32 +1023,11 @@ public class Alignment {
 
 			sig = group.Signature[0]; // don't reverse the signature, too confusing
 
+			System.out.println(String.format("group.Signature %s", group.Signature));
+
 			for (int s = 1; s < sData.size(); s++) {
-				groupScores[s-1] = modelScoreMat[index][rotation][s];
+				groupScores[s-1] = modelRotationSequenceScore[index][rotation][s];
 			}
-
-			// int index = indices[g];
-			// String groupName = tinyModNames.get(index);
-			// String sig;
-			// int rotation;
-			// double[] groupScores = new double[sData.size()];
-			// group = groupData.get(groupName);
-			// if (reversed[index] == 0) {  //not reversed
-			// 	rotation = 0;
-			// 	sig = group.Signature[0];
-			// int numInputSeqs = sData.size()-1;
-			// 	for(int col = 1; col < numInputSeqs+1; col++)
-			// 	{
-			// 		groupScores[col-1] = modelScoreMat[index][col];
-			// 	}
-			// } else {  //reversed
-			// 	rotation = 1;
-			// 	sig = group.Signature[1];
-
-			// 	for(int col = 1; col < numInputSeqs+1; col++) {
-			// 		groupScores[col-1] = rmodelScoreMat[index][col];
-			// 	}
-			// }
 
 			double[] deficits = getDeficits(group.Best_Score, groupScores);
 
@@ -1245,6 +1178,14 @@ public class Alignment {
 	}
 
 	// Overloaded doParse that can take model/node data as a string instead of a file name
+	// It loops through all Sequence objects in sData.
+	// It adds node data just once, to a new Sequence object called S.  Then it adds the organism and letters from each Sequence object.
+	// Then it runs the parseSequence method of the Sequence class.
+	// It runs through all nodes to store max log probability information
+	// Finally, it calls the showParse method of the first node of the model, which accumulates a
+	// very, very wide version of the alignments in row-column format.
+	// Many columns of the alignment then need to get removed later.
+
 	public static List<Sequence> doParse(List<Sequence> sData, String nodeInfo, int range, boolean fullModelText, boolean calculateCorrespondences, boolean saveNodeProbs) 	{
 		Node current;
 		List<Double> mProbs = new Vector<Double>();
@@ -1390,16 +1331,18 @@ public class Alignment {
 
 
 	public static int[] getMinEditDistance(MotifGroup group, List<Sequence> sData, String type, int rotation, boolean interior){
-		//Calculate edit distances
+
+		// load sequences from the current motif group
 		Vector<Sequence> modsData = Alignment.parseFastaText(group.Sequences,0,0);
+
+		// Calculate edit distances
+		// we assume that the sequences in sData are already rotated appropriately
 		int[][] EditDistances;
-		if(type.equalsIgnoreCase("IL")){
-			EditDistances = SimpleAlign.calcILEditDistances(sData,modsData,rotation,false,interior);
-		}else {
-			EditDistances = SimpleAlign.calcHLEditDistances(sData,modsData,false,interior);
-		}
+		EditDistances = SimpleAlign.calcEditDistances(sData,modsData,false,interior);
+
+		// for each sequence in sData, return the minimum edit distance to model sequences
 		int[] MinDist = new int[EditDistances.length];
-		for(int i = 0; i < EditDistances.length; i ++){
+		for (int i = 0; i < EditDistances.length; i++) {
 			MinDist[i] = ArrayMath.min(EditDistances[i]);
 		}
 		return MinDist;

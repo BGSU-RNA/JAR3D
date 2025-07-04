@@ -1,24 +1,26 @@
 package edu.bgsu.rna.jar3d;
 
-import java.util.*; 
+import java.util.*;
 
 public class SimpleAlign {
-	
+
 	public static String[] getSeqStrings(List<Sequence> sData){
 		//pulls sequence strings from a vector of Sequence objects
-		
+
 		int n = sData.size();
 		String seqs[] = new String[n-1];
+
+		// start at 1 because position 0 is for headers
 		for(int i = 1; i < n; i++){
 			Sequence seq = (Sequence)sData.get(i);
 			seqs[i-1] = (String)seq.letters;
 		}
-		return seqs;	
+		return seqs;
 	}
-	
+
 	public static String[] SimpleAlignment(String seq1, String seq2){
 		//does a very basic alignment between seq1 and seq2
-		
+
 		int n1 = seq1.length();
 		int n2 = seq2.length();
 		int[][] Scores = new int[n1+1][n2+1];
@@ -75,22 +77,22 @@ public class SimpleAlign {
 		}
 		return aligned;
 	}
-	
+
 	public static int editDist(String seq1, String seq2){
 		//calculates the Levenshtein distance between seq1 and seq2
-		
+
 //		System.out.println("==="+seq1+"==="+seq2+"===");
 
 		seq1 = seq1.toUpperCase().replaceAll("-", "");
 		seq2 = seq2.toUpperCase().replaceAll("-", "");
-		
+
 		if(seq1.length()==0&seq2.length()==0) return 0;
 		if(seq1.length()==0) 				  return seq2.length();
 		if(seq2.length()==0) 				  return seq1.length();
-		
+
 		int n1 = seq1.length();
 		int n2 = seq2.length();
-		
+
 		int[][] Scores = new int[n1+1][n2+1];
 		for(int i = 0; i <= n1; i ++){
 			Scores[i][0] = i;
@@ -115,7 +117,57 @@ public class SimpleAlign {
 		}
 		return Scores[n1][n2];
 	}
-	
+
+	public static int[][] calcEditDistances(List<Sequence> sD1,List<Sequence> sD2,boolean Verbose,boolean Interior){
+		// calculate all-against-all edit distance between sequences in sD1 and sD2
+		// Interior true means to leave off the first and last letter of each strand
+		// this function breaks the strings at the * character and adds up edit
+		// distances across the strands; the number of strands must be the same
+		// no reversal or rotation is done; the sequences should already be rotated appropriately
+
+		// omit the sequence in position 0, that is for a header
+		String[] seqs1 = getSeqStrings(sD1);
+		String[] seqs2 = getSeqStrings(sD2);
+		int n1 = seqs1.length;
+		int n2 = seqs2.length;
+
+		int[][] EdDists = new int[n1][n2];
+
+		String part1 = "";
+		String part2 = "";
+
+		// loop over all pairs of sequences
+		for (int i = 0; i < n1; i++) {
+			// split into strands
+			String[] parts1 = seqs1[i].split("\\*");
+			// System.out.println(String.format("SimpleAlign: seqs1 is %s", seqs1));
+			for (int j = 0; j < n2; j++) {
+				String[] parts2 = seqs2[j].split("\\*");
+				int ed = 0;
+				if (parts1.length != parts2.length) {
+					System.out.println(String.format("Error: Strings %s and %s have different numbers of parts!",seqs1[i],seqs2[j]));
+				} else {
+					// System.out.println(String.format("SimpleAlign: seqs2 is %s", seqs2));
+					for (int k = 0; k < parts1.length; k++) {
+						if (Interior == true) {
+							// omit first and last position of each strand
+							part1 = parts1[k].substring(1, parts1[k].length() - 1);
+							part2 = parts2[k].substring(1, parts2[k].length() - 1);
+						} else {
+							// use the whole strand
+							part1 = parts1[k];
+							part2 = parts2[k];
+						}
+						ed = ed + editDist(part1,part2);
+					}
+				}
+				EdDists[i][j] = ed;
+			}
+		}
+
+		return EdDists;
+	}
+
 	public static int[][] calcILEditDistances(List<Sequence> sD1,List<Sequence> sD2,int rotation){
 		return calcILEditDistances(sD1,sD2,rotation,false,true);
 	}
@@ -123,19 +175,19 @@ public class SimpleAlign {
 	public static int[][] calcILEditDistances(List<Sequence> sD1,List<Sequence> sD2,int rotation, boolean Verbose){
 		return calcILEditDistances(sD1,sD2,rotation,Verbose,true);
 	}
-	
+
 	public static int[][] calcILEditDistances(List<Sequence> sD1,List<Sequence> sD2,int rotation, boolean Verbose,boolean Interior){
 		//calculates the edit distance between every sequence in fasta file seqFile1
 		//and every sequence in faste file seqFile2.  the first dim of the returned
 		//2d array corresponds to the files in seqFile1, the second to seqFile2
 		//this function assumes the fasta files involved are for internal loops
 		//and use a '*' character to denote the break in strands
-		
+
 		//reverse sequences in seqFile1 if reverse is true
 		if (rotation == 1){
 			sD1 = Alignment.reverse(sD1);
 		}
-		
+
 		String[] seqs1 = getSeqStrings(sD1);
 		String[] seqs2 = getSeqStrings(sD2);
 		int n1 = seqs1.length;
@@ -181,8 +233,8 @@ public class SimpleAlign {
 				breakpoint = seqs2[i].indexOf("*");
 				seqs2left[i] = seqs2[i].substring(0, breakpoint);
 				seqs2right[i] = seqs2[i].substring(breakpoint+1,seqs2[i].length());
-			}			
-		
+			}
+
 		}
 		int leftDist;
 		int rightDist;
@@ -202,21 +254,21 @@ public class SimpleAlign {
 		}
 		return EdDists;
 	}
-	
+
 	public static int[][] calcHLEditDistances(List<Sequence> sD1,List<Sequence> sD2){
 		return calcHLEditDistances(sD1,sD2,false,true);
 	}
-	
+
 	public static int[][] calcHLEditDistances(List<Sequence> sD1,List<Sequence> sD2, boolean Verbose){
 		return calcHLEditDistances(sD1,sD2,Verbose,true);
 	}
-	
+
 	public static int[][] calcHLEditDistances(List<Sequence> sD1,List<Sequence> sD2,boolean Verbose,boolean Interior){
 		//calculates the edit distance between every sequence in fasta file seqFile1
 		//and every sequence in faste file seqFile2.  the first dim of the returned
 		//2d array corresponds to the files in seqFile1, the second to seqFile2
 		//this function assumes the fasta files involved are for hairpin loops
-	
+
 		String[] seqs1 = getSeqStrings(sD1);
 		String[] seqs2 = getSeqStrings(sD2);
 		int n1 = seqs1.length;
