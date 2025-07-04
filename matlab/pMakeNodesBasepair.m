@@ -1,6 +1,6 @@
 % set up basepair
 
-n = n+1;  
+n = n+1;
 Node(n).type        = 'Basepair';        % node type
 Node(n).nextnode    = n+1;               % index of next node in tree
 Node(n).LeftLetter  = File.NT(a).Base;
@@ -13,7 +13,7 @@ Node(n).LeftIndex   = a;
 Node(n).RightIndex  = B;
 Node(n).leftLengthDist  = subPoisson(0.01);
 Node(n).rightLengthDist = subPoisson(0.01);
-if Normalize == 1,
+if Normalize == 1
   Node(n).leftLetterDist  = [0.25 0.25 0.25 0.25];
   Node(n).rightLetterDist = [0.25 0.25 0.25 0.25];
 else

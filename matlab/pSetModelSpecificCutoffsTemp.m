@@ -17,7 +17,7 @@
 
 function [void] = pSetModelSpecificCutoffs(OutputBase,Release,UseAlignmentSequences)
 
-if nargin < 3
+if nargin < 3,
 	UseAlignmentSequences = 2;               % use alignment sequences to set cutoffs and show them too
 	UseAlignmentSequences = 1;               % show alignment sequences but don't use them to set cutoffs
 	UseAlignmentSequences = 0;               % don't use or show alignment sequences
@@ -29,7 +29,7 @@ Params.CoreEditCutoff   = 5;
 Grayscale = 0;                              % plot in grayscale for the paper or in color for talks
 tfs = 13;
 
-if UseAlignmentSequences == 2
+if UseAlignmentSequences == 2,
 	NumAlignmentSequencesNeeded = 20;           % number for cutoffs based on alignment and random sequences
 else
 	NumAlignmentSequencesNeeded = Inf;          % for cutoffs based only on random sequences
@@ -47,14 +47,16 @@ MaxNumFP = [200 200 400 500 600 800 1000];  % maximum number of false positives 
 MaxNumFP = [MaxNumFP Inf * ones(1,200)];
 Params.CutoffType = 2;
 
-if Save3DPlots > 0
+if Save3DPlots > 0,
 	Show3dPlots = 1;
 end
 
+Release = strrep(Release,'/',filesep);
+Release = strrep(Release,'\',filesep);
 OutputPath = [OutputBase filesep Release];
+MotifRelease = Release(4:end);
 
 loopType = Release(1:2);
-MotifRelease = Release(4:end);
 
 ModelPath = [OutputPath filesep 'lib'];
 
@@ -62,7 +64,7 @@ GroupData = pGetModelData(OutputPath,loopType);
 
 MSCOutputPath = [OutputPath filesep 'ModelSpecificCutoffs'];
 
-if ~(exist(MSCOutputPath) == 7)        % if directory doesn't yet exist
+if ~(exist(MSCOutputPath) == 7),        % if directory doesn't yet exist
   mkdir(MSCOutputPath);
 end
 
@@ -70,21 +72,21 @@ DiaryFile = [MSCOutputPath filesep 'log_' date '.txt'];
 
 diary(DiaryFile);
 
-if ~(exist(MSCOutputPath) == 7)        % if directory doesn't yet exist
+if ~(exist(MSCOutputPath) == 7),        % if directory doesn't yet exist
   mkdir(MSCOutputPath);
 end
 
-if UseAlignmentSequences > 0 && ~exist('AlignmentData')
+if UseAlignmentSequences > 0 && ~exist('AlignmentData'),
 	load([OutputPath filesep loopType '_Alignment_Sequence_Data.mat']);
 	AlignmentData = SequenceData;
 	clear SequenceData
 
-	if isfield(AlignmentData,'Percentile')
+	if isfield(AlignmentData,'Percentile'),
 		AlignmentData = rmfield(AlignmentData,'Percentile');
 	end
 
 	AlignmentDataMotifIDs = cell(1,length(AlignmentData));
-	for i = 1:length(AlignmentData)
+	for i = 1:length(AlignmentData),
 		AlignmentDataMotifIDs{i} = AlignmentData(i).MotifID;
 	end
 
@@ -98,12 +100,12 @@ end
 
 motiforder = 1:length(GroupData);
 
-for iii = 1:length(GroupData)
+for iii = 1:length(GroupData),
 
 	motifnum = motiforder(iii);
 	pauseafter = 0;
 
-	if ListSequences > 0
+	if ListSequences > 0,
 		clc
 	end
 
@@ -114,9 +116,9 @@ for iii = 1:length(GroupData)
 	% -------------------------- filter out poor alignment data
 
 	k = find(ismember(AlignmentDataMotifIDs,CurrentMotif));
-    SequenceData = AlignmentData(k);
+  SequenceData = AlignmentData(k);
 
-	if length(SequenceData) > 0
+  if length(SequenceData) > 0,
 		ce = cat(1,SequenceData.CoreEdit);
 		k = find(ce <= CoreEditCutoff);
 		SequenceData = SequenceData(k);
@@ -124,7 +126,7 @@ for iii = 1:length(GroupData)
 		def = cat(1,SequenceData.Deficit);
 		k = find(def <= Params.DeficitCutoff);
 		SequenceData = SequenceData(k);
-		fprintf('Removed based on deficit, %d sequences remaining\n',length(SequenceData));
+	  fprintf('Removed based on deficit, %d sequences remaining\n',length(SequenceData));
 		fprintf('%10d sequences from alignments with deficits between %d %d\n', length(SequenceData), 0, Params.DeficitCutoff);
 
 		[y,k] = sort(rand(1,length(SequenceData)));         % randomize order
@@ -134,7 +136,7 @@ for iii = 1:length(GroupData)
 	% ---------------------------- record data from motif group
 
 	clear NSD
-	for co = 1:GroupData(motifnum).NumInstances
+	for co = 1:GroupData(motifnum).NumInstances,
 		NSD(co).Deficit      = max(GroupData(motifnum).OwnScore) - GroupData(motifnum).OwnScore(co);
 		NSD(co).CoreEdit     = 0;
 		NSD(co).FullEdit     = 0;
@@ -155,13 +157,13 @@ for iii = 1:length(GroupData)
 
 	AllSD = [NSD SequenceData];      % put sequences from 3D first
 
-	if isfield(GroupData(motifnum),'DeficitEditData')
+	if isfield(GroupData(motifnum),'DeficitEditData'),
 		RSNum = length(GroupData(motifnum).DeficitEditData(:,1));
 	else
 		fprintf('pSetModelSpecificCutoffs:  No data about how random sequences match the model\n');
 
-		for mm = 1:length(GroupData)
-			if ~isfield(GroupData(mm),'DeficitEditData')
+		for mm = 1:length(GroupData),
+			if ~isfield(GroupData(mm),'DeficitEditData'),
 				fprintf('Group %3d is missing DeficitEditData\n',mm);
 			end
 		end
@@ -172,13 +174,13 @@ for iii = 1:length(GroupData)
 
 	fprintf('Using %d random sequences, %d from an alignment, and %d from 3D structures\n', RSNum, length(SequenceData), length(NSD));
 
-	if RSNum + length(AllSD) > 0
+	if RSNum + length(AllSD) > 0,
 
 		clear SequenceData
 
 		Keep = ones(1,length(AllSD));
-		for i = 1:length(AllSD)
-			if isempty(AllSD(i).CoreEdit)
+		for i = 1:length(AllSD),
+			if isempty(AllSD(i).CoreEdit),
 				Keep(1,i) = 0;
 			end
 		end
@@ -197,7 +199,7 @@ for iii = 1:length(GroupData)
 		SD(:,10) = cat(1,AllSD.NumFixed);
 		SD(:,11) = cat(1,AllSD.Basepairs);
 
-		if RSNum > 0
+		if RSNum > 0,
 			clear RSD
 			RSD(:,1) = cat(1,GroupData(motifnum).DeficitEditData(:,1));
 			RSD(:,2) = cat(1,GroupData(motifnum).DeficitEditData(:,2));
@@ -239,17 +241,17 @@ for iii = 1:length(GroupData)
 		Names{5} = 'NumConserved';
 		Names{6} = 'FlankEdit';
 		Names{7} = 'AlignmentScore';
-		Names{10} = 'NumFixed';
-		Names{11} = 'Basepairs';
+	  Names{10} = 'NumFixed';
+	  Names{11} = 'Basepairs';
 
 		f = 1;
-	    if Show2dPlots > 0
+	  if Show2dPlots > 0,
 			j = 1:min(length(Source),10000);
 
- 		    n = [1 2 3 4 6 7];                  % which variables to plot and in what order
+		  n = [1 2 3 4 6 7];                  % which variables to plot and in what order
 
-			for a = 1:length(n)
-				for b = (a+1):length(n)
+			for a = 1:length(n),
+				for b = (a+1):length(n),
 					figure(f)
 					clf
 					scatter(SDR(j,n(a)),SDR(j,n(b)),4,min(Source(j),3),'filled');
@@ -261,7 +263,7 @@ for iii = 1:length(GroupData)
 			end
 		end
 
-		if Show3dPlots > 0
+		if Show3dPlots > 0,
 
 			Triple(1,:) = [1 2 8];
 			Triple(2,:) = [1 2 9];
@@ -272,14 +274,14 @@ for iii = 1:length(GroupData)
 			Triple(7,:) = [4 5 10];
 			Triple(8,:) = [2 4 7];
 
-		  	clear Triple
+	  	clear Triple
 
 			Triple(1,:) = [2 4 1];
 
 			j = 1:min(2000,length(Source));  % plot up to 2000 points
 			j = [j find(Source == 0)'];
 
-			for t = 1:length(Triple(:,1))
+			for t = 1:length(Triple(:,1)),
 				figure(f)
 				[ax,az] = view;
 				clf
@@ -307,48 +309,42 @@ for iii = 1:length(GroupData)
 
 		i = [2 4 1];  % core edit, sequence length, deficit
 
-		if ListSequences > 0
-			OrderMatrix = [BinarySource SD(:,7)];
-			[y,ii] = sortrows(OrderMatrix,[1 2]);
-			for n = 1:length(ii)
-				j = ii(n);
-				fprintf('Source %d %50s CoreEdit %d Score %8.4f Deficit %8.4f \n', Source(j), AllSD(j).Sequence, SD(j,2), SD(j,7), SD(j,1));
-			end
-		end
+  	if ListSequences > 0,
+  		OrderMatrix = [BinarySource SD(:,7)];
+  		[y,ii] = sortrows(OrderMatrix,[1 2]);
+  		for n = 1:length(ii),
+  			j = ii(n);
+  			fprintf('Source %d %50s CoreEdit %d Score %8.4f Deficit %8.4f \n', Source(j), AllSD(j).Sequence, SD(j,2), SD(j,7), SD(j,1));
+  		end
+  	end
 
 		ra = find(Source == 1);
-	    AlignmentMixedScores = SD(ra,[1 2]) * Coeff';          % scores of these sequences against current coefficients
+    AlignmentMixedScores = SD(ra,[1 2]) * Coeff';          % scores of these sequences against current coefficients
 
 		ra = find(Source == 2);
-    	RandomMixedScores = SD(ra,[1 2]) * Coeff';             % scores of these sequences against current coefficients
+    RandomMixedScores = SD(ra,[1 2]) * Coeff';             % scores of these sequences against current coefficients
 
 		ra = find((Source == 2) .* (SD(:,2) > 1));             % random sequences at core edit distance 2 or greater
-	    RandomMixedScoresB = SD(ra,[1 2]) * Coeff';            % scores of these sequences against current coefficients
+    RandomMixedScoresB = SD(ra,[1 2]) * Coeff';            % scores of these sequences against current coefficients
 
 		GroupData(motifnum).RandomQuantile80 = quantile(RandomMixedScores,0.2);
 		GroupData(motifnum).RandomQuantile96 = quantile(RandomMixedScores,0.04);
 		GroupData(motifnum).RandomQuantile98 = quantile(RandomMixedScores,0.02);
 
-		switch loopType
-			case 'HL'
-				DefaultMixedScoreCutoff = min(25,10+3*(GroupData(motifnum).NumNT-5));
-			case 'IL'
-				DefaultMixedScoreCutoff = min(25,10+1.8*(GroupData(motifnum).NumNT-5));
-			case 'J3'
-				fprintf('Trying a definition of DefaultMixedScoreCutoff for J3\n');
-				DefaultMixedScoreCutoff = min(25,10+1.8*(GroupData(motifnum).NumNT-5));
-			otherwise
-				fprintf('Trying a definition of DefaultMixedScoreCutoff for %s\n', loopType);
-				DefaultMixedScoreCutoff = min(25,10+1.8*(GroupData(motifnum).NumNT-5));
+		switch loopType,
+		case 'IL'
+			DefaultMixedScoreCutoff = min(25,10+1.8*(GroupData(motifnum).NumNT-5));
+		case 'HL'
+			DefaultMixedScoreCutoff = min(25,10+3*(GroupData(motifnum).NumNT-5));
 		end
 		MixedScoreCutoff = DefaultMixedScoreCutoff;
  		GroupData(motifnum).CutoffMethod = 1;
 
-		figure(2)
-		clf
+    figure(2)
+  	clf
 
-		k = find((Source <= 1) + (Source == 2).*(SD(:,2) > 0));  % only use alignment sequences and "bad" random sequences
-		MixedScores = SD(k,[1 2]) * Coeff';
+  	k = find((Source <= 1) + (Source == 2).*(SD(:,2) > 0));  % only use alignment sequences and "bad" random sequences
+  	MixedScores = SD(k,[1 2]) * Coeff';
 
 		if sum(Source == 2) > 0 && sum(Source <= 1) > NumAlignmentSequencesNeeded,  % enough of both random and alignment sequences
 
@@ -356,7 +352,7 @@ for iii = 1:length(GroupData)
 	  	MixedScoreValues = 0:0.1:40;
 	  	performance = zeros(length(MixedScoreValues),3);
 
-	  	for c = 1:length(MixedScoreValues)
+	  	for c = 1:length(MixedScoreValues),
 	  	  mynewclasses = 2 - (MixedScores <= MixedScoreValues(c));
 	  	  TP = sum((mynewclasses == 1) .* (BinarySource(k,:) == 1)) / sum(BinarySource(k,:) == 1);
 	  	  TN = sum((mynewclasses == 2) .* (BinarySource(k,:) == 2)) / sum(BinarySource(k,:) == 2);
@@ -369,7 +365,7 @@ for iii = 1:length(GroupData)
 				fprintf('Borderline case for imposing a model-specific cutoff, maximum %8.4f\n',mm);
 			end
 
-			if min(performance(:,3)) < -0.5
+			if min(performance(:,3)) < -0.5,
 				fprintf('Many random sequences perform better than sequences from alignments.\n');
 			end
 
@@ -400,7 +396,7 @@ for iii = 1:length(GroupData)
 		  TP = sum((mynewclasses == 1) .* (BinarySource(k,:) == 1)) / sum(BinarySource(k,:) == 1);
 
 	  	if NumFalsePositive > LocalMaxNumFP && TP > 0.5,  % large number of false positives and an acceptable true positive rate
-	  		while NumFalsePositive >= LocalMaxNumFP && MixedScoreCutoff > 0
+	  		while NumFalsePositive >= LocalMaxNumFP && MixedScoreCutoff > 0,
 	  			fprintf('Constant %8.4f False positives %4d\n',MixedScoreCutoff,sum((2 - (MixedScores <= MixedScoreCutoff) == 1) .* (BinarySource(k,:) == 2)));
 		  		MixedScoreCutoff = MixedScoreCutoff - 0.1;
 			  	NumFalsePositive = sum((2 - (MixedScores <= MixedScoreCutoff) == 1) .* (BinarySource(k,:) == 2));
@@ -409,66 +405,66 @@ for iii = 1:length(GroupData)
 	  		GroupData(motifnum).CutoffMethod = GroupData(motifnum).CutoffMethod + 2;
 	  	end
 
-	elseif sum(Source == 2) > 20                 % 3D and random sequences, few alignment sequences
+	  elseif sum(Source == 2) > 20,                           % 3D and random sequences, few alignment sequences
 	    MixedScoreCutoff = (quantile(RandomMixedScores,0.04)+quantile(RandomMixedScoresB,0.02))/2;  % find the cutoff which gets the true negative rate roughly equal to 98%
 	    MixedScoreCutoff = quantile(RandomMixedScores,0.05);  % find the cutoff which gets the true negative rate roughly equal to 96%
 	    MixedScoreCutoff = quantile(RandomMixedScores,0.04);  % find the cutoff which gets the true negative rate roughly equal to 96%
   		GroupData(motifnum).CutoffMethod = 6;
 
-	    if MixedScoreCutoff > 20
-			fprintf('Decreased cutoff from %8.4f because the cutoff seemed overly generous\n',MixedScoreCutoff);
+	    if MixedScoreCutoff > 20,
+				fprintf('Decreased cutoff from %8.4f because the cutoff seemed overly generous\n',MixedScoreCutoff);
 		    MixedScoreCutoff = max(20,min(RandomMixedScores)-0.1);
 		    MixedScoreCutoff = max(20,quantile(RandomMixedScores,0.02));  % find the cutoff which gets the true negative rate roughly equal to 98%
 	  		GroupData(motifnum).CutoffMethod = 8;
-		end
+			end
 
-	elseif sum(Source == 2) == 0,                         % no random sequences meet the generic cutoffs
+	  elseif sum(Source == 2) == 0,                         % no random sequences meet the generic cutoffs
 	  	MixedScoreCutoff = 35;                                        % impose essentially no model-specific cutoff
 	  	fprintf('No random sequence matches, so essentially no model-specific cutoff imposed\n');
   		GroupData(motifnum).CutoffMethod = 9;
 
-	elseif sum(Source == 1) > NumAlignmentSequencesNeeded,                       % 3D and alignment sequences, few random sequences
+	  elseif sum(Source == 1) > NumAlignmentSequencesNeeded,                       % 3D and alignment sequences, few random sequences
 	    MixedScoreCutoff = quantile(AlignmentMixedScores,0.90);                    % 90th percentile of alignment sequences
 	  	GroupData(motifnum).CutoffMethod = 10;
-	end
+		end
 
-	if MixedScoreCutoff < 9.5
-		MixedScoreCutoff = 5 + Coeff(2);
-		MixedScoreCutoff = 9.5;
-		fprintf('Increased cutoff to %8.4f so that at least a few sequences with core edit distance 1 can meet the cutoff\n',MixedScoreCutoff);
-	GroupData(motifnum).CutoffMethod = 11;
-	end
+		if MixedScoreCutoff < 9.5,
+			MixedScoreCutoff = 5 + Coeff(2);
+			MixedScoreCutoff = 9.5;
+			fprintf('Increased cutoff to %8.4f so that at least a few sequences with core edit distance 1 can meet the cutoff\n',MixedScoreCutoff);
+	  	GroupData(motifnum).CutoffMethod = 11;
+		end
 
-	if MixedScoreCutoff > 25
-		MixedScoreCutoff = 25;
-		fprintf('Decreased cutoff to %8.4f so that it is possible to reject matches\n',MixedScoreCutoff);
-		GroupData(motifnum).CutoffMethod = 12;
-	end
+		if MixedScoreCutoff > 25,
+			MixedScoreCutoff = 25;
+			fprintf('Decreased cutoff to %8.4f so that it is possible to reject matches\n',MixedScoreCutoff);
+	  	GroupData(motifnum).CutoffMethod = 12;
+		end
 
-	mynewclasses = 2 - (MixedScores <= MixedScoreCutoff);
-	TP = sum((mynewclasses == 1) .* (BinarySource(k,:) == 1)) / sum(BinarySource(k,:) == 1);
-	TN = sum((mynewclasses == 2) .* (BinarySource(k,:) == 2)) / sum(BinarySource(k,:) == 2);
+	  mynewclasses = 2 - (MixedScores <= MixedScoreCutoff);
+	  TP = sum((mynewclasses == 1) .* (BinarySource(k,:) == 1)) / sum(BinarySource(k,:) == 1);
+	  TN = sum((mynewclasses == 2) .* (BinarySource(k,:) == 2)) / sum(BinarySource(k,:) == 2);
 
-	GroupData(motifnum).TruePositiveRate           = TP;
-	GroupData(motifnum).TrueNegativeRate           = TN;
-	GroupData(motifnum).NumberOf3DSequences        = length(GroupData(motifnum).OwnScore);
-	GroupData(motifnum).NumberOfAlignmentSequences = sum(Source == 1);
-	GroupData(motifnum).NumberOfRandomSequences    = sum(Source == 2);
-	GroupData(motifnum).NumberOfFalsePositives     = sum((mynewclasses == 1) .* (Source(k,:) == 2));  % number of false positives
+		GroupData(motifnum).TruePositiveRate           = TP;
+		GroupData(motifnum).TrueNegativeRate           = TN;
+		GroupData(motifnum).NumberOf3DSequences        = length(GroupData(motifnum).OwnScore);
+		GroupData(motifnum).NumberOfAlignmentSequences = sum(Source == 1);
+		GroupData(motifnum).NumberOfRandomSequences    = sum(Source == 2);
+		GroupData(motifnum).NumberOfFalsePositives     = sum((mynewclasses == 1) .* (Source(k,:) == 2));  % number of false positives
 
-	GroupData(motifnum).DeficitCutoff    = Params.DeficitCutoff;
-	GroupData(motifnum).CoreEditCutoff   = Params.CoreEditCutoff;
+		GroupData(motifnum).DeficitCutoff    = Params.DeficitCutoff;
+		GroupData(motifnum).CoreEditCutoff   = Params.CoreEditCutoff;
 
-	GroupData(motifnum).DeficitEditCutoff = MixedScoreCutoff;
+		GroupData(motifnum).DeficitEditCutoff = MixedScoreCutoff;
 
-	GroupData(motifnum).MinScore        = max(GroupData(motifnum).OwnScore) - Params.DeficitCutoff;
-	GroupData(motifnum).MaxScore        = max(GroupData(motifnum).OwnScore);
-	GroupData(motifnum).ScoreEditCutoff = GroupData(motifnum).DeficitEditCutoff - Coeff(1) * max(GroupData(motifnum).OwnScore);
+		GroupData(motifnum).MinScore        = max(GroupData(motifnum).OwnScore) - Params.DeficitCutoff;
+		GroupData(motifnum).MaxScore        = max(GroupData(motifnum).OwnScore);
+		GroupData(motifnum).ScoreEditCutoff = GroupData(motifnum).DeficitEditCutoff - Coeff(1) * max(GroupData(motifnum).OwnScore);
 
-	m = motifnum;
-	GD = GroupData(motifnum);
-	fprintf('Group %3d, %-11s has acceptance rules AlignmentScore >= %8.4f, CoreEdit <= %d, and %8.4f * CoreEdit - %8.4f * AlignmentScore <= %8.4f\n',motifnum, GD.MotifID, GD.MinScore, GD.CoreEditCutoff, GD.CoreEditCoeff, GD.DeficitCoeff, GD.ScoreEditCutoff);
-	fprintf('TP %8.2f%%, TN %8.2f%%, min %8.2f%%, %3d 3D sequences, %5d alignment sequences, %4d random sequences, %4d random matches, %2d NTs, %s\n',100*GD.TruePositiveRate, 100*GD.TrueNegativeRate, 100*min(GD.TruePositiveRate,GD.TrueNegativeRate), GD.NumInstances, GD.NumberOfAlignmentSequences, GD.NumberOfRandomSequences, GD.NumberOfFalsePositives, GD.NumNT, GD.Signature{1});
+		m = motifnum;
+		GD = GroupData(motifnum);
+		fprintf('Group %3d, %-11s has acceptance rules AlignmentScore >= %8.4f, CoreEdit <= %d, and %8.4f * CoreEdit - %8.4f * AlignmentScore <= %8.4f\n',motifnum, GD.MotifID, GD.MinScore, GD.CoreEditCutoff, GD.CoreEditCoeff, GD.DeficitCoeff, GD.ScoreEditCutoff);
+		fprintf('TP %8.2f%%, TN %8.2f%%, min %8.2f%%, %3d 3D sequences, %5d alignment sequences, %4d random sequences, %4d random matches, %2d NTs, %s\n',100*GD.TruePositiveRate, 100*GD.TrueNegativeRate, 100*min(GD.TruePositiveRate,GD.TrueNegativeRate), GD.NumInstances, GD.NumberOfAlignmentSequences, GD.NumberOfRandomSequences, GD.NumberOfFalsePositives, GD.NumNT, GD.Signature{1});
 
     % ---------------------------- Deficit versus core edit distance - the graph that really matters
 		% ---------------- main figure - represent points from 3D, from alignments, random sequences
@@ -476,16 +472,16 @@ for iii = 1:length(GroupData)
     clf
 
     i = find(Source >= 2);                        % randomly-generated sequences
-    if length(i) > 2000
+    if length(i) > 2000,
     	i = i(1:2000);
     end
     ii = find(Source == 1);                        % sequences from alignments
-    if length(i) > 2000
+    if length(i) > 2000,
     	ii = ii(1:2000);
     end
     iii = find(Source == 0);                        % use all sequences from 3D
 
-	ced = 0.01:0.01:100;                                % range of core edit distances
+		ced = 0.01:0.01:100;                                % range of core edit distances
   	ycutoff = (GroupData(motifnum).DeficitEditCutoff - Coeff(2) * ced)/Coeff(1);
   	ar = find(ycutoff >= 0);
   	ced = ced(ar);
@@ -495,8 +491,8 @@ for iii = 1:length(GroupData)
   	cutofffifty = min(19.9,cutofffifty);
   	ar2 = find(cutofffifty >= 0);
 
-    if Grayscale > 0
-		plot(ced,(GroupData(motifnum).DeficitEditCutoff - Coeff(2) * ced)/Coeff(1),'k','linewidth',3);
+    if Grayscale > 0,
+			plot(ced,(GroupData(motifnum).DeficitEditCutoff - Coeff(2) * ced)/Coeff(1),'k','linewidth',3);
 	    hold on
 	    plot(SDR(i,2),SDR(i,1),'k.');
 	    plot(SDR(ii,2),SDR(ii,1),'x','color',0.6*[1 1 1]);
@@ -523,13 +519,13 @@ for iii = 1:length(GroupData)
 			plot(ced,cutofffifty,'color',cutofflines,'linewidth',3);
 			plot([0 5.5],[0 0],'k');
 			plot([0 0],[0 20],'k');
-			if ced(ar(end)) < 5.3
+			if ced(ar(end)) < 5.3,
 				text(ced(ar(end)),1,'0','color',cutofflines,'fontweight','bold','fontsize',20)
 			end
 			text(ced(ar2(end)),1,'50','color',cutofflines,'fontweight','bold','fontsize',20)
 			text(0.1,1,'100','color',cutofflines,'fontweight','bold','fontsize',20)
-	    scatter(SDR(i,2),SDR(i,1),4,'r','filled');
-	    scatter(SDR(ii,2),SDR(ii,1),4,'k','filled');
+%	    scatter(SDR(i,2),SDR(i,1),4,'r','filled');
+%	    scatter(SDR(ii,2),SDR(ii,1),4,'k','filled');
 	    plot(SDR(iii,2),SDR(iii,1),'bx','MarkerSize',14,'LineWidth',3);
 	  end
 		NameForTitle = strrep(GroupData(motifnum).MotifID,'_','\_');
@@ -541,13 +537,13 @@ for iii = 1:length(GroupData)
 
 		axis([0 5.5 0 20]);                           % show every case on the same scale
 
-		if SaveDeficitCoreEditPlot > 0
+		if SaveDeficitCoreEditPlot > 0,
 			figure(1)
-			saveas(gcf,[MSCOutputPath filesep CurrentMotif '_alignment_random_sequences_method_' num2str(GroupData(motifnum).CutoffMethod) '_NumNT_' num2str(GroupData(motifnum).NumNT) '.png']);
-			saveas(gcf,[MSCOutputPath filesep CurrentMotif '_alignment_random_sequences_method_' num2str(GroupData(motifnum).CutoffMethod) '_NumNT_' num2str(GroupData(motifnum).NumNT) '.pdf']);
+			saveas(gcf,[MSCOutputPath filesep CurrentMotif '_temp_alignment_random_sequences_method_' num2str(GroupData(motifnum).CutoffMethod) '_NumNT_' num2str(GroupData(motifnum).NumNT) '.png']);
+			saveas(gcf,[MSCOutputPath filesep CurrentMotif '_temp_alignment_random_sequences_method_' num2str(GroupData(motifnum).CutoffMethod) '_NumNT_' num2str(GroupData(motifnum).NumNT) '.pdf']);
 		end
 
-		if PlotCutoffPlane > 0 && MixedScoreCutoff < Inf
+		if PlotCutoffPlane > 0 && MixedScoreCutoff < Inf,
 			figure(1)
 			hold on
 			ax = axis;
@@ -556,21 +552,21 @@ for iii = 1:length(GroupData)
 
 			xmax = 5.5;
 
-			for x = 0:xmax
+			for x = 0:xmax,
 				xx = x * ones(1,1001);                      % core edit values
 				yy = ax(3) + (0:1000)*(ax(4)-ax(3))/1000;   % sequence length values
 				zz = (MixedScoreCutoff - Coeff(2)*xx)/Coeff(1);        % values that exactly match the cutoff
 				ii = find((zz < max(SD(:,1))) .* (zz > min(SD(:,1))));    % values to display on the screen without going above/below the current limits
 				ii = find((zz < ax(4)) .* (zz > ax(3)));    % values to display on the screen without going above/below the current limits
-				plot3(xx(ii),yy(ii),zz(ii),'r');
+%				plot3(xx(ii),yy(ii),zz(ii),'r');
 			end
-			for y = ax(3):ax(4)
+			for y = ax(3):ax(4),
 				xx = 0 + (0:1000)*ax(2)/1000;               % core edit values
 				yy = y * ones(1,1001);                      % sequence length values
 				zz = (MixedScoreCutoff - Coeff(2)*xx)/Coeff(1);
 				ii = find((zz < max(SD(:,1))) .* (zz > min(SD(:,1))));    % values to display on the screen without going above/below the current limits
 				ii = find((zz < ax(4)) .* (zz > ax(3)));    % values to display on the screen without going above/below the current limits
-				plot3(xx(ii),yy(ii),zz(ii),'r');
+%				plot3(xx(ii),yy(ii),zz(ii),'r');
 			end
 			view([0 0]);
 %			axis(ax);
@@ -583,13 +579,13 @@ for iii = 1:length(GroupData)
 		fprintf('Motif index %d\n', iii);
 	  fprintf('\n');
 
-	  if pauseafter > 0
+	  if pauseafter > 0,
 	  	pause
 	  end
 	end
 end
 
-if SaveGroupData > 0
+if SaveGroupData > 0,
 	save([OutputPath filesep loopType '_GroupData_with_full_cutoffs.mat'],'GroupData');
 end
 
@@ -599,7 +595,7 @@ end
 
 CM = cat(1,GroupData.CutoffMethod);
 
-for j = 1:max(CM)
+for j = 1:max(CM),
 	datacounter(j) = sum(CM == j);
 end
 
@@ -619,7 +615,7 @@ CMText{9} = 'models had no random sequences and so no model-specific cutoff impo
 CMText{10} = 'models had the cutoff set from alignment sequences only';
 CMText{11} = 'models got the minimum cutoff';
 
-for j = 1:length(CMText)
+for j = 1:length(CMText),
 	fprintf('%3d (%6.2f%%) %s\n', datacounter(j), 100*datacounter(j)/length(GroupData), CMText{j});
 end
 
@@ -627,10 +623,10 @@ fprintf('%d groups, total in this table is %d\n',length(GroupData),sum(datacount
 
 % -------------- Write out model-specific cutoffs
 
-if isfield(GroupData,'ScoreEditCutoff')
+if isfield(GroupData,'ScoreEditCutoff'),
 	clear TN
 	clear TP
-	for m = 1:length(GroupData)
+	for m = 1:length(GroupData),
 		GD = GroupData(m);
 		TP(m) = GroupData(m).TruePositiveRate;
 		TN(m) = GroupData(m).TrueNegativeRate;
@@ -638,20 +634,20 @@ if isfield(GroupData,'ScoreEditCutoff')
 		fprintf('TP %8.2f%%, TN %8.2f%%, min %8.2f%%, %3d 3D sequences, %5d alignment sequences, %5d random sequences, %4d random matches, %2d NTs, %s\n',100*GD.TruePositiveRate, 100*GD.TrueNegativeRate, 100*min(GD.TruePositiveRate,GD.TrueNegativeRate), GD.NumInstances, GD.NumberOfAlignmentSequences, GD.NumberOfRandomSequences, GD.NumberOfFalsePositives, GD.NumNT, GD.Signature{1});
 	end
 
-	if 0 > 1
-		for m = 1:length(GroupData)
+	if 0 > 1,
+		for m = 1:length(GroupData),
 			fprintf('Group %3d, %-11s has acceptance rules AlignmentScore >= %8.4f, CoreEdit <= %d, and %8.4f * CoreEdit - %8.4f * AlignmentScore <= %8.4f\n',m, GroupData(m).MotifID, GroupData(m).MinScore, GroupData(m).CoreEditCutoff, GroupData(m).CoreEditCoeff, GroupData(m).DeficitCoeff, GroupData(m).ScoreEditCutoff);
 		end
 	end
 
 	MSCOutputPath = [OutputPath filesep 'ModelSpecificCutoffs'];
 	fid = fopen([MSCOutputPath filesep loopType '_' MotifRelease '_acceptance_rule_numbers.txt'],'w');
-	for m = 1:length(GroupData)
+	for m = 1:length(GroupData),
 		fprintf(fid,'%s\t%0.8f\t%d\t%0.8f\t%0.8f\t%0.8f\n', GroupData(m).MotifID, GroupData(m).MinScore, GroupData(m).CoreEditCutoff, GroupData(m).CoreEditCoeff, GroupData(m).DeficitCoeff, GroupData(m).ScoreEditCutoff);
 	end
 	fclose(fid);
 
-	for m = 1:length(GroupData)
+	for m = 1:length(GroupData),
 		fid = fopen([ModelPath filesep GroupData(m).MotifID '_cutoffs.txt'],'w');
 		fprintf(fid,'%0.8f\t%d\t%0.8f\t%0.8f\t%0.8f\t%0.8f\t%0.8f\n', GroupData(m).MinScore, GroupData(m).CoreEditCutoff, GroupData(m).CoreEditCoeff, GroupData(m).DeficitCoeff, GroupData(m).ScoreEditCutoff, GroupData(m).DeficitEditCutoff, GroupData(m).MaxScore);
 		fclose(fid);
@@ -677,13 +673,11 @@ if isfield(GroupData,'ScoreEditCutoff')
 	scatter(cat(1,GroupData.NumNT),cat(1,GroupData.DeficitEditCutoff),10,cutoffmethods,'filled');
 	hold on
 	x = 4:18;
-	switch loopType
-	case 'HL'
-		plot(x,10+3*(x-5),'r');
+	switch loopType,
 	case 'IL'
 		plot(x,10+1.8*(x-5),'r');
-	otherwise
-		plot(x,10+1.8*(x-5),'r');
+	case 'HL'
+		plot(x,10+3*(x-5),'r');
 	end
 	xlabel('Number of nucleotides');
 	ylabel('MixedScore cutoff');

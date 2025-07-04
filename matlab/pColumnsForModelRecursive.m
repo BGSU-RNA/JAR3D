@@ -1,6 +1,6 @@
 % pColumnsForModel lists out what column each part of a JAR3D model should go into when displayed
 
-% This program needs to call itself recursively to deal with junctions!!!
+% This program needs to call itself recursively to deal with junctions
 
 % load 'MotifLibrary\IL_018.mat'
 % JAR3D_path
@@ -15,30 +15,32 @@ clear T                                % build up lines from the left
 r = 1;
 clear U                                % build up lines from the right,
                                        % will be read backwards
+U = [];
+
 s = 1;
 
-n = N;
+n = N;                                 % node number to start working
 continu = 1;
 
 while continu > 0,
   if strcmp(Node(n).type,'Initial')
-    if length(Node(n).leftLengthDist) > 1,
+    if length(Node(n).leftLengthDist) > 1
       T{r} = sprintf('Node_%d_Position_1_Insertion', n);
       r = r + 1;
     end
-    if length(Node(n).rightLengthDist) > 1,
+    if length(Node(n).rightLengthDist) > 1
       U{s} = sprintf('Node_%d_Position_2_Insertion', n);
       s = s + 1;
     end
-  elseif strcmp(Node(n).type,'Fixed'),
-    if length(Node(n).leftLengthDist) > 1,
+  elseif strcmp(Node(n).type,'Fixed')
+    if length(Node(n).leftLengthDist) > 1
       T{r} = sprintf('Node_%d_Position_1', n);
       r = r + 1;
     else
       U{s} = sprintf('Node_%d_Position_2', n);
       s = s + 1;
     end
-  elseif strcmp(Node(n).type,'Basepair'),
+  elseif strcmp(Node(n).type,'Basepair')
     T{r} = sprintf('Node_%d_Position_1', n);
     r = r + 1;
     T{r} = sprintf('Node_%d_Position_1_Insertion', n);
@@ -49,7 +51,7 @@ while continu > 0,
     s = s + 1;
   elseif strcmp(Node(n).type,'Cluster')
     k = 1;
-    for j = 1:(length(Node(n).LeftIndex)-1),
+    for j = 1:(length(Node(n).LeftIndex)-1)
       T{r} = sprintf('Node_%d_Position_%d', n, k);
       r = r + 1;
       T{r} = sprintf('Node_%d_Position_%d-%d_Insertion', n, k, k+1);
@@ -62,7 +64,7 @@ while continu > 0,
 
     kk = length(Node(n).LeftIndex) + length(Node(n).RightIndex);
 
-    for j = 1:(length(Node(n).RightIndex)-1),
+    for j = 1:(length(Node(n).RightIndex)-1)
       U{s} = sprintf('Node_%d_Position_%d', n, kk);
       s = s + 1;
       U{s} = sprintf('Node_%d_Position_%d-%d_Insertion', n, kk-1, kk);
@@ -73,7 +75,7 @@ while continu > 0,
     s = s + 1;
   elseif strcmp(Node(n).type,'Hairpin')
     k = 1;
-    for j = 1:(length(Node(n).MiddleIndex)-1),
+    for j = 1:(length(Node(n).MiddleIndex)-1)
       T{r} = sprintf('Node_%d_Position_%d', n, k);
       r = r + 1;
       T{r} = sprintf('Node_%d_Position_%d-%d_Insertion', n, k, k+1);
@@ -83,21 +85,22 @@ while continu > 0,
     T{r} = sprintf('Node_%d_Position_%d', n, k);
     r = r + 1;
 
-    T = [T fliplr(U)];                  % append, reverse entries of U
     continu = 0;                        % stop after a hairpin
   elseif strcmp(Node(n).type,'Junction')
-    disp('Junction nodes have not been tested in pColumnsForModelRecursive');
-    T = [T pColumnsForModelRecursive(Node,ModelName,Node(n).nextnode(1))];
-    T = [T pColumnsForModelRecursive(Node,ModelName,Node(n).nextnode(2))];
-    T = [T fliplr(U)];
+    T = [T pColumnsForModelRecursive(Node,Node(n).nextnode(1))];
+    T = [T pColumnsForModelRecursive(Node,Node(n).nextnode(2))];
     continu = 0;
   elseif strcmp(Node(n).type,'Alternative')
     disp('Alternative nodes are not set up in pColumnsForModelRecursive');
     continu = 0;
   end
 
+  if continu == 0
+    T = [T fliplr(U)];                  % append, reverse entries of U
+  end
+
   n = n + 1;
-  if n > length(Node),
+  if n > length(Node)
     continu = 0;
   end
 end

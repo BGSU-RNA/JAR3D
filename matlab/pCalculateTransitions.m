@@ -11,20 +11,26 @@ transitionCounts = zeros(4,4);    %(A,C,G,U)^2
 initialTransitionCounts = zeros(4,4);    %(A,C,G,U)^2
 TransitionFile = [OutputPath filesep 'transitions.mat'];
 
-for m = 1:length(Filenames),
+for m = 1:length(Filenames)
   MotifName = Filenames(m).name;
   load([MotifLibraryPath filesep MotifName '.mat']);
-  [Search,Node] = pMakeSingleJAR3DModel(Search,Param,Prior,loopType);
 
-  if isempty(Node),
+  % [Search,Node] = pMakeSingleJAR3DModel(Search,Param,Prior,loopType);
+
+  Node = [1,2];   % spoof it for next line
+
+  if isempty(Node)
 %    mkdir([MotifLibraryPath filesep 'trouble']);
-%    movefile([MotifLibraryPath filesep MotifName '.mat'],[MotifLibraryPath filesep 'trouble' filesep MotifName '.mat']); 
-    fprintf('@@@@@@@@@@@@ pCalculateTransitions: Motif %s could not be modeled\n', MotifName);
+%    movefile([MotifLibraryPath filesep MotifName '.mat'],[MotifLibraryPath filesep 'trouble' filesep MotifName '.mat']);
+    fprintf('@@@@@@@@@@@@ pCalculateTransitions: Motif %s has no Node and so could not be modeled\n', MotifName);
   else
     [Text,T3,T4,T5] = xFASTACandidates(Search.File,Search,1,MotifName);
 
-    % ---------- extract sequences counts for transition matricies
-  
+    % ---------- extract sequence counts for transition matricies
+
+    fprintf('pCalculateTransitions:  processing %s\n', MotifName);
+    disp(Text)
+
     [cWW, initial, transition, core, initialTransition] = pExtractSequenceCounts(Text);
     cWWCounts = cWWCounts + cWW;
     initialCounts = initialCounts + initial;
@@ -34,7 +40,7 @@ for m = 1:length(Filenames),
   end
 end
 
-cWW_M = cWWCounts/sum(cWWCounts); 
+cWW_M = cWWCounts/sum(cWWCounts);
 initial_M = initialCounts/sum(initialCounts);
 core_M = coreCounts/sum(coreCounts);
 transition_M(1,:) = transitionCounts(1,:)/sum(transitionCounts(1,:));
@@ -48,12 +54,15 @@ initialTransition_M(4,:) = initialTransitionCounts(4,:)/sum(initialTransitionCou
 
 save(TransitionFile, 'cWW_M', 'initial_M', 'transition_M');
 
-fprintf('pCalculateTransitions:  cWW basepair probabilities are\n');
+fprintf('pCalculateTransitions:  cWW basepair probabilities for CG, GC, AU, UA, GU, UG are\n');
 cWW_M
 
-fprintf('pCalculateTransitions:  initial distribution is\n');
+fprintf('pCalculateTransitions:  initial distribution for A, C, G, U is\n');
 initial_M
 
-fprintf('pCalculateTransitions:  transition matrix is\n');
+fprintf('pCalculateTransitions:  initial transition matrix is\n');
+initialTransition_M
+
+fprintf('pCalculateTransitions:  interior transition matrix is\n');
 transition_M
 

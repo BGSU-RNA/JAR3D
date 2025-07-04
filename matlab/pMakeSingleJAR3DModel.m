@@ -4,7 +4,7 @@
 
 function [Search,Node] = pMakeSingleJAR3DModel(Search,Param,Prior,loopType)
 
-if nargin < 2,
+if nargin < 2
   Param = [0 2 0 4 100 1 1 1 Inf 5 3];                   % See below
 
   % Parameters stored in Param:
@@ -25,6 +25,13 @@ Verbose = Param(1);
 
 if nargin < 3,
   Prior = [.5 .5 .5 .5 0];              % Prior distribution for insertion bases
+end
+
+CL = zClassLimits;
+if exist('PairExemplars.mat','file') > 0
+    load('PairExemplars','Exemplar');
+else
+    Exemplar = [];
 end
 
 % ----- Calculate coplanar measure for each File in Search
@@ -96,14 +103,38 @@ end
 
 [Node,Search] = pMakeMotifModelFromSSF(Search,Param,Prior,loopType,1:L);
 
-if length(Node) > 0,
+% simple quality check on junctions
+if loopType(1) == 'J'
+    Rotations = str2num(strrep(loopType,'J',''));  % J3, J4, etc.
+    hairpin_count = 0;
+    junction_count = 0;
+    for n = 1:length(Node)
+        if strcmp(Node(n).type,'Junction')
+            junction_count = junction_count + 1;
+        end
+        if strcmp(Node(n).type,'Hairpin')
+            hairpin_count = hairpin_count + 1;
+        end
+    end
+    if hairpin_count ~= Rotations-1
+        fprintf('pMakeSingleJAR3DModel: number of hairpins is incorrect, stopping\n');
+        fprintf(crash)
+    end
+    if junction_count ~= Rotations-2
+        fprintf('pMakeSingleJAR3DModel: number of junctions is incorrect, stopping\n');
+        fprintf(crash)
+    end
+end
+
+% simple quality check on IL, hopefully no longer needed
+if length(Node) > 0
   OK = 1;
-  for n = 1:length(Node),
-    if strcmp(loopType,'IL') && strcmp(Node(n).type,'Junction'),
+  for n = 1:length(Node)
+    if strcmp(loopType,'IL') && strcmp(Node(n).type,'Junction')
       OK = 0;
     end
   end
-  if OK == 0,
+  if OK == 0
     Node = [];
   end
 end

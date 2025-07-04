@@ -1,3 +1,5 @@
+% deprecated
+
 % pEditDistanceIL(a,b) treats a and b as a hairpin loop sequence.  It returns full or interior/core edit distance, as requested.
 
 function [d] = pEditDistanceHL(a,b,location)

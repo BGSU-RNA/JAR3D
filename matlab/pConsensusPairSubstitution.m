@@ -1,4 +1,4 @@
-% pConsensusPairSubstitution(a,b,f,File,F,L,Search) looks at the letter pairs corresponding to nucleotides a and b of the query motif in Search, uses interactions in F as the consensus, 
+% pConsensusPairSubstitution(a,b,f,File,F,L,Search) looks at the letter pairs corresponding to nucleotides a and b of the query motif in Search, uses interactions in F as the consensus,
 
 % The argument Noncanonical being set to 1 means that this pair should set low probabilities for CG, GC, AU, and UA base combinations, because this pair is the first non-canonical pair in a motif.
 
@@ -10,7 +10,7 @@ end
 
 Verbose = Param(1);
 
-Score = zeros(4,4);                       % ready to sum IsoScores for this pair 
+Score = zeros(4,4);                       % ready to sum IsoScores for this pair
 Count = zeros(4,4);                       % tally observed basepairs here
 
 [L,N] = size(Search.Candidates);          % L = num instances; N = num NT
@@ -148,7 +148,7 @@ else                                      % conserved but non-basepairing positi
       fprintf('pConsensusPairSubstitution: File %4s has non-basepairing core base %s%4s\n', File(f(c)).Filename, NT1.Base, NT1.Number);
     end
 
-    Count(1,NT1.Code) = Count(1,NT1.Code) + 1;    
+    Count(1,NT1.Code) = Count(1,NT1.Code) + 1;
   end
 
   Pr = Prior(1:4);

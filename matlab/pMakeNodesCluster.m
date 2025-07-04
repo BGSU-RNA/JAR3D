@@ -13,35 +13,31 @@
 % 2. Numbering along each strand, from 1 to N on each strand.  ss, tt, zs, zt, xs, yt, RightNotInter are on this scheme.
 % 3. Numbering the interacting bases in the cluster from 1 to M, regardless of strand.  rightnum, e, IBases are on this scheme.
 
-if exist('zxsx')
-  disp('Cluster *****************************************************');
+if pStrandBreaksBetween(a,B,Truncate) == 0
+  % hairpin
+  amax = min([length(File.NT) a+cdepth floor((a+B)/2)]);
+  bmin = max([1 B-cdepth ceil((a+B)/2) amax+1]);
+
+  fprintf('amax is %d bmin is %d\n',amax,bmin);
+  use_amax = 0;
+else
+  % IL or junction
+  amax = min(a+cdepth,pNextTruncation(a,Truncate,N)); % how far to look on left, at most
+  bmin = max(B-cdepth,pNextTruncation(B,Truncate,1)); % how far to look on right, at most
+  use_amax = 1;
 end
 
-%[a b B cdepth]
 b = B;                                 % current base on right
-
-amax = min(a+cdepth,floor((a+b)/2));   % how far to look on left
-bmin = max(b-cdepth,floor((a+b)/2)+1); % how far to look on right
-
-z = find((a < Truncate) .* (Truncate < amax));
-if ~isempty(z),
-  amax = Truncate(z)-1;                % don't look beyond truncation point
-end
-
-z = find((bmin < Truncate) .* (Truncate < b));
-if ~isempty(z),
-  bmin = Truncate(z)-1;                % don't look beyond truncation point
-end
 
 X = full(triu(G(a:amax,a:amax)));      % interactions on left strand
 Y = full(triu(G(bmin:b,bmin:b)));      % interactions on right strand
 Z = full(G(a:amax,bmin:b));            % interactions between left + right
-[s,t] = size(Z);                       % X is s x s, Y is t x t
+[s,t] = size(Z);                       % X is s by s, Y is t by t
 
 % ------------------------------------ determine extent of cluster interactions
 
 ssa = max(find(X(1,:)));               % depth from a on left
-ssb = max(find(Z(:,t)));               % nearest interaction to t 
+ssb = max(find(Z(:,t)));               % nearest interaction to t
 if isempty(ssa), ssa = 1; end
 if isempty(ssb), ssb = 1; end
 ss = max(ssa, ssb);
@@ -55,7 +51,7 @@ tt = min(tta, ttb);
 while sum(sum(Z(1:ss,1:(tt-1)))) > 0 || ...
       sum(sum(Z((ss+1):s,tt:t))) > 0 || ...
       sum(sum(X(1:ss,(ss+1):s))) > 0 || ...
-      sum(sum(Y(tt:t,1:(tt-1)))) > 0,
+      sum(sum(Y(tt:t,1:(tt-1)))) > 0
   ssa = max(find(sum(X(1:ss,:),1)));
   ssb = max(find(sum(Z(:,tt:t),2)));
   if isempty(ssa), ssa = 1; end
@@ -72,22 +68,40 @@ end
 aa = a - 1 + ss;                      % left extent of cluster
 bb = b - (t - tt);                    % right extent of cluster
 
+fprintf('pMakeNodesCluster: Cluster goes from %d to %d and then %d to %d\n', a,aa,bb,b);
+
+if aa + 1 == bb && use_amax == 0
+  fprintf('pMakeNodesCluster: Using a hairpin to finish this stem\n')
+  make_hairpin = 1;
+  return
+else
+  make_hairpin = 0;
+end
+
+% if use_amax == 0 && aa + 1 == bb
+%   % hairpin loop and the cluster seems to be the whole loop
+%   % allow them to overlap so we don't miss any nucleotides
+%   bb = aa + 1;
+% end
+
+fprintf('aa is %d bb is %d\n',aa,bb);
+
 % ------------------------------------- Set up basics of cluster node
 
 n=n+1;
-Node(n).Delete       = 0.001;            % deletion probability
-Node(n).type         = 'Cluster';        % node type
-Node(n).nextnode     = n+1;              % index of next node in tree
-Node(n).LeftIndex    = [a:aa];           % full range of indices
-Node(n).LeftLetter   = cat(2,File.NT(a:aa).Base);
-Node(n).RightLetter  = cat(2,File.NT(bb:b).Base);
-Node(n).RightIndex   = [bb:b];
-
-AllIndices = [a:aa bb:b];
+Node(n).Delete      = 0.001;            % deletion probability for now
+Node(n).type         = 'Cluster';      % node type
+Node(n).nextnode    = n+1;              % index of next node in tree
+Node(n).LeftIndex   = a:aa;             % full range of indices
+Node(n).LeftLetter  = cat(2,File.NT(a:aa).Base);
+Node(n).RightLetter = cat(2,File.NT(bb:b).Base);
+Node(n).RightIndex  = bb:b;
 
 Node(n).Comment = [' // Cluster node ' File.NT(Node(n).LeftIndex(1)).Base File.NT(Node(n).LeftIndex(1)).Number ':' File.NT(Node(n).LeftIndex(end)).Base, File.NT(Node(n).LeftIndex(end)).Number ' and ' File.NT(Node(n).RightIndex(1)).Base File.NT(Node(n).RightIndex(1)).Number ':' File.NT(Node(n).RightIndex(end)).Base File.NT(Node(n).RightIndex(end)).Number];
 
-if Verbose > 0,
+AllIndices = [a:aa bb:b];
+
+if Verbose > 0
   fprintf('%3d Cluster   %s:%s %s:%s\n', n, File.NT(a).Number, File.NT(aa).Number, File.NT(bb).Number, File.NT(b).Number);
 end
 
@@ -102,10 +116,21 @@ zt = find(sum(Z,1));       % bases on right interacting with left
 xs = find(sum(X+X',1));    % left with left
 yt = find(sum(Y+Y',1));    % right with right
 
-Node(n).LeftNotInter = setdiff(1:length(Node(n).LeftIndex),union(zs,xs));
+Node(n).LeftNotInter  = setdiff(1:length(Node(n).LeftIndex),union(zs,xs));
 Node(n).RightNotInter = setdiff(1:length(Node(n).RightIndex),union(zt,yt));
 
-if insertionconserved == 1,  % treat non-interacting bases as part of the cluster
+% Node(n).LeftNotInter
+% Node(n).LeftIndex
+% Z
+% zs
+% xs
+
+% Node(n).RightNotInter
+% Node(n).RightIndex
+% zt
+% yt
+
+if insertionconserved == 1   % treat non-interacting bases as part of the cluster
   zs = 1:ss;                 % all are thought of as interacting
   zt = 1:length(Y(1,:));
   xs = 1:ss;
@@ -114,7 +139,7 @@ end
 
 leftinter = union(zs,xs);            % list of interacting on left
 leftnum   = [];
-leftnum(leftinter) = 1:length(leftinter); 
+leftnum(leftinter) = 1:length(leftinter);
                           % sequential numbering of interacting bases
 
 rightinter = union(zt,yt);
@@ -126,12 +151,12 @@ rightnum(find(rightnum)) = rightnum(find(rightnum))+length(leftinter);  % shift 
 % --------------- list insertion possibilities and corresponding probabilities
 
 zsxs = union(zs,xs);              % all interacting bases on the left
-if isempty(zsxs),                 % happens when no inter across
+if isempty(zsxs)                  % happens when no inter across
   zsxs = 1;
 end
 
 ztyt = union(zt,yt);              % all interacting bases on the right
-if isempty(ztyt),
+if isempty(ztyt)
   ztyt = 1;
 end
 
@@ -217,7 +242,7 @@ for k = 1:length(i),                 % loop through them
     end
 
     Node(n).SubsProb(:,:,K) = pIsoScore(File.Edge(i1,i2), ...
- File.NT(i1).Code, File.NT(i2).Code,method,ExemplarIDI,ExemplarFreq,Normalize);
+    File.NT(i1).Code, File.NT(i2).Code,method,ExemplarIDI,ExemplarFreq,Normalize);
 
     Node(1).Edge(i1,i2) = File.Edge(i1,i2);
     K  = K + 1;
@@ -225,7 +250,7 @@ end
 
 % ---- interactions between right and right
 [i,j] = find(Y);                      % interacting pairs
-for k = 1:length(i),                  % loop through them
+for k = 1:length(i)                   % loop through them
     Node(n).IBases(K,:) = [rightnum(i(k)) rightnum(j(k))];
     i1 = i(k) + bb - 1;               % index of first base
     i2 = j(k) + bb - 1;               % index of second
@@ -233,7 +258,7 @@ for k = 1:length(i),                  % loop through them
 
     Node(n).InteractionComment{K} = [ ' // Cluster Interaction ' File.NT(i1).Base File.NT(i1).Number ' - ' File.NT(i2).Base File.NT(i2).Number ' ' zEdgeText(File.Edge(i1,i2))];
 
-    if Verbose > 0,
+    if Verbose > 0
       fprintf('    RR Inter  %4s %4s %c%c %s\n', File.NT(i1).Number, File.NT(i2).Number, File.NT(i1).Base, File.NT(i2).Base, zEdgeText(File.Edge(i1,i2)));
 %fprintf('%d %d\n', Node(n).IBases(K,1), Node(n).IBases(K,2));
     end
@@ -246,36 +271,36 @@ end
 
 % ---- inserted bases which are treated as conserved insertions and modeled as interacting with themselves
 
-for i = Node(n).LeftNotInter,
+for i = Node(n).LeftNotInter
   K = length(Node(n).IBases(:,1))+1;
   Node(n).IBases(K,:) = [i i];
   i1 = i + a - 1;
   Node(n).InterIndices(K,:) = [i1 i1];
-  Node(n).InteractionComment{K} = [' // Left strand conserved insertion ' File.NT(i1).Base File.NT(i1).Number];
+  Node(n).InteractionComment{K} = [' // Left strand conserved insertion ' File.NT(i1).ID];
   M = eye(4);
   M(File.NT(i1).Code,File.NT(i1).Code) = 4;
   M = M / sum(sum(M));
   Node(n).SubsProb(:,:,K) = M;            % favor the observed base
-  
-  if Verbose > 0,
-    fprintf('    Left strand conserved insertion %c%4s at position %d\n', File.NT(i1).Base, File.NT(i1).Number, i);
+
+  if Verbose > 0
+    fprintf('    Left  strand conserved insertion %s at position %d\n', File.NT(i1).ID, i);
   end
 end
 
-for i = Node(n).RightNotInter,
+for i = Node(n).RightNotInter
   K = length(Node(n).IBases(:,1))+1;
 
   Node(n).IBases(K,:) = [i i] + length(leftinter); % shift from right strand numbering to whole motif numbering
   i1 = i + bb - 1;                        % index in original file
   Node(n).InterIndices(K,:) = [i1 i1];
-  Node(n).InteractionComment{K} = [' // Right strand conserved insertion ' File.NT(i1).Base File.NT(i1).Number];
+  Node(n).InteractionComment{K} = [' // Right strand conserved insertion ' File.NT(i1).ID];
   M = eye(4);
   M(File.NT(i1).Code,File.NT(i1).Code) = 4;
   M = M / sum(sum(M));
   Node(n).SubsProb(:,:,K) = M;            % favor the observed base
 
-  if Verbose > 0,
-    fprintf('    Right strand conserved insertion %c%4s at right strand position %d\n', File.NT(i1).Base, File.NT(i1).Number, i);
+  if Verbose > 0
+    fprintf('    Right strand conserved insertion %s at position %d\n', File.NT(i1).ID, i);
   end
 
 end
@@ -300,7 +325,20 @@ a = aa + 1;                           % current base on left
                                       % skip over rest of cluster
 B = bb - 1;                           % current base on right
 
-a = min(a,B);                         % just in case!
+fprintf('pMakeNodesCluster a=%d B=%d at the end\n', a, B)
+
+B = max(B,1);
+
+% a > B is an important sign that there are no more bases to model with a node
+
+% a = min(a,B);                         % just in case!
+
+if use_amax && a <= B
+  a = min(a,amax);                      % don't go beyond the current strand
+  B = max(B,bmin);
+end
+
+fprintf('pMakeNodesCluster a=%d B=%d at the end\n', a, B)
 
 % calculate normalization constant
 %if Normalize == 1,
@@ -309,7 +347,7 @@ a = min(a,B);                         % just in case!
 %    Node(n).NormCons = pClusterNorm(Node(n).InterIndices,Node(n).SubsProb,Node(n).LeftIndex,Node(n).RightIndex);
 %    Node(n).NormCons = .66;             % pClusterNorm only works for normalized matrices, temp fix!
 %end
-    
+
 %         psum = 0;
 %         numBases = length(Node(n).Left) + length(Node(n).Right);
 % 		if numBases < 11,

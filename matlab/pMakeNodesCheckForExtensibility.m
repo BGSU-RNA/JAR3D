@@ -1,4 +1,5 @@
-% pMakeNodesCheckForExtensibility checks the rest of the stem to see if there are long-range basepairs, BPh, or GU packing interactions
+% pMakeNodesCheckForExtensibility checks the rest of the stem to see if there
+% are long-range basepairs, BPh, or GU packing interactions
 
 Outside = [1:(a-1) (B+1):length(File.NT)];
 
@@ -9,8 +10,8 @@ if sum(sum(J(a:B,Outside))) == 0 && ... % no tertiary inter outside this stem
    (~strcmp(File.Filename,'2AW4') || (a > 69)),
 
   if TertiaryFreeNode == 0,              % only mark the first one
-    TertiaryFreeNode = n;                
-    if Verbose > 0,
+    TertiaryFreeNode = n;
+    if Verbose > 10
      fprintf('After node %3d, this stem is free of tertiary interactions\n',n);
     end
 

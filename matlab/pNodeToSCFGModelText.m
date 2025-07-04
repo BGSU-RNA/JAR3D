@@ -5,22 +5,22 @@
 
 function [T] = pNodeToSCFGModelText(Node,NumChar)
 
-if nargin < 2,
+if nargin < 2
   NumChar = 4;
 end
 
-if NumChar == 4,
+if NumChar == 4
   Text = 'Character Definition | A,C,G,U // Define characters here';
-elseif NumChar == 5,
+elseif NumChar == 5
   Text = 'Character Definition | A,C,G,U,* // Define characters here';
-elseif NumChar == 6,
+elseif NumChar == 6
   Text = 'Character Definition | A,C,G,U,N // Define characters here';
 end
 
 T{1} = Text;
 r = 2;
 
-for n=1:length(Node),
+for n=1:length(Node)
   switch Node(n).type
     case 'Initial' % -----------------------------------------------------
 
@@ -79,7 +79,7 @@ for n=1:length(Node),
 
     case 'Junction' % -----------------------------------------------------
       Text = [sprintf('JunctionNode | Branches ')];
-      Text = [Text sprintf('[%d] ',length(Node(n).nextnode))];
+      Text = [Text sprintf('[%d] ',Node(n).numbranches)];
 
       LI = Node(n).LeftIndex;
       RI = Node(n).RightIndex;
@@ -196,7 +196,7 @@ for n=1:length(Node),
         RI = Node(n).MiddleIndex(end);                    % use the last
       else
         LI = Node(n).LeftIndex(1);                        % use the first
-        RI = Node(n).RightIndex(end);                     % use the last  
+        RI = Node(n).RightIndex(end);                     % use the last
         fprintf('pNodeToSCFGModelText: Warning, Node(%d).MiddleIndex is empty\n',n);
       end
 
@@ -205,7 +205,7 @@ for n=1:length(Node),
       if(isfield(Node(n),'NormCons')),
         Text = [Text sprintf(' | Norm Constant [%0.15f]', Node(n).NormCons)];
       else
-        Text = [Text sprintf(' | Norm Constant [%0.15f]', 1.0)];  
+        Text = [Text sprintf(' | Norm Constant [%0.15f]', 1.0)];
       end
       Text = [Text Node(n).Comment];
 

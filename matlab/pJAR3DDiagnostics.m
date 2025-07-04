@@ -7,7 +7,7 @@
 
 function [void] = pJAR3DDiagnostics(OutputBase,Release,SequenceSource,DiagnosticMode)
 
-fprintf('Running JAR3D diagnostics on release %s\n',Release);
+fprintf('pJAR3DDiagnostics: Running JAR3D diagnostics on release %s\n',Release);
 
 if nargin < 4,
   DiagnosticMode = 1;
@@ -43,14 +43,9 @@ DiagnosticTestName = '';
 
 % ---------------------------------------- set directories
 
-Release = strrep(Release,'\',filesep);
-Release = strrep(Release,'/',filesep);
 OutputPath = [OutputBase filesep Release];
 
-SequenceSource = strrep(SequenceSource,'\',filesep);
-SequenceSource = strrep(SequenceSource,'/',filesep);
-
-if strcmp(Release,SequenceSource),
+if strcmp(Release,SequenceSource)
   UsingSequencesFromMotifGroups = 1;
   SequencePath = [OutputBase filesep SequenceSource filesep 'lib'];
 else
@@ -76,13 +71,14 @@ end
 
 loopType = Release(1:2);
 
-switch loopType,
-case 'JL'
-  Rotations = 3;                      % three rotations, for 3-way junctions
-case 'IL'
-  Rotations = 2;                      % two rotations are computed
-case 'HL'
-  Rotations = 1;                      % only one "rotation"
+switch loopType
+  case 'HL'
+    Rotations = 1;                      % only one "rotation"
+  case 'IL'
+    Rotations = 2;                      % two rotations are computed
+  otherwise
+    loopType
+    Rotations = str2num(strrep(loopType,'J',''));   % three rotations, for 3-way junctions
 end
 
 % ----------------------------------- set paths, make directories if needed
@@ -118,25 +114,16 @@ end
 
 % ----------------------------------------
 
-fs = 14;                                 % font size for figures
-tfs = 13;
+fs = 11;                                 % font size for figures
+tfs = 11;
 
 % ---------------------------------------- Read data from models
 
 [GroupData,MotifEquivalence] = pGetModelData(OutputPath,loopType);
 
-% ---------------------------------------------------------------------
+% ------------------------------ Align 3D sequences against its own model and write out correspondences
 
-clear OwnPercentile
-clear SeqLength
-clear LeaveOneOut
-clear NumBetterScore
-clear OwnMLP
-clear OwnTotalProb
-
-% ---------------------------------- Align 3D sequences against model and write out correspondences
-
-for g = 1:length(GroupData),
+for g = 1:length(GroupData)
   MotifName = GroupData(g).MotifID;
   FastaFile = [SequencePath filesep MotifName '.fasta'];
   DiagnosticFile = [DiagnosticPath filesep MotifName '_diagnostics.txt'];
@@ -153,17 +140,10 @@ for g = 1:length(GroupData),
   end
   fclose(fid);
 
+  % javaclasspath to see where Matlab looks for Java classes
+  % in my case,       Documents\GitHub\JAR3D\target\classes\edu\bgsu\rna\jar3d
+  % source code is in Documents\GitHub\JAR3D\src\main\java\edu\bgsu\rna\jar3d
   corresp = edu.bgsu.rna.jar3d.JAR3DMatlab.ModelCorrespondences(FastaFile,ModelPath,MotifName,0);
-  % ----------- The following lines prevent the program from being stopped
-  % ----------- by a crazy Matlab bug.  It is intermittent, but after a call
-  % ----------- to JAR3D, it is hell bent on saying
-  % ----------- "Dot name reference on non-scalar structure"
-  try
-    x = Temp.A + 1;
-    Temp.A
-  catch ME
-    Temp.B = 9876;
-  end
 
   corresp = char(corresp);
   correspcell = zStringSplit(corresp,char(10));
@@ -196,19 +176,19 @@ if UsingSequencesFromMotifGroups == 1,     % internal diagnostic
   end
   [FASTA, OwnMotif] = pConcatenateFASTASequences(SequencePath, SeqNames);
   SeqGroup = OwnMotif;                      % same concept here
-  for n = 1:length(FASTA),
+  for n = 1:length(FASTA)
     FASTA(n).Multiplicity = 1;
   end
 else
 %  SequencePath = [pwd filesep 'lib' filesep SequenceSource];
   DiagnosticBase = [pwd filesep Release filesep 'externaldiagnostic' filesep SequenceSource DiagnosticTestName];
   DiagnosticPath = [pwd filesep Release filesep 'externaldiagnostic' filesep SequenceSource DiagnosticTestName];
-  if ~(exist(DiagnosticPath) == 7),
+  if ~(exist(DiagnosticPath) == 7)
     mkdir(DiagnosticPath);
   end
 
 %  [FASTA, OwnMotif, SeqGroup, SeqNames] = pReadMSASequences(SequencePath,MotifNames);
-	fprintf('pJAR3DDiagnostics:  This option is no longer available\n');
+	fprintf('pJAR3DDiagnostics:  externaldiagnostic option is no longer available\n');
 
 end
 
@@ -247,73 +227,83 @@ fprintf('Overall maximum intragroup core edit distance is %2d\n', max1);
 NumSequences = length(FASTA);
 NumSeqGroups = max(SeqGroup);
 
-% --------------------- Add UU pairs to FASTA for diagnostic purposes
-
-if any(DiagnosticMode == [2 3 4]),
+if any(DiagnosticMode == [2 3 4])
+  % --------------------- Add UU pairs to FASTA for diagnostic purposes
   FASTA = pAddPairstoFASTAforDiagnostic(FASTA,NumSequences,DiagnosticMode);
 end
 
 % --------------------- Write sequences to one file for each rotation
 
-[AllSequencesFile] = pWriteSequencesWithRotations(ModelPath,FASTA,loopType,Rotations);
+% [AllSequencesFile] = pWriteSequencesWithRotations(ModelPath,FASTA,loopType,Rotations);
+[AllSequencesFile,rotatedFASTA] = pWriteSequencesWithRotations(DiagnosticPath,FASTA,loopType,Rotations,'internal_diagnostic');
 
-% ------------------------- Load parsing and edit distance data if necessary
+% ------------------------- Load parsing and edit distance data if available
 
 DataFile = [DiagnosticPath filesep 'ParsingData.mat'];
 
-if exist(DataFile,'file'),
+if exist(DataFile,'file')
 	load(DataFile)
 	fprintf('Loaded data file %s\n', DataFile);
 else
-  % ----------------------- Calculate edit distance between FASTA and 3D instances
+  % ----------------------- Calculate interior edit distance between FASTA and 3D instances
   clear CoreEditDistance
   clear AvgCoreEditDistance
 
-  fprintf('Finding core edit distance of %4d sequences against %4d models\n', NumSequences, length(GroupData));
-  for m = 1:length(GroupData),
-    ModelFASTA = zReadFASTA([ModelPath filesep GroupData(m).MotifID '.fasta']); % read sequences from *models*
+%   fprintf('Finding interior edit distance of %4d sequences against %4d models\n', NumSequences, length(GroupData));
+%   for m = 1:length(GroupData),
+%     ModelFASTA = zReadFASTA([ModelPath filesep GroupData(m).MotifID '.fasta']); % read sequences from *models*
 
-    [D1,D2,D3] = pEditDistance(FASTA,ModelFASTA,loopType,'core');
-    if strcmp(Release,SequenceSource),                % internal diagnostic
-%     i = find(OwnMotif == m);                        % seqs from current motif
-%     D2(i,:) = zMakeZeroInf(D2(i,:));                % ignore exact matches
-%     D3(i,:) = zMakeZeroInf(D3(i,:));                % ignore exact matches
-    end
-    CoreEditDistance(:,m,1) = min(D2,[],2);     % best match of core seq
-    AvgCoreEditDistance(:,m,1) = mean(D2,2);     % best match of core seq
-    if strcmp(loopType,'IL'),
-      CoreEditDistance(:,m,2) = min(D3,[],2);     % best match of core rev'd
-      AvgCoreEditDistance(:,m,2) = mean(D3,2);     % best match of core rev'd
-    end
+%     [D1,D2,D3] = pEditDistance(FASTA,ModelFASTA,loopType,'core');
+%     if strcmp(Release,SequenceSource),                % internal diagnostic
+% %     i = find(OwnMotif == m);                        % seqs from current motif
+% %     D2(i,:) = zMakeZeroInf(D2(i,:));                % ignore exact matches
+% %     D3(i,:) = zMakeZeroInf(D3(i,:));                % ignore exact matches
+%     end
+%     CoreEditDistance(:,m,1) = min(D2,[],2);     % best match of core seq
+%     AvgCoreEditDistance(:,m,1) = mean(D2,2);     % best match of core seq
+%     if strcmp(loopType,'IL')
+%       CoreEditDistance(:,m,2) = min(D3,[],2);     % best match of core rev'd
+%       AvgCoreEditDistance(:,m,2) = mean(D3,2);     % best match of core rev'd
+%     end
 
-    if mod(m,50) == 0,
-      fprintf('Checked core edit distance for %4d models so far\n', m);
-    end
-  end
+%     if mod(m,40) == 0
+%       fprintf('Checked core edit distance for %4d models so far\n', m);
+%     end
+%   end
 
-  % ----------------------- Calculate edit distance between FASTA and 3D instances
+  % ----------------------- Calculate full edit distance between FASTA and 3D instances
   clear FullEditDistance
   clear AvgFullEditDistance
 
-  fprintf('Finding full edit distance of %4d sequences against %4d models\n', length(FASTA), length(GroupData));
-  for m = 1:length(GroupData),
+  fprintf('Finding full and core edit distance of %4d sequences against %4d models\n', length(FASTA), length(GroupData));
+  for m = 1:length(GroupData)
     ModelFASTA = zReadFASTA([ModelPath filesep GroupData(m).MotifID '.fasta']);
 
-    [D1,D2,D3] = pEditDistance(FASTA,ModelFASTA,loopType,'full');
-    if strcmp(Release,SequenceSource),           % internal diagnostic
-%      i = find(OwnMotif == m);                        % seqs from current motif
-%      D2(i,:) = zMakeZeroInf(D2(i,:));                % ignore exact matches
-%      D3(i,:) = zMakeZeroInf(D3(i,:));                % ignore exact matches
-    end
-    FullEditDistance(:,m,1) = min(D2,[],2);     % best match of Full seq
-    AvgFullEditDistance(:,m,1) = mean(D2,2);     % best match of Full seq
-    if strcmp(loopType,'IL'),
-      FullEditDistance(:,m,2) = min(D3,[],2);     % best match of Full rev'd
-      AvgFullEditDistance(:,m,2) = mean(D3,2);     % best match of Full rev'd
+    for rotation = 1:length(rotatedFASTA)
+      D = pEditDistanceAll(rotatedFASTA{rotation},ModelFASTA,'core');
+      CoreEditDistance(:,m,rotation) = min(D,[],2);     % min over sequences in this motif group
+      AvgCoreEditDistance(:,m,rotation) = mean(D,2);     % best match of core seq
+
+      D = pEditDistanceAll(rotatedFASTA{rotation},ModelFASTA,'full');
+      FullEditDistance(:,m,rotation) = min(D,[],2);     % min over sequences in this motif group
+      AvgFullEditDistance(:,m,rotation) = mean(D,2);     % best match of core seq
     end
 
-    if mod(m,50) == 0,
-      fprintf('Checked full edit distance for %4d models so far\n', m);
+%     [D1,D2,D3] = pEditDistance(FASTA,ModelFASTA,loopType,'full');
+%     if strcmp(Release,SequenceSource),           % internal diagnostic
+% %      i = find(OwnMotif == m);                        % seqs from current motif
+% %      D2(i,:) = zMakeZeroInf(D2(i,:));                % ignore exact matches
+% %      D3(i,:) = zMakeZeroInf(D3(i,:));                % ignore exact matches
+%     end
+%     FullEditDistance(:,m,1) = min(D2,[],2);     % best match of Full seq
+%     AvgFullEditDistance(:,m,1) = mean(D2,2);     % best match of Full seq
+%     if strcmp(loopType,'IL'),
+%       FullEditDistance(:,m,2) = min(D3,[],2);     % best match of Full rev'd
+%       AvgFullEditDistance(:,m,2) = mean(D3,2);     % best match of Full rev'd
+%     end
+
+    if mod(m,40) == 0
+      fprintf('Checked edit distances for %4d models so far\n', m);
     end
   end
 
@@ -326,30 +316,31 @@ else
 	% MLPS(a,m,r) is the score of sequence a against model m using rotation r
 	% Percentile(a,m,r) is the percentile of sequence a against model m using r
 
-	Temp.A = 12;
-	Temp.B = 27;
+	% Temp.A = 12;
+	% Temp.B = 27;
+
+  MLPS = zeros(NumSequences,length(GroupData),Rotations);
 
 	fprintf('Parsing %4d sequences against %4d models\n', NumSequences, length(GroupData));
-	for m = 1:length(GroupData),
-	  quantileFile = [ModelPath filesep GroupData(m).MotifID '_distribution.txt'];
-	  for r = 1:Rotations,
-	    MN = [ModelPath filesep GroupData(m).MotifID '_model.txt'];
+	for m = 1:length(GroupData)
+	  % quantileFile = [ModelPath filesep GroupData(m).MotifID '_distribution.txt'];
+	  for r = 1:Rotations
+      TotalProb(:,m,r) = zeros(1,NumSequences);     % total probability score for each sequence
+      Percentile(:,m,r) = zeros(1,NumSequences);    % percentile of this score
+
+      MN = [ModelPath filesep GroupData(m).MotifID '_model.txt'];
 	    S = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifParseSingle(pwd,AllSequencesFile{r},MN);
-%	    T = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifTotalProbSingle(pwd,AllSequencesFile{r},MN);
-
-      MixedScore = -(GroupData(m).DeficitCoeff * (max(GroupData(m).OwnScore) - S) + GroupData(m).CoreEditCoeff * CoreEditDistance(:,m,r));
-
-%	    Q = edu.bgsu.rna.jar3d.JAR3DMatlab.getQuantilesFromFile(MixedScore,quantileFile);
-
 	    MLPS(:,m,r) = S;          % max log probability score for each sequence
-%	    TotalProb(:,m,r) = T;     % total probability score for each sequence
-%	    Percentile(:,m,r) = Q;    % percentile of this score
-      TotalProb(:,m,r) = zeros(size(S));     % total probability score for each sequence
-      Percentile(:,m,r) = zeros(size(S));    % percentile of this score
+
+      %	    T = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifTotalProbSingle(pwd,AllSequencesFile{r},MN);
+      % MixedScore = -(GroupData(m).DeficitCoeff * (max(GroupData(m).OwnScore) - S) + GroupData(m).CoreEditCoeff * CoreEditDistance(:,m,r));
+      %	    TotalProb(:,m,r) = T;     % total probability score for each sequence
+      %	    Q = edu.bgsu.rna.jar3d.JAR3DMatlab.getQuantilesFromFile(MixedScore,quantileFile);
+      %	    Percentile(:,m,r) = Q;    % percentile of this score
 	  end
 
-	  if mod(m,50) == 0,
-	    fprintf('Parsed against %4d models so far\n', m);
+	  if mod(m,40) == 0
+	    fprintf('Parsed sequences from motif groups against %4d models so far\n', m);
 	  end
 	end
 
@@ -357,11 +348,11 @@ else
 	% ----------- by a crazy Matlab bug.  It is intermittent, but after a call
 	% ----------- to JAR3D, it is hell bent on saying
 	% ----------- "Dot name reference on non-scalar structure"
-	try
-	  Temp.A
-	catch ME
-	  Temp.B = 27;
-	end
+	% try
+	%   Temp.A
+	% catch ME
+	%   Temp.B = 27;
+	% end
 
   save(DataFile,'FASTA','MLPS','TotalProb','Percentile','CoreEditDistance','FullEditDistance','AvgCoreEditDistance','AvgFullEditDistance');
 
@@ -373,26 +364,47 @@ CutoffMet   = zeros(size(MLPS));
 CutoffScore = zeros(size(MLPS));
 Par = Params;
 Par.CutoffType = 3;
-for mm = 1:length(GroupData),
-  for r = 1:Rotations,
+
+size(MLPS)
+size(CoreEditDistance)
+size(Percentile)
+
+for mm = 1:length(GroupData)
+  for r = 1:Rotations
     Features = [MLPS(:,mm,r) CoreEditDistance(:,mm,r) Percentile(:,mm,r)];
-    [CutoffMet(:,mm,r) CutoffScore(:,mm,r)] = pModelSpecificCutoff(GroupData(mm),Features,Par);
+    [CutoffMet(:,mm,r), CutoffScore(:,mm,r)] = pModelSpecificCutoff(GroupData(mm),Features,Par);
   end
 end
 
 % --------------------- Determine sequence length, excess length, percentile
 
-clear GroupSize
+% clear GroupSize
+GroupSize = zeros(1,max(SeqGroup));
 
-for g = 1:max(SeqGroup),
+for g = 1:max(SeqGroup)
   j = find(SeqGroup == g);
   GroupSize(g) = length(j);           % number of sequences in this group
 end
 
-clear ExcessSeqLength
-clear SeqLength
+% clear ExcessSeqLength
+% clear SeqLength
+% clear OwnPercentile
+% clear SeqLength
+% clear LeaveOneOut
+% clear NumBetterScore
+% clear OwnMLP
+% clear OwnTotalProb
 
-for s = 1:NumSequences,
+SeqLength = zeros(1,NumSequences);
+ExcessSeqLength = zeros(1,NumSequences);
+OwnPercentile = zeros(1,NumSequences);
+OwnMLP = zeros(1,NumSequences);
+OwnTotalProb = zeros(1,NumSequences);
+OwnEditDistance = zeros(1,NumSequences);
+OwnCutoffScore = zeros(1,NumSequences);
+OwnDeficit = zeros(1,NumSequences);
+
+for s = 1:NumSequences
   SeqLength(s) = length(FASTA(s).Sequence)-Rotations+1; % HL, R=1, IL, R=2, etc.
 
   g = OwnMotif(s);
@@ -403,7 +415,7 @@ for s = 1:NumSequences,
   OwnCutoffScore(s) = CutoffScore(s,g,1);
 end
 
-for s = 1:NumSequences,
+for s = 1:NumSequences
   j = find(OwnMotif == OwnMotif(s));     % sequences from the same group
   ExcessSeqLength(s) = SeqLength(s) - mode(SeqLength(j));
   OwnDeficit(s) = max(OwnMLP(j)) - OwnMLP(s);
@@ -485,15 +497,17 @@ cc = cc(OwnMotif);
 pHistogramNumBetterScoreIndividual(NBS,cc,T,fs);
 ylabel('Colored by core basepairs per nucleotide','fontsize',fs)
 
-% --------------------------------------- Individual sequence details
-% This can be run after the individual-group or structured individual-group diagnostic
+% --------------------------------------- Individual sequence rundown
 
 LogFile = [DiagnosticPath filesep 'log ' date '.txt'];
 delete(LogFile);
 clc
 diary(LogFile);
 
-Text = pIndividualGroupSequenceRundown(Params,OnlyStructured,OwnMotif,GroupData,MLPS,FASTA,ModelPath,SeqGroup,OwnEditDistance,CoreEditDistance,Percentile,3,Verbose,CutoffScore,FullEditDistance,AvgCoreEditDistance,CutoffMet,MotifEquivalence);
+Criterion = 3;  % core edit distance only
+Criterion = 5;  % cutoff score
+Criterion = 1;  % MLPS
+Text = pIndividualGroupSequenceRundown(Params,OnlyStructured,OwnMotif,GroupData,MLPS,FASTA,ModelPath,SeqGroup,OwnEditDistance,CoreEditDistance,Percentile,Criterion,Verbose,CutoffScore,FullEditDistance,AvgCoreEditDistance,CutoffMet,MotifEquivalence);
 
 % write Text to text file
 
@@ -503,6 +517,23 @@ for i = 1:length(Text),
   fprintf(fid,'%s\n',Text{i});
 end
 fclose(fid);
+
+% ------------------------------- individual to group using cutoff score
+
+OnlyStructured = 0;
+
+NBCS = pIndividualGroupCutoffScore(GroupData,OnlyStructured,OwnMotif,CutoffScore,FASTA);
+
+figure(1)
+T = ['Individual-group cutoff score, ' num2str(NumSequences) ' sequences against ' num2str(length(GroupData)) ' models'];
+
+pHistogramNumBetterScoreIndividual(NBCS,abs(ExcessSeqLength),T,fs);
+ylabel('Colored by difference in sequence length','fontsize',fs);
+
+print(gcf,'-dpng',[DiagnosticPath filesep 'Individual_Group_Cutoff_Score' DM{DiagnosticMode} '.png']);
+
+% ---------------------------------------------------------------------
+
 
 diary off
 
