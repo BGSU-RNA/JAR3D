@@ -473,9 +473,9 @@ for m = 1:length(Filenames)
 
     fprintf('pMakeSCFGModels: Writing motif data file %s\n', DataFile);
     fid = fopen(DataFile,'w');
-    if strcmp(loopType,'IL'),
+    if strcmp(loopType,'IL')
       fprintf(fid,'%s %s\n', Search.Signature, Search.RSignature);
-    elseif strcmp(loopType,'HL'),
+    else
       fprintf(fid,'%s\n', Search.Signature);
     end
     fprintf(fid,'%d nucleotides\n',GroupData(m).NumNT);
