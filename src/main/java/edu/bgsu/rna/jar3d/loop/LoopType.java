@@ -71,11 +71,11 @@ public enum LoopType {
 	 */
 	public static LoopType fromString(String type) {
 		System.out.println(type);
-		if (type.equalsIgnoreCase("IL") || type.equalsIgnoreCase("internal")) {
-			return INTERNAL;
-		}
 		if (type.equalsIgnoreCase("HL") || type.equalsIgnoreCase("hairpin")) {
 			return HAIRPIN;
+		}
+		if (type.equalsIgnoreCase("IL") || type.equalsIgnoreCase("internal")) {
+			return INTERNAL;
 		}
 		if (type.equalsIgnoreCase("J3")) {
 			return J3;
@@ -116,6 +116,8 @@ public enum LoopType {
 
 		String[] parts = seq.split("\\*");  // escape * with \\, since it's a regex
         int strand_count = parts.length;
+
+		// System.out.println(String.format("LoopType fromSequence sequence %s strand_count %d",seq,strand_count));
 
 		if (strand_count == 1) {
 			return HAIRPIN;
