@@ -24,7 +24,7 @@ public class DBLoader implements QueryLoader {
     private PreparedStatement sqlForQueryInfo;
 
     private PreparedStatement sqlForLoops;
-    
+
     private PreparedStatement updateQueryInfo;
 
     public DBLoader(String username, String password, String dbConnection) throws SQLException {
@@ -42,7 +42,7 @@ public class DBLoader implements QueryLoader {
     	sqlForLoops.setLong(2, index);
     	ResultSet results = sqlForLoops.executeQuery();
     	long id = -1;
-    	
+
     	String type = "";
     	List<Sequence> sequences = new ArrayList<Sequence>();
     	while (results.next()) {
@@ -51,6 +51,9 @@ public class DBLoader implements QueryLoader {
     		id = results.getLong("loop_id");
     		int seq_id = results.getInt("seq_id");
     		sequences.add(new Sequence(seq_id, "", sequence));
+
+			System.out.println(String.format("DBLoader.loadLoop %s %s %d",sequence,type,id));
+
     	}
     	results.close();
 
@@ -61,22 +64,22 @@ public class DBLoader implements QueryLoader {
         String loopCountSql = "SELECT MAX(loop_id) AS max FROM `jar3d_query_sequences` where query_id = ?;";
         PreparedStatement sqlForLoopCount = connection.prepareStatement(loopCountSql);
         sqlForLoopCount.setString(1, queryId);
-        
+
         List<Loop> loops = new ArrayList<Loop>();
         ResultSet result = sqlForLoopCount.executeQuery();
         boolean found = result.first();
         if (!found) {
         	throw new QueryLoadingFailed("Could not find any loops for query: " + queryId);
         }
-        
+
         int loopCount = result.getInt("max") + 1;
         result.close();
-        
+
         for (int i = 0; i < loopCount; i++) {
-        	Loop loop = loadLoop(queryId, i); 
+        	Loop loop = loadLoop(queryId, i);
         	if(loop.getId()!=-1) {loops.add(loop);}
         }
-        
+
         return loops;
     }
 
@@ -88,25 +91,28 @@ public class DBLoader implements QueryLoader {
         String hlSet;
         List<Loop> loops;
         boolean onlyStructured;
-        
+
+
+		System.out.println(String.format("DBLoader.load queryId %s",queryId));
+
 		try {
 	        sqlForQueryInfo.setString(1, queryId);
 	        updateQueryInfo.setString(1, queryId);
-	        
+
 	        updateQueryInfo.executeUpdate();
 	        ResultSet result = sqlForQueryInfo.executeQuery();
 	        boolean found = result.first();
-	        
+
 	        if (!found) {
 	        	throw new QueryLoadingFailed("Could not find query with id: " + queryId);
 	        }
-	        
+
 	        modelType = result.getString("model_type");
 	        groupSet = result.getString("group_set");
 	        String[] parts = groupSet.split("/");
 	        ilSet = parts[0];
 	        hlSet = parts[1];
-	        
+
 	        int structured = result.getInt("structured_models_only");
 	        if (structured == 1) {
 	        	onlyStructured = true;
@@ -114,18 +120,20 @@ public class DBLoader implements QueryLoader {
 	        	onlyStructured = false;
 	        }
 	        result.close();
-	        
+
+			System.out.println(String.format("DBLoader.load queryId %s",queryId));
+
 	        loops = loadLoops(queryId);
 		} catch (SQLException e) {
 			System.out.println(sqlForQueryInfo);
 			throw new QueryLoadingFailed("Could not load: " + queryId, e);
 		}
-		
+
         Query query = new ImmutableQuery(queryId, loops, onlyStructured, ilSet, hlSet, modelType);
-        
+
         return query;
 	}
-	
+
 	public void cleanUp() {
 		try {
 			connection.close();
