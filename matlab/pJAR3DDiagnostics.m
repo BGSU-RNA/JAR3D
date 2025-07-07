@@ -143,6 +143,7 @@ for g = 1:length(GroupData)
   % javaclasspath to see where Matlab looks for Java classes
   % in my case,       Documents\GitHub\JAR3D\target\classes\edu\bgsu\rna\jar3d
   % source code is in Documents\GitHub\JAR3D\src\main\java\edu\bgsu\rna\jar3d
+  % last parameter is rotation, and only 0 works reliably
   corresp = edu.bgsu.rna.jar3d.JAR3DMatlab.ModelCorrespondences(FastaFile,ModelPath,MotifName,0);
 
   corresp = char(corresp);
