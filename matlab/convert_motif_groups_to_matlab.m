@@ -2,9 +2,13 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 
     [modified_base_to_parent,modified_base_atom_list,modified_atom_to_parent,parent_atom_to_modified,modified_base_to_hydrogens,modified_base_to_hydrogen_coordinates] = zDefineModifiedNucleotides();  % load in the modified nucleotide definitions
 
+	url = ['https://rna.bgsu.edu/rna3dhub/motifs/release/' lower(loop_type) '/' version '/json'];
+	fprintf('Using data from %s\n',url);
+
 	if ~exist([MotifLibraryLocation Input filesep 'release.json'],'file')
 		% download the release from the RNA Motif Atlas website
-		% https://rna.bgsu.edu/rna3dhub/motifs/release/il/3.92/json
+		% https://rna.bgsu.edu/rna3dhub/motifs/release/j3/3.48/json
+		% https://rna.bgsu.edu/rna3dhub/motifs/release/il/3.98/json
 		url = ['https://rna.bgsu.edu/rna3dhub/motifs/release/' lower(loop_type) '/' version '/json'];
 		fprintf('pJAR3DMaster: downloading %s from the RNA Motif Atlas %s\n', Input, url)
 		options = weboptions('Timeout', 45); % Set timeout to 45 seconds
@@ -12,7 +16,6 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 	end
 
 	% read the json file into text
-	[MotifLibraryLocation Input filesep 'release.json']
 	json = fileread([MotifLibraryLocation Input filesep 'release.json']);
 
 	% replace ||||P_1 with empty string because motif atlas keeps them but Matlab does not
@@ -23,19 +26,26 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 	% load the json file into a Matlab data structure
 	motif_list = jsondecode(json);
 
+	% matlab changes the keys '1', '2', '3' to field names x1, x2, x3
+
 	% we don't know ahead of time how many distinct pdb ids there will be
 	% make a set data structure that we can add to without duplication
 	pdb_ids = {};
 	% motif_structure is a cell array of structured variables
 	motif_structure = cell(1,length(motif_list));
-    GroupData(length(motif_list)) = struct();
+    % GroupData(length(motif_list)) = struct();
     pdb_id_to_motif_and_loop = containers.Map();
+	keep = ones(1,length(motif_list));  % which groups have data and can be kept
 
     % get all pdb ids, and set up empty motif structure for each motif group
 	for i = 1:length(motif_list)
-		i
-		motif_list{i}
+		if ~isfield(motif_list{i},'alignment')
+			keep(i) = 0;
+			continue
+		end
+
 		loop_ids = fieldnames(motif_list{i}.alignment);
+
 		for j = 1:numel(loop_ids)
 			loop_id = loop_ids{j};
 			fields = split(loop_ids{j},'_');
@@ -47,8 +57,14 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
             pdb_id_to_motif_and_loop(pdb_id) = [pdb_id_to_motif_and_loop(pdb_id); [i j]];
         end
 
+		% i
+		% motif_list{i}
 		num_instances = length(motif_list{i}.alignment);
-		num_positions = length(motif_list{i}.alignment.(loop_ids{1}));
+
+		% loop_ids{1}
+		% motif_list{i}.alignment.(loop_ids{1})
+
+		num_positions = length(fieldnames(motif_list{i}.alignment.(loop_ids{1})));
 
 		% this is the structure we need to produce, although not all of these fields
 		% Candidates: [278×7 uint16]
@@ -65,7 +81,7 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 		motif_structure{i}.Signature = motif_list{i}.bp_signature;  % text string
 		motif_structure{i}.chainbreak = motif_list{i}.chainbreak;
 
-		% create Truncate variable needed later
+		% create Truncate variable needed later to know where strand breaks are
 		Truncate = zeros(length(motif_structure{i}.chainbreak),1);
 		if iscell(motif_structure{i}.chainbreak)
 		  for j = 1:length(motif_structure{i}.chainbreak)
@@ -91,7 +107,7 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
             motif_structure{i}.MaxDiffMat(cb) = Inf;
         end
 
-        GroupData(i).MotifID = motif_list{i}.motif_id;
+        % GroupData(i).MotifID = motif_list{i}.motif_id;
         % GroupData(i).Signature = cell();
         % GroupData(i).Signature{1} = motif_list{i}.signature;
         % GroupData(i).NumNT = num_positions;
@@ -157,6 +173,11 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 
 		% loop over motif_list many times, even though inefficient
 		for i = 1:length(motif_list)
+
+			if keep(i) == 0
+				continue
+			end
+
 			% motif_list{i}.motif_id
 			loop_ids = fieldnames(motif_list{i}.alignment);
 
@@ -215,10 +236,19 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 					% get indices of each unit id relative to the subfile to save in candidates
 					% unit_ids in core positions in this loop
 					unit_ids = motif_list{i}.alignment.(loop_id);
-					candidate_indices = zeros(1,length(unit_ids)+1);
-					for k = 1:length(unit_ids)
-						candidate_indices(k) = map_unit_id_to_index(sf_unit_id_to_index,unit_ids{k});
+
+					unit_ids
+					fields = fieldnames(unit_ids);  % keys in the alignment, now fields
+
+					candidate_indices = zeros(1,length(fields)+1);
+					for k = 1:length(fields)
+						candidate_indices(k) = map_unit_id_to_index(sf_unit_id_to_index,unit_ids.(fields{k}));
 					end
+
+					% this code suddenly stopped working on 7/4/2025, don't know why
+					% for k = 1:length(unit_ids)
+					% 	candidate_indices(k) = map_unit_id_to_index(sf_unit_id_to_index,unit_ids{k});
+					% end
 					% list column of candidate_indices points to the sub-file index
 					candidate_indices(end) = j;
 
@@ -249,6 +279,9 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 	% loop over motif groups and save the individual files
 	fprintf('Saving motif group .mat files\n')
 	for i = 1:length(motif_list)
+		if keep(i) == 0
+			continue
+		end
 		% save the motif group
         fprintf('Saving %s\n',motif_list{i}.motif_id)
 		fn = [MotifLibraryPath filesep motif_list{i}.motif_id '.mat'];
