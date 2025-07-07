@@ -872,20 +872,22 @@ public class Alignment {
 		return scores;
 	}
 
-	public static double[] getILScoresSingle(List<Sequence> sData, String modName, int range)
-	{
-		double[] scores = new double[sData.size()-1];       // all scores computed
-		sData  = Alignment.doParse(sData, modName, range);
-		// add up model scores for each sequence
-		for(int m = 0; m < sData.size()-1; m++)
-		{
-				// double tempo = sData.get(m+1).getMaxNodeLogProbabilityOf(0, 0);  // stopped working! same number for all m, even though fine in doParse
-				double tempo = sData.get(m+1).getMaxLogProbability(0);
-				scores[m] = tempo;
+	public static double[] getILScoresSingle(List<Sequence> sData, String modName, int range) {
+		// score sequences in sData against one model
+		// not just for IL
 
-				System.out.println("getILScoresSingle:  getMaxNodeLogProbabilityOf: "+sData.get(m+1).getMaxNodeLogProbabilityOf(0, 0));
-				System.out.println("getILScoresSingle:  scores[m]:                  "+scores[m]);
-				System.out.println("getILScoresSingle:  getMaxLogProbability:       "+sData.get(m+1).getMaxLogProbability(0));
+		double[] scores = new double[sData.size()-1];       // all scores computed, starting at 0
+		sData  = Alignment.doParse(sData, modName, range);  // entry 0 for header, start at 1
+
+		// add up model scores for each sequence
+		for (int s = 1; s < sData.size(); s++) {
+			// double tempo = sData.get(s).getMaxNodeLogProbabilityOf(0, 0);  // stopped working! same number for all s, even though fine in doParse
+			double tempo = sData.get(s).getMaxLogProbability(0);
+			scores[s-1] = tempo;
+
+			// System.out.println("getILScoresSingle:  getMaxNodeLogProbabilityOf: "+sData.get(s).getMaxNodeLogProbabilityOf(0, 0));
+			// System.out.println("getILScoresSingle:  scores[m]:                  "+scores[s-1]);
+			// System.out.println("getILScoresSingle:  getMaxLogProbability:       "+sData.get(s).getMaxLogProbability(0));
 		}
 		return scores;
 	}
@@ -1331,6 +1333,7 @@ public class Alignment {
 
 
 	public static int[] getMinEditDistance(MotifGroup group, List<Sequence> sData, String type, int rotation, boolean interior){
+		// now works with J3, J4, etc.
 
 		// load sequences from the current motif group
 		Vector<Sequence> modsData = Alignment.parseFastaText(group.Sequences,0,0);
