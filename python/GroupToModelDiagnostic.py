@@ -22,30 +22,26 @@ def onemodeldiagnostic(motifID,libDirectory,diagDirectory,prevHTML,nextHTML):
     # read correspondences for the given motif group; there are many such correspondences
     InstanceToGroup, InstanceToPDB, InstanceToSequence, GroupToModel, ModelToColumn, SequenceToModel, HasName, HasScore, HasInteriorEdit, HasFullEdit, HasCutoffValue, HasCutoffScore, HasAlignmentScoreDeficit = readcorrespondencesfromfile(FN)
 
-    print "Read diagnostics from " + FN
+    print("Read diagnostics from " + FN)
 
     # default display color, indexed by instance; each instance will be displayed in one row
     DisplayColor = {}
 
     # loop through instances from the motif group and set the color that it will be displayed
-    for i in InstanceToPDB.iterkeys():
+    for i in InstanceToPDB.keys():
       a = re.search("(.+Instance_[0-9]+)",i)
       DisplayColor[a.group(1)] = 'blue'            # default display color
 
     # loop through sequences from the motif group and set the default display color in a dictionary
-    for i in SequenceToModel.iterkeys():
+    for i in SequenceToModel.keys():
       a = re.search("(.+Sequence_[0-9]+)",i)
       DisplayColor[a.group(1)] = 'black'            # default display color
 
     MisAlign = 0
 
-#    print GroupToModel
-#    print SequenceToModel
-#    print InstanceToPDB
-
-    for nt in sorted(InstanceToPDB.iterkeys()):
+    for nt in sorted(InstanceToPDB.keys()):
       if GroupToModel[InstanceToGroup[nt]] != SequenceToModel[InstanceToSequence[nt]]:
-        print nt + ' belongs to ' + GroupToModel[InstanceToGroup[nt]] + ' but was aligned to ' + SequenceToModel[InstanceToSequence[nt]]
+        print(nt + ' belongs to ' + GroupToModel[InstanceToGroup[nt]] + ' but was aligned to ' + SequenceToModel[InstanceToSequence[nt]])
         MisAlign += 0.5
 #        a = re.search("(.+Instance_[0-9]+)",nt)
 #        DisplayColor[a.group(1)] = 'red'
@@ -56,31 +52,31 @@ def onemodeldiagnostic(motifID,libDirectory,diagDirectory,prevHTML,nextHTML):
 
     aligdata = {}                                      # new dictionary
 
-    for a in InstanceToGroup.iterkeys():
+    for a in InstanceToGroup.keys():
       m = re.search("(.+Instance_[0-9]+)",a)
       aligdata[m.group(1)] = []                        # initialize this key with empty list
 
-    for a in SequenceToModel.iterkeys():
+    for a in SequenceToModel.keys():
       m = re.search("(.+Sequence_[0-9]+)",a)
       aligdata[m.group(1)] = []                        # initialize this key with empty list
 
-    for a in aligdata.iterkeys():
+    for a in aligdata.keys():
       for j in range(0,len(ModelToColumn)):
         aligdata[a].append('')                         # initialize with blank
                                                        # sorting by key should keep insertions in order
-    for a in sorted(InstanceToGroup.iterkeys(), key=columnkeyforsortbynumber):
+    for a in sorted(InstanceToGroup.keys(), key=columnkeyforsortbynumber):
       m = re.search("(.+Instance_[0-9]+)",a)
       t = int(ModelToColumn[GroupToModel[InstanceToGroup[a]]]) # map position in group to the correct column in the model and in the alignment
       aligdata[m.group(1)][t-1] += a[len(a)-1]         # last character of the key is the base for this position
 
-    for a in sorted(SequenceToModel.iterkeys(), key=positionkeyforsortbynumber):
+    for a in sorted(SequenceToModel.keys(), key=positionkeyforsortbynumber):
       m = re.search("(.+Sequence_[0-9]+)",a)
       t = int(ModelToColumn[SequenceToModel[a]])
       aligdata[m.group(1)][t-1] += a[len(a)-1]
 
 #    for a,b in aligdata.iteritems():
 #      for i in range(0,len(b)-1):
-#        print '<td>'+aligdata[a][i]+'</td>',
+#        print('<td>'+aligdata[a][i]+'</td>'),
 #      print
 
     f = open(diagDirectory+"\\"+motifID+"_GroupToModelDiagnostic.html","w")
@@ -126,27 +122,27 @@ def onemodeldiagnostic(motifID,libDirectory,diagDirectory,prevHTML,nextHTML):
     f.write("</html>")
     f.close()
 
-    print "Wrote html file with alignment of 3D instances and sequences for " + motifID
+    print("Wrote html file with alignment of 3D instances and sequences for " + motifID)
 
     return aligdata, MisAlign
 
 def allmodelsdiagnostic(directory):
 
-  print "Starting all models diagnostic in directory " + directory
+  print("Starting all models diagnostic in directory " + directory)
 
   libDirectory = directory + "\\" + "lib"                       # replace \\ with os. separator character
   diagDirectory = directory + "\\" + "diagnostic"
   #  diagDirectory = re.sub('bp_models','interactions',libDirectory)
 
   dirList = os.listdir(libDirectory)
-#  print dirList
+#  print(dirList)
 
   motifIDList = []
   for fn in dirList:
     if re.search("_correspondences.txt",fn):
       motifIDList += [re.sub("_correspondences.txt","",fn)]
 
-#  print motifIDList
+#  print(motifIDList)
 
   prevHTML = ""
 
@@ -162,7 +158,7 @@ def allmodelsdiagnostic(directory):
     motifID = motifIDList[i]
     currentHTML = motifID + "_GroupToModelDiagnostic.html"
 
-    print "Starting motif group " + motifID
+    print("Starting motif group " + motifID)
 
 #    m = re.search("(.*)(_diagnostics)(.*)",fn)
 
@@ -171,7 +167,7 @@ def allmodelsdiagnostic(directory):
       InteractionFile = libDirectory + "\\" + motifID + "_correspondences.txt"
       with open(InteractionFile,"r") as intf:
         for line in intf.readlines():
-          print line,
+          print(line),
 
     if i < len(motifIDList)-1:
       nextHTML = motifIDList[i+1] + "_GroupToModelDiagnostic.html"
