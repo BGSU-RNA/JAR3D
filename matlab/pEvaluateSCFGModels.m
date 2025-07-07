@@ -10,7 +10,7 @@
 % pMakeSCFGModels([pwd filesep 'IL_20140329_0627' filesep 'mat'],pwd,'IL/1.13',1)
 % pMakeSCFGModels([pwd filesep '' filesep 'mat'],pwd,'HL/1.13',1)
 
-function [void] = pMakeSCFGModels(MotifLibraryPath,OutputBase,Release,Mode)
+function [void] = pEvaluateSCFGModels(MotifLibraryPath,OutputBase,Release,Mode)
 
 if nargin < 4,
   Mode = 1;    % make normal models
@@ -471,7 +471,8 @@ for m = 1:length(Filenames),
 
     % ---------- write out correspondences for alignment diagnostics
 
-    if WriteCorrespondences > 0,
+    if WriteCorrespondences > 0
+      % last parameter is rotation, and only 0 works reliably
       corresp = edu.bgsu.rna.jar3d.JAR3DMatlab.ModelCorrespondences(FastaFile,ModelPath,MotifName,0);
       % ----------- The following lines prevent the program from being stopped
       % ----------- by a crazy Matlab bug.  It is intermittent, but after a call
