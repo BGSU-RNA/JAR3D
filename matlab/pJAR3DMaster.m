@@ -15,8 +15,8 @@ loop_type = 'HL';
 loop_type = 'IL';
 loop_type = 'J3';
 
-version = '3.48';
 version = '3.98';
+version = '3.48';
 
 Input = [loop_type '_' version];
 Release = [loop_type filesep version];
