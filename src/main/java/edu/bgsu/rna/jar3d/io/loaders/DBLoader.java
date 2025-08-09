@@ -30,11 +30,12 @@ public class DBLoader implements QueryLoader {
     public DBLoader(String username, String password, String dbConnection) throws SQLException {
         connection = DriverManager.getConnection(dbConnection, username, password);
         String querySql = "SELECT group_set, model_type, structured_models_only FROM `jar3d_query_info` WHERE query_id = ?;";
-        String loopSql = "SELECT seq_id, loop_id, loop_sequence, loop_type FROM `jar3d_query_sequences` WHERE query_id = ? and loop_id = ?;";
-        String updateInfo = "UPDATE jar3d_query_info SET status=2 WHERE query_id = ?;";
+        // update sql statement to only work with status 0 sequences, which can form the given loop
+        String loopSql = "SELECT seq_id, loop_id, loop_sequence, loop_type FROM `jar3d_query_sequences` WHERE query_id = ? and loop_id = ? and status >= 0;";
+        // String updateInfo = "UPDATE jar3d_query_info SET status=2 WHERE query_id = ?;";
         sqlForQueryInfo = connection.prepareStatement(querySql);
         sqlForLoops = connection.prepareStatement(loopSql);
-        updateQueryInfo = connection.prepareStatement(updateInfo);
+        // updateQueryInfo = connection.prepareStatement(updateInfo);
     }
 
     private Loop loadLoop(String queryId, int index) throws SQLException {
@@ -52,7 +53,7 @@ public class DBLoader implements QueryLoader {
     		int seq_id = results.getInt("seq_id");
     		sequences.add(new Sequence(seq_id, "", sequence));
 
-			System.out.println(String.format("DBLoader.loadLoop %s %s %d",sequence,type,id));
+		System.out.println(String.format("DBLoader.loadLoop %s %s %d",sequence,type,id));
 
     	}
     	results.close();
@@ -77,7 +78,10 @@ public class DBLoader implements QueryLoader {
 
         for (int i = 0; i < loopCount; i++) {
         	Loop loop = loadLoop(queryId, i);
-        	if(loop.getId()!=-1) {loops.add(loop);}
+                // previously, if a query was empty, it would just skip
+                // if(loop.getId()!=-1) {loops.add(loop);}
+                // but that messes up indexing, so just always add
+                loops.add(loop);
         }
 
         return loops;
@@ -97,10 +101,11 @@ public class DBLoader implements QueryLoader {
 
 		try {
 	        sqlForQueryInfo.setString(1, queryId);
-	        updateQueryInfo.setString(1, queryId);
 
-	        updateQueryInfo.executeUpdate();
-	        ResultSet result = sqlForQueryInfo.executeQuery();
+			// updateQueryInfo.setString(1, queryId);
+	        // updateQueryInfo.executeUpdate();
+
+			ResultSet result = sqlForQueryInfo.executeQuery();
 	        boolean found = result.first();
 
 	        if (!found) {
