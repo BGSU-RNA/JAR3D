@@ -89,12 +89,9 @@ public class Alignment {
 			organism = temp;
 			temp = rdr.readLine();
 
-			while(temp != null)
-			{
-				if(temp.charAt(0)=='>')
-				{
-					if (DNA > 1)
-					{
+			while(temp != null) {
+				if(temp.charAt(0)=='>') {
+					if (DNA > 1) {
 						String d = "";
 						letters = Alignment.reverseString(letters);
                         for (int j = 0; j < 300-letters.length(); j++)
@@ -107,9 +104,7 @@ public class Alignment {
 						sData.add(new Sequence(organism.substring(1,organism.length()),letters));
 					organism = temp;
 					letters = "";
-				}
-				else
-				{
+				} else {
 					if (DNA > 0) {
 						// change A to U, G to C, etc.
 						temp = temp.replace("A", "w");
@@ -135,8 +130,7 @@ public class Alignment {
 				temp = rdr.readLine();
 			}
 
-			if (DNA > 1)
-			{
+			if (DNA > 1) {
 				String d = "";
 				letters = Alignment.reverseString(letters);
                 for (int j = 0; j < 300-letters.length(); j++)
@@ -149,7 +143,8 @@ public class Alignment {
 			if (EndCol > 0)
 				sData.add(new Sequence(organism.substring(1,organism.length()),letters.substring(StartCol,EndCol)));
 			else
-				sData.add(new Sequence(organism.substring(2,organism.length()),letters));
+				// changed substring starting at 2 to 1, not sure why it was 2
+				sData.add(new Sequence(organism.substring(1,organism.length()),letters));
 
 			rdr.close();
 		}
@@ -245,18 +240,18 @@ public class Alignment {
 
 
 	/**
-	 * This method rotates strand orders r times in sequenceData and returns a new vector of sequence data
+	 * This method cyclically rotates sequenceData to put strand r first
 	 * @param sequenceData
 	 * @return
 	 */
 	public static List<Sequence> rotate(List<Sequence> sequenceData, int rotation) {
 		List<Sequence> rotatedSData = new Vector<Sequence>();
 
-		String temp="";
-		String organism="";
-		String letters= "";
-		String second = "";
-		String first  = "";
+		String temp     = "";
+		String organism = "";
+		String letters  = "";
+		String second   = "";
+		String first    = "";
 
 		rotatedSData.add(new Sequence("","")); // save space for header information to be added later as element 0 of this vector
 
@@ -265,10 +260,12 @@ public class Alignment {
 			organism = sequenceData.get(s).organism;
 
 			String[] parts = temp.split("\\*");  // split on "*"
-			int n = parts.length;
+			int n = parts.length;                // number of strands
 			StringBuilder result = new StringBuilder();
 
 			for (int k = 0; k < n; k++) {
+				// when rotation = 0, k % n equals k, and result is the original string
+				// when rotation = 1, (k + rotation) % n starts at parts[1], then [2], finally [0]
 				result.append(parts[(k + rotation) % n]);
 				if (k < n-1) {
 					result.append("*");
@@ -277,9 +274,9 @@ public class Alignment {
 
 		    letters = result.toString();
 
-			System.out.println(String.format("Alignment rotate: rotation %d",rotation));
-			System.out.println(String.format("Alignment rotate: organism %s",organism));
-			System.out.println(String.format("Alignment rotate: letters  %s",letters));
+			// System.out.println(String.format("Alignment rotate: rotation %d",rotation));
+			// System.out.println(String.format("Alignment rotate: organism %s",organism));
+			// System.out.println(String.format("Alignment rotate: letters  %s",letters));
 
 			// print the stack so we know how we got here
 			// StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
@@ -914,30 +911,20 @@ public class Alignment {
 		return results;
 	}
 
-	public static List<SequenceResult> doSingleDBQuery(Loop loop, MotifGroup group, String model_id, int range) {
-
-		List<Sequence> sData = loop.getSequences();
-		Query query = loop.getQuery();
-
-		// 2013-11-05 CLZ Last argument cannot be null, must be something like "IL"
-		// 2013-11-05 CLZ Last argument seems to be reliably obtained from loop
-		List<SequenceResult> results = doSingleDBQuery(query, sData, group, model_id, range, loop, loop.getTypeString());
-
-		return results;
+	//Takes a JAR3D query and submits results to MySQL database
+	public static List<LoopResult> doLoopDBQuery(int loopID, Query query, List<Sequence> sData, List<String> modNames,
+			HashMap<String, MotifGroup> groupData, int range, Loop loop, String type) {
+		return doLoopDBQuery(loopID, query, sData, modNames,
+				groupData, range, loop, type, false);
 	}
 
-	//Takes a JAR3D query and submits results to MySQL database
-		public static List<LoopResult> doLoopDBQuery(int loopID, Query query, List<Sequence> sData, List<String> modNames,
-				HashMap<String, MotifGroup> groupData, int range, Loop loop, String type) {
-			return doLoopDBQuery(loopID, query, sData, modNames,
-					groupData, range, loop, type, false);
-		}
-
-	//Takes a JAR3D query and submits results to MySQL database
 	public static List<LoopResult> doLoopDBQuery(int loopID, Query query, List<Sequence> sData, List<String> modNames,
 			HashMap<String, MotifGroup> groupData, int range, Loop loop, String type, Boolean saveSeqRes) {
 
-		// new code to handle all required rotations at once
+		// Takes a JAR3D query, parses all sequences in one loop against all motif groups
+		// Returns a data structure with loop results that can be saved in the database
+
+		// new code to prepare all required rotations before scoring against motif groups
 		int maxRotation = 0;
 		if (type.equalsIgnoreCase("HL")) {
 			maxRotation = 0;
@@ -1025,7 +1012,7 @@ public class Alignment {
 
 			sig = group.Signature[0]; // don't reverse the signature, too confusing
 
-			System.out.println(String.format("group.Signature %s", group.Signature));
+			// System.out.println(String.format("group.Signature %s", group.Signature));
 
 			for (int s = 1; s < sData.size(); s++) {
 				groupScores[s-1] = modelRotationSequenceScore[index][rotation][s];
@@ -1081,87 +1068,162 @@ public class Alignment {
 		return loopRes;
 	}
 
-	// Takes a JAR3D query and submits results to MySQL database
+	public static List<SequenceResult> doSingleDBQuery(Loop loop, MotifGroup group, String model_id, int range) {
+
+		List<Sequence> sData = loop.getSequences();
+		Query query = loop.getQuery();
+
+		// 2013-11-05 CLZ Last argument cannot be null, must be something like "IL"
+		// 2013-11-05 CLZ Last argument seems to be reliably obtained from loop
+		List<SequenceResult> results = doSingleDBQuery(query, sData, group, model_id, range, loop, loop.getTypeString());
+
+		return results;
+	}
+
 	public static List<SequenceResult> doSingleDBQuery(Query query, List<Sequence> sData,
 			MotifGroup group, String model_id, int range, Loop loop, String type) {
+		// called when one loop is being aligned to one model
+		// this is the first time that doParse is asked to produce correspondences
 
-		// TODO 2013-11-07 CLZ generalize this so that it can apply to HL, IL, 3WJ, 4WJ, etc.
-		// Currently there is only space for rotations 0 and 1
-		double modelSum=0;
-		double rmodelSum=0;
-		double modelScore=-9999;
-		double rmodelScore=-9999;
-		double[] modelScores = new double[sData.size()];
-		double[] rmodelScores = new double[sData.size()];
-		int reversed;
-		List<Sequence> rsData = new Vector<Sequence>();
+		// strangely, it repeats the evaluation of which rotation is best
+		// that should already be known in database queries
+		// we should pass in the desired rotation, apply it, and compute the correspondences for that
+		// but maybe there are use cases where we don't know the rotation ahead of time,
+		// so just do them again.  It's fast anyway.
 
-		if(type.equalsIgnoreCase("IL")){
-			rsData = Alignment.reverse(sData);  // reversed sequence data
+		// modify this function following doLoopDBQuery
+
+		int maxRotation = 0;
+		if (type.equalsIgnoreCase("HL")) {
+			maxRotation = 0;
+		} else if (type.equalsIgnoreCase("IL")){
+			maxRotation = 1;
+		} else if (type.startsWith("J")) {
+			// J3, J4, ...
+			maxRotation = Integer.parseInt(type.substring(1)) - 1;
 		}
 
-	    sData  = Alignment.doParse(sData, group.Model, range, true, true, false);
-			if(type.equalsIgnoreCase("IL")){
-				rsData = Alignment.doParse(rsData, group.Model, range, true, true, false);
-			}
-	    //Add up model scores for each sequence, find mean score, compare regular and reversed scores
-	    for(int m = 1; m < sData.size(); m++)
-	    {
-	    	double tempo = sData.get(m).getMaxLogProbability(0);
-	    	modelSum += tempo;
-	    	modelScores[m] =  tempo;
-	    	if(type.equalsIgnoreCase("IL")){
-	    		tempo = rsData.get(m).getMaxLogProbability(0);
-	    		rmodelSum += tempo;
-	    		rmodelScores[m] = tempo;
-	    	}
-	    }
+		// rotate sequence data however many times are needed; 0 for HL, 0 and 1 for IL, etc.
+		List<Sequence>[] rotatedData = new Vector[maxRotation+1];  // Array of Vector<Sequence>
+		for (int r = 0; r <= maxRotation; r++) {
+			rotatedData[r] = Alignment.rotate(sData,r);
+		}
 
-	    modelScore = (modelSum/(sData.size()-1));
-	    if(type.equalsIgnoreCase("IL")){
-	    	rmodelScore = (rmodelSum/(sData.size()-1));
-	    }
-	    if(type.equalsIgnoreCase("IL")){
-	    	if(rmodelScore > modelScore)          // choose between forward and reversed for each model
-	    	{
-	    		modelScore = rmodelScore;
-	    		modelScores = rmodelScores;
-	    		reversed = 1;
-	    	}
-	    	else {
-	    		reversed = 0;
-	    	}
-	    }else{
-	    	reversed = 0;
-	    }
+		// calculate alignment and correspondences (second Boolean is true)
+		for (int r = 0; r <= maxRotation; r++) {
+			rotatedData[r] = Alignment.doParse(rotatedData[r], group.Model, range, true, true, false);
+		}
+
+		// collect data to calculate average scores for each rotation
+		double[] rotationScoreSum = new double[maxRotation+1];
+		double[][] rotationSequenceScore = new double[maxRotation+1][sData.size()];
+
+		for (int r = 0; r <= maxRotation; r++) {
+			for (int s = 1; s < sData.size(); s++) {
+				double tempo = rotatedData[r].get(s).getMaxLogProbability(0);
+				rotationScoreSum[r] += tempo;
+				rotationSequenceScore[r][s] = tempo;
+			}
+		}
+
+		// find the best rotation
+		double score = -9999;
+		int bestRotation = 0;
+		for (int r = 0; r <= maxRotation; r++) {
+			// number of sequences is sData.size()-1, 0th place is empty to leave space for headers
+			double tempScore = rotationScoreSum[r]/(sData.size()-1);
+			if (tempScore > score) {
+				score = tempScore;
+				bestRotation = r;
+			}
+		}
+		// System.out.println(String.format("Alignment: groupName %s best rotation %d score %8.2f",modNames.get(m),bestRotation[m],scores[m]));
+
+
+		// double modelSum=0;
+		// double rmodelSum=0;
+		// double modelScore=-9999;
+		// double rmodelScore=-9999;
+		// double[] modelScores = new double[sData.size()];
+		// double[] rmodelScores = new double[sData.size()];
+		// int reversed;
+		// List<Sequence> rsData = new Vector<Sequence>();
+
+		// if(type.equalsIgnoreCase("IL")){
+		// 	rsData = Alignment.reverse(sData);  // reversed sequence data
+		// }
+
+	    // sData  = Alignment.doParse(sData, group.Model, range, true, true, false);
+		// 	if(type.equalsIgnoreCase("IL")){
+		// 		rsData = Alignment.doParse(rsData, group.Model, range, true, true, false);
+		// 	}
+
+		// Add up model scores for each sequence, find mean score, compare regular and reversed scores
+	    // for (int m = 1; m < sData.size(); m++) {
+	    // 	double tempo = sData.get(m).getMaxLogProbability(0);
+	    // 	modelSum += tempo;
+	    // 	modelScores[m] =  tempo;
+	    // 	if(type.equalsIgnoreCase("IL")){
+	    // 		tempo = rsData.get(m).getMaxLogProbability(0);
+	    // 		rmodelSum += tempo;
+	    // 		rmodelScores[m] = tempo;
+	    // 	}
+	    // }
+
+	    // modelScore = (modelSum/(sData.size()-1));
+	    // if(type.equalsIgnoreCase("IL")){
+	    // 	rmodelScore = (rmodelSum/(sData.size()-1));
+	    // }
+	    // if(type.equalsIgnoreCase("IL")){
+	    // 	if(rmodelScore > modelScore)          // choose between forward and reversed for each model
+	    // 	{
+	    // 		modelScore = rmodelScore;
+	    // 		modelScores = rmodelScores;
+	    // 		reversed = 1;
+	    // 	}
+	    // 	else {
+	    // 		reversed = 0;
+	    // 	}
+	    // }else{
+	    // 	reversed = 0;
+	    // }
 
 	    double[] groupScores = new double[sData.size()];
-	    for(int i=1; i <sData.size(); i++){
-	    	groupScores[i-1] = modelScores[i];
-	    }
+	    // for(int i=1; i <sData.size(); i++){
+	    // 	groupScores[i-1] = modelScores[i];
+	    // }
+
+		// record the model scores for the best rotation
+		for (int s = 1; s < sData.size(); s++) {
+			groupScores[s-1] = rotationSequenceScore[bestRotation][s];
+		}
 
 	    double[] deficits = getDeficits(group.Best_Score, groupScores);
 
-	    int[] InteriorMinDist = getMinEditDistance(group,sData,type,reversed,true);
-		int[] FullMinDist = getMinEditDistance(group,sData,type,reversed,false);
+	    int[] InteriorMinDist = getMinEditDistance(group,rotatedData[bestRotation],type,0,true);
+		int[] FullMinDist = getMinEditDistance(group,rotatedData[bestRotation],type,0,false);
 
 		boolean[] cutoffs = getCutoffs(group,groupScores,InteriorMinDist);
 		double[] cutoffscores = getCutoffScores(group,groupScores,InteriorMinDist);
 
 	    List<SequenceResult> seqRes = new ArrayList<SequenceResult>();
-		for(int m = 0; m < sData.size() - 1; m++) {
+		for (int s = 1; s < sData.size(); s++) {
+			// seqR includes the correspondences
 			SequenceResult seqR;
-			if(reversed == 1){
-				seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], deficits[m], InteriorMinDist[m], FullMinDist[m],reversed,cutoffs[m],cutoffscores[m],rsData.get(m + 1).correspondences);
-			}else{
-				seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], deficits[m], InteriorMinDist[m], FullMinDist[m],reversed,cutoffs[m],cutoffscores[m],sData.get(m + 1).correspondences);
-			}
+			seqR = new BasicSequenceResult(sData.get(s), groupScores[s-1], deficits[s-1], InteriorMinDist[s-1], FullMinDist[s-1],bestRotation,cutoffs[s-1],cutoffscores[s-1],rotatedData[bestRotation].get(s).correspondences);
+
+			// if(reversed == 1){
+			// 	seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], deficits[m], InteriorMinDist[m], FullMinDist[m],reversed,cutoffs[m],cutoffscores[m],rsData.get(m + 1).correspondences);
+			// }else{
+			// 	seqR = new BasicSequenceResult(sData.get(m + 1), groupScores[m], deficits[m], InteriorMinDist[m], FullMinDist[m],reversed,cutoffs[m],cutoffscores[m],sData.get(m + 1).correspondences);
+			// }
 			seqRes.add(seqR);
 		}
 
-		LoopResult result = new BasicLoopResult(model_id, reversed, "sig", seqRes);
+		// LoopResult result = new BasicLoopResult(model_id, reversed, "sig", seqRes);
+		LoopResult result = new BasicLoopResult(model_id, bestRotation, "sig", seqRes);
 
-		for(SequenceResult res : seqRes) {
+		for (SequenceResult res : seqRes) {
 			res.setLoopResult(result);
 		}
 
