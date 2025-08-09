@@ -145,7 +145,7 @@ public class SimpleAlign {
 				String[] parts2 = seqs2[j].split("\\*");
 				int ed = 0;
 				if (parts1.length != parts2.length) {
-					System.out.println(String.format("Error: Strings %s and %s have different numbers of parts!",seqs1[i],seqs2[j]));
+					System.out.println(String.format("SimpleAlign: Error: Strings %s and %s have different numbers of parts!",seqs1[i],seqs2[j]));
 				} else {
 					// System.out.println(String.format("SimpleAlign: seqs2 is %s", seqs2));
 					for (int k = 0; k < parts1.length; k++) {
