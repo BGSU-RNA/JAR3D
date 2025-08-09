@@ -15,34 +15,35 @@ import edu.bgsu.rna.jar3d.results.SequenceResult;
 public class DBResultSaver extends AbstractResultsSaver {
 
 	private final Connection connection;
-	
+
     private PreparedStatement insertLoopResult;
-    
+
     private PreparedStatement insertSequenceResult;
-    
+
     private PreparedStatement updateSequenceQuery;
-    
+
     private PreparedStatement updateLoopQuery;
-    
+
     private PreparedStatement markLoopFailure;
-    
+
     private PreparedStatement insertCorrespondenceResult;
-    
+
     private PreparedStatement getSequenceResult;
-    
+
     private PreparedStatement updateCorrQuery;
-    
+
     private PreparedStatement markCorrFailure;
-    
+
     private Timestamp now;
-	
+
 	public DBResultSaver(String username, String password, String dbConnection) throws SQLException {
         connection = DriverManager.getConnection(dbConnection, username, password);
         String loopResultSQL = "insert into jar3d_results_by_loop (query_id, loop_id, motif_id, cutoff_percent, mean_cutoff_score, meanscore, meaninterioreditdist, meanfulleditdist, medianscore, medianinterioreditdist, medianfulleditdist, signature, rotation, correspondences) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         String sequenceResultSQL = "insert into jar3d_results_by_loop_instance (query_id, seq_id, loop_id, cutoff, score, interioreditdist, fulleditdist, rotation, cutoff_score, motif_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         String correspondenceResultSQL = "insert into jar3d_node_position_results (result_instance_id, sequence_position, node, node_position, is_insertion) values(?, ?, ?, ?, ?)";
         String updateLoopSQL = "UPDATE jar3d_query_info SET status=1, time_completed=? WHERE query_id = ?;";
-        String updateSequenceSQL = "UPDATE jar3d_query_sequences SET status=1, time_completed=? WHERE query_id = ? and seq_id = ? and loop_id = ?;";
+        // used to change the status to 1 but that is not helpful; 0 is what is used for OK sequences
+        String updateSequenceSQL = "UPDATE jar3d_query_sequences SET status=0, time_completed=? WHERE query_id = ? and seq_id = ? and loop_id = ?;";
         String failureSQL = "UPDATE jar3d_query_info SET status=-1, time_completed = ? WHERE query_id = ?;";
         String loopResultIDSQL = "SELECT * FROM jar3d_results_by_loop_instance WHERE query_id = ? AND seq_id = ? AND loop_id = ? AND motif_id = ?;";
         String loopQuerySQL = "UPDATE jar3d_loop_results_queue SET status=1, time_finished = ? WHERE query_id = ? AND loop_id = ? AND motif_group = ?;";
@@ -56,10 +57,10 @@ public class DBResultSaver extends AbstractResultsSaver {
         markLoopFailure = connection.prepareStatement(failureSQL);
         updateCorrQuery = connection.prepareStatement(loopQuerySQL);
         markCorrFailure = connection.prepareStatement(loopQueryFailSQL);
-        
+
         now = new Timestamp(System.currentTimeMillis());
 	}
-	
+
 	public void markAllDone(String queryId) throws SaveFailed {
 		try {
 			updateLoopQuery.setTimestamp(1, now);
@@ -69,11 +70,11 @@ public class DBResultSaver extends AbstractResultsSaver {
 			throw new SaveFailed("Could not mark query as done", e);
 		}
 	}
-	
+
 	/**
 	 * Save the information for a single loop run against a single model. This
-	 * save the aggregate and sequence level information. 
-	 * 
+	 * save the aggregate and sequence level information.
+	 *
 	 * @param results The loop results.
 	 */
 	public void save(LoopResult results)  throws SaveFailed {
@@ -104,7 +105,7 @@ public class DBResultSaver extends AbstractResultsSaver {
 		} catch (SQLException e) {
 			throw new SaveFailed("Could not generate loop sql.", e);
 		}
-		
+
 		try {
 			int count = insertLoopResult.executeUpdate();
 
@@ -118,7 +119,7 @@ public class DBResultSaver extends AbstractResultsSaver {
 
 	/**
 	 * Save a the results for a single sequence.
-	 * 
+	 *
 	 * @param result The results of analyzing a single sequence.
 	 * @throws SaveFailed If any problem occurs. s
 	 */
@@ -145,11 +146,11 @@ public class DBResultSaver extends AbstractResultsSaver {
 		} catch (SQLException e) {
 			throw new SaveFailed("Could not generate save sequence sql.", e);
 		}
-		
+
 		try {
 			int count = insertSequenceResult.executeUpdate();
 			updateSequenceQuery.executeUpdate();
-			
+
 			if (count == 0) {
 				throw new SaveFailed("Saving should have updated at least 1 row.");
 			}
@@ -160,11 +161,11 @@ public class DBResultSaver extends AbstractResultsSaver {
 
 	/**
 	 * Save a the results for a set of sequences.
-	 * 
+	 *
 	 * @param result The results of analyzing a single sequence.
 	 * @throws SaveFailed If any problem occurs. s
 	 */
-	
+
 	public void saveSequenceResults(List<SequenceResult> results, Query query, String loopID) throws SaveFailed {
 		try{
 			for(SequenceResult sequenceResult: results) {
@@ -192,10 +193,10 @@ public class DBResultSaver extends AbstractResultsSaver {
 			throw new SaveFailed("Could not mark query as done: " + query.getId(), e);
 		}
 	}
-	
+
 	/**
 	 * Save a the correspondences for a sequences.
-	 * 
+	 *
 	 * @param result The results of analyzing a single sequence.
 	 * @throws SaveFailed If any problem occurs. s
 	 */
@@ -243,7 +244,7 @@ public class DBResultSaver extends AbstractResultsSaver {
 			try {
 				int count = insertCorrespondenceResult.executeUpdate();
 				insertCorrespondenceResult.executeUpdate();
-				
+
 				if (count == 0) {
 					throw new SaveFailed("Saving should have updated at least 1 row.");
 				}
@@ -252,7 +253,7 @@ public class DBResultSaver extends AbstractResultsSaver {
 			}
 		}
 	}
-	
+
 	/**
 	 * Close the database connection.
 	 */
@@ -263,17 +264,17 @@ public class DBResultSaver extends AbstractResultsSaver {
 			e.printStackTrace();
 		}
 	}
-	
-	private int rotationInt(boolean rotation) {
-		if (rotation) {
-			return 1;
-		}
-		return 0;
-	}
+
+	// private int rotationInt(boolean rotation) {
+	// 	if (rotation) {
+	// 		return 1;
+	// 	}
+	// 	return 0;
+	// }
 
 	/**
 	 * Mark that we could not process the loop for some reason.
-	 * 
+	 *
 	 * @param loop The loop to mark.
 	 */
 	public void markFailure(String queryId) throws SaveFailed {
