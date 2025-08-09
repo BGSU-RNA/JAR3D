@@ -13,19 +13,19 @@ import edu.bgsu.rna.jar3d.query.ImmutableQuery;
 import edu.bgsu.rna.jar3d.query.Query;
 
 /**
- * This class loads a single loop from a FASTA formatted file. This assumes that the file represents a single loop. 
+ * This class loads a single loop from a FASTA formatted file. This assumes that the file represents a single loop.
  */
 public class FastaFileLoader implements QueryLoader {
 
 	/** Reader for the file. */
 	private BufferedReader reader;
-	
+
 	/** Filename we are reading from. */
 	private final String filename;
 
 	/**
 	 * Create a new FastaFileLoader.
-	 * 
+	 *
 	 * @param filename File to read from.
 	 * @throws IOException
 	 */
