@@ -59,6 +59,7 @@
     <profile>
       <id>db</id>
       <build>
+        <finalName>webJAR3D_server</finalName>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -91,6 +92,7 @@
     <profile>
       <id>singleDB</id>
       <build>
+        <finalName>jar3dCorr</finalName>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
