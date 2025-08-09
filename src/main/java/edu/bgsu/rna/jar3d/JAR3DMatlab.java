@@ -30,7 +30,7 @@ public class JAR3DMatlab {
 		String type = group.loopType;
 
 		if (rotation > 0)
-			sequenceData = Alignment.reverse(sequenceData);
+			sequenceData = Alignment.rotate(sequenceData,rotation);
 
 		sequenceData = Alignment.doParse(sequenceData, group.Model, 999, true, true);
 
