@@ -21,8 +21,6 @@ case 1                                    % parse and calculate edit distance, w
   Params.PercentileCutoff = 0.2;          % generic cutoffs
 
   SequenceBySequence = 0;
-  CalculateAlignments = 0;                % calculate alignment score, occasionally needed
-  CalculateEditDistance = 0;
   PlotPercentileVersusDeficit = 0;
   AccumulateSequenceData = 0;
   AccumulateRandomSequenceData = 0;       % data on sequences for each model
@@ -45,8 +43,6 @@ case 2                                   % accumulate false positive data
   Params.PercentileCutoff = 0.0;          % generic cutoffs; do not impose a percentile cutoff
 
   SequenceBySequence = 0;
-  CalculateAlignments = 0;
-  CalculateEditDistance = 0;
   PlotPercentileVersusDeficit = 0;
   AccumulateSequenceData = 0;
   AccumulateRandomSequenceData = 1;       % data on sequences for each model
@@ -68,8 +64,6 @@ case 3                                    % run the diagnostic using model-speci
   Params.CoreEditCutoff   = 5;            % generic cutoffs
   Params.PercentileCutoff = 0.2;          % generic cutoffs
 
-  CalculateAlignments = 0;
-  CalculateEditDistance = 0;
   SequenceBySequence = 1;
   PlotPercentileVersusDeficit = 0;
   AccumulateSequenceData = 0;
@@ -135,11 +129,11 @@ end
 
 switch loopType
   case 'HL'
-    Rotations = 1;                      % only one "rotation"
+    max_rotation = 0;                      % rotation 0 means no change
   case 'IL'
-    Rotations = 2;                      % two rotations are computed
+    max_rotation = 1;                      % rotations 0 and 1 are needed
   otherwise
-    Rotations = str2num(strrep(loopType,'J',''));  % J3, J4, etc.
+    max_rotation = str2num(strrep(loopType,'J','')) - 1;   % 0, 1, 2 for 3-way junctions
 end
 
 ModelPath = [OutputBase filesep Release filesep 'lib'];
@@ -176,72 +170,6 @@ end
 
 clear seqlengths
 clear nummodelsbylengths
-
-% switch loopType
-% case 'HL'
-%   for s = 1:length(FASTA)
-%     seqlengths(s,1) = length(FASTA(s).Sequence);
-%   end
-%   [uniqueseqlengths,i,j] = unique(seqlengths,'rows');
-
-%   maxlengths = max(seqlengths);
-%   nummodelsbylengths(maxlengths(1)+3,1) = 0;    % make enough space
-
-%   for k = 1:length(i)
-%     a = uniqueseqlengths(k,1);
-%     nummodelsbylengths(a,1) = length(unique(OwnMotif(find(j==k))));
-%   end
-
-%   newlengths = [];
-
-%   for k = 1:length(uniqueseqlengths(:,1))
-%     newlengths(end+1,:) = uniqueseqlengths(k,:) + 1;
-%   end
-
-%   [uniqueseqlengths,i,j] = unique([uniqueseqlengths; newlengths],'rows');
-
-%   T = [seqlengths OwnMotif];
-%   T = sortrows(T,[1 2]);
-% case 'IL'
-%   for s = 1:length(FASTA)
-%     i = strfind(FASTA(s).Sequence,'*');
-%     j = length(FASTA(s).Sequence) - i;
-%     seqlengths(s,1) = min(i-1,j);
-%     seqlengths(s,2) = max(i-1,j);
-%   end
-%   [uniqueseqlengths,i,j] = unique(seqlengths,'rows');
-
-%   maxlengths = max(seqlengths);
-%   nummodelsbylengths(maxlengths(1)+3,maxlengths(2)+3) = 0;    % make enough space
-
-%   for k = 1:length(i)
-%     a = uniqueseqlengths(k,1);
-%     b = uniqueseqlengths(k,2);
-%     nummodelsbylengths(a,b) = length(unique(OwnMotif(find(j==k))));
-%   end
-
-%   newlengths = [];
-
-%   for k = 1:length(uniqueseqlengths(:,1))
-%     if uniqueseqlengths(k,1) < uniqueseqlengths(k,2)
-%       newlengths(end+1,:) = uniqueseqlengths(k,:) + [1 0];
-%     end
-%     newlengths(end+1,:) = uniqueseqlengths(k,:) + [0 1];
-%     newlengths(end+1,:) = uniqueseqlengths(k,:) + [1 1];
-%   end
-
-%   [uniqueseqlengths,i,j] = unique([uniqueseqlengths; newlengths],'rows');
-
-%   T = [seqlengths OwnMotif sum(seqlengths,2)];
-%   T = sortrows(T,[1 2 3]);
-
-% % sort by total length???
-% %  T = sortrows(T,[4 1 2 3]);
-% %  T = T(:,1:3);
-% otherwise
-%   fprintf('pJAR3DFalsePositiveStudy: loopType %s not recognized\n', loopType);
-%   pause
-% end
 
 for seqfilenumber = 1:numfiles                           % loop through files of random sequences
 
@@ -307,12 +235,9 @@ for seqfilenumber = 1:numfiles                           % loop through files of
 
   NumSequences = length(FASTA);
 
-  [AllSequencesFile,rotatedFASTA] = pWriteSequencesWithRotations(DiagnosticPath,FASTA,loopType,Rotations,CF);
+  [AllSequencesFile,rotatedFASTA] = pWriteSequencesWithRotations(DiagnosticPath,FASTA,loopType,max_rotation,CF);
 
-  if Skip == 0 && (CalculateEditDistance > 0 || FirstTime > 0) && length(FASTA) > 0
-
-    % SeqGroup = ones(NumSequences,1) * 0;
-    % OwnMotif = ones(NumSequences,1) * 0;
+  if Skip == 0 && FirstTime > 0 && length(FASTA) > 0
 
     % ----------------------- Calculate edit distance between FASTA and 3D instances
     CoreEditDistance = Inf * ones(length(FASTA),length(GroupData),length(rotatedFASTA));
@@ -337,49 +262,9 @@ for seqfilenumber = 1:numfiles                           % loop through files of
         fprintf('pJAR3DFalsePositiveStudy: Checked edit distances for %4d models so far, total time estimate %8.4f minutes\n', m, length(GroupData)*toc/(60*m));
       end
     end
-
-    % if strcmp(loopType,'HL') || strcmp(loopType,'IL')
-    %   for m = 1:length(GroupData)
-    %     ModelFASTA = zReadFASTA([ModelPath filesep GroupData(m).MotifID '.fasta']);
-
-    %     % D1 is best over all rotations, D2 for original, D3 for first rotation
-    %     [D1,D2,D3] = pEditDistance(FASTA,ModelFASTA,loopType,'core');
-
-    %     CoreEditDistance(:,m,1) = min(D2,[],2);     % best match of core seq
-    %     if strcmp(loopType,'IL')
-    %       CoreEditDistance(:,m,2) = min(D3,[],2);     % best match of core rev'd
-    %     end
-
-    %     if mod(m,100) == 0
-    %       fprintf('pJAR3DFalsePositiveStudy: Checked interior edit distance for %4d models so far, total time estimate %8.4f minutes\n', m, length(GroupData)*toc/(60*m));
-
-    %     end
-    %   end
-
-    %   if FindFullEditDistance > 0
-    %     tic;
-    %     fprintf('\nFinding full edit distance of %4d sequences against %4d models\n', NumSequences, length(GroupData));
-    %     for m = 1:length(GroupData)
-    %       ModelFASTA = zReadFASTA([ModelPath filesep GroupData(m).MotifID '.fasta']);
-
-    %       [D1,D2,D3] = pEditDistance(FASTA,ModelFASTA,loopType,'full');
-
-    %       FullEditDistance(:,m,1) = min(D2,[],2);     % best match of full seq
-    %       if strcmp(loopType,'IL')
-    %         FullEditDistance(:,m,2) = min(D3,[],2);     % best match of full rev'd
-    %       end
-
-    %       if mod(m,100) == 0
-    %         fprintf('pJAR3DFalsePositiveStudy: Checked full edit distance for %4d models so far, total time estimate %8.4f minutes\n', m, length(GroupData)*toc/(60*m));
-    %       end
-    %     end
-    %   else
-    %     FullEditDistance = 99 * ones(size(CoreEditDistance));
-    %   end
-    % end
   end
 
-	if Skip == 0 && (CalculateAlignments > 0 || FirstTime > 0) && length(FASTA) > 0
+	if Skip == 0 && FirstTime > 0 && length(FASTA) > 0
     % OwnMotif maps from sequence to MotifName index
     % SeqGroup maps from sequence to 1:L, where L is the number of sequence groups
     %   Each different sequence group gets a different number
@@ -401,12 +286,12 @@ for seqfilenumber = 1:numfiles                           % loop through files of
     tic;
     fprintf('Parsing %d sequences from file %s against %d models over %d rotations\n', NumSequences, SVN, length(GroupData), length(rotatedFASTA));
     for m = 1:length(GroupData)
-      for r = 1:Rotations
+      for r = 0:max_rotation
         % quantileFile = [ModelPath filesep GroupData(m).MotifID '_distribution.txt'];
         MN = [ModelPath filesep GroupData(m).MotifID '_model.txt'];
 
-        S = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifParseSingle(pwd,AllSequencesFile{r},MN);
-        MLPS(:,m,r) = S;          % max log probability score for each sequence
+        S = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifParseSingle(pwd,AllSequencesFile{r+1},MN);
+        MLPS(:,m,r+1) = S;          % max log probability score for each sequence
 %          T = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifTotalProbSingle(pwd,AllSequencesFile{r},MN);
 %          MixedScore = -(GroupData(m).DeficitCoeff * (max(GroupData(m).OwnScore) - S) + GroupData(m).CoreEditCoeff * CoreEditDistance(:,m,r));
 %          Q = edu.bgsu.rna.jar3d.JAR3DMatlab.getQuantilesFromFile(MixedScore,quantileFile);
@@ -422,7 +307,7 @@ for seqfilenumber = 1:numfiles                           % loop through files of
   end
 
   Marker = 2;
-  if Skip == 0 && (FirstTime > 0 || CalculateAlignments > 0 || CalculateEditDistance > 0) && length(FASTA) > 0
+  if Skip == 0 && FirstTime > 0 && length(FASTA) > 0
     % save(DataFile,'FASTA','Marker','MLPS','TotalProb','Percentile','CoreEditDistance','FullEditDistance');
     save(DataFile,'FASTA','Marker','MLPS','CoreEditDistance','FullEditDistance');
 
@@ -444,9 +329,9 @@ for seqfilenumber = 1:numfiles                           % loop through files of
       CutoffMet = zeros(size(MLPS));
       CutoffScore = zeros(size(MLPS));
       for mm = 1:length(GroupData)
-        for r = 1:Rotations
-          Features = [MLPS(:,mm,r) CoreEditDistance(:,mm,r)];
-          [CutoffMet(:,mm,r), CutoffScore(:,mm,r)] = pModelSpecificCutoff(GroupData(mm),Features,Params);
+        for r = 0:max_rotation
+          Features = [MLPS(:,mm,r+1) CoreEditDistance(:,mm,r+1)];
+          [CutoffMet(:,mm,r+1), CutoffScore(:,mm,r+1)] = pModelSpecificCutoff(GroupData(mm),Features,Params);
         end
       end
     end
@@ -463,9 +348,10 @@ for seqfilenumber = 1:numfiles                           % loop through files of
 
       for g = 1:length(GroupData)
         [y,br] = min(MixedScore(:,g,:),[],3);      % find the rotation which minimizes the mixed score; this is the best rotation
-        for r = 1:Rotations
-          i = find((br == r) .* (Deficit(:,g,r) <= Params.DeficitCutoff) .* (CoreEditDistance(:,g,r) <= Params.CoreEditCutoff));
-          GroupData(g).DeficitEditData = [GroupData(g).DeficitEditData; [Deficit(i,g,r) CoreEditDistance(i,g,r)]];
+        br = br - 1;                               % rotations are 0, 1, 2, ...
+        for r = 0:max_rotation
+          i = find((br == r) .* (Deficit(:,g,r+1) <= Params.DeficitCutoff) .* (CoreEditDistance(:,g,r+1) <= Params.CoreEditCutoff));
+          GroupData(g).DeficitEditData = [GroupData(g).DeficitEditData; [Deficit(i,g,r+1) CoreEditDistance(i,g,r+1)]];
         end
       end
     end
@@ -477,9 +363,9 @@ for seqfilenumber = 1:numfiles                           % loop through files of
       PP = Params;
       PP.CutoffType = 2;                              % generic cutoff, for comparison
       for mm = 1:length(GroupData)
-        for r = 1:Rotations
-          Features = [MLPS(:,mm,r) CoreEditDistance(:,mm,r)];
-          GenericCutoffMet(:,mm,r) = pModelSpecificCutoff(GroupData(mm),Features,PP);
+        for r = 0:max_rotation
+          Features = [MLPS(:,mm,r+1) CoreEditDistance(:,mm,r+1)];
+          GenericCutoffMet(:,mm,r+1) = pModelSpecificCutoff(GroupData(mm),Features,PP);
         end
       end
 
@@ -489,10 +375,10 @@ for seqfilenumber = 1:numfiles                           % loop through files of
       clear StrandLengths
 
       SeqLength = zeros(NumSequences,1);
-      StrandLengths = zeros(NumSequences,Rotations+1);
+      StrandLengths = zeros(NumSequences,max_rotation+2);  % additional column here
 
       for s = 1:NumSequences
-        SeqLength(s) = length(FASTA(s).Sequence)-Rotations+1; % HL, R=1, IL, R=2, etc.
+        SeqLength(s) = length(FASTA(s).Sequence)-max_rotation; % subtract 0 for HL, 1 for IL, etc.
 
         % StrandLengths is the total sequence length followed by individual strand lengths
         s_parts = strsplit(FASTA(s).Sequence,'*');
@@ -687,7 +573,7 @@ for seqfilenumber = 1:numfiles                           % loop through files of
         TotalSequences = zeros(length(k),2);
 
   	    for w = 1:length(k)
-          LengthsToPosition(mat2str(y(w,1:(Rotations+1)))) = w;
+          LengthsToPosition(mat2str(y(w,1:(max_rotation+2)))) = w;
           % fprintf('%s\n',mat2str(y(w,1:(Rotations+1))));
   	    end
   	    LengthPairs = y;
@@ -826,7 +712,7 @@ for seqfilenumber = 1:numfiles                           % loop through files of
   			        SD.Conserved    = GroupData(mm).NumNT;
   			        SD.NumInstances = GroupData(mm).NumInstances;
   			        SD.MLPS         = MLPS(n,mm,rm);
-  			        SD.Length       = length(FASTA(n).Sequence)-Rotations+1;
+  			        SD.Length       = length(FASTA(n).Sequence)-max_rotation;
   			        SD.Source       = 2;
   			        SD.Basepairs    = GroupData(mm).NumBasepairs;
                 SD.NumFixed     = GroupData(mm).NumFixed;
