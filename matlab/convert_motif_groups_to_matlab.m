@@ -26,6 +26,15 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 	% load the json file into a Matlab data structure
 	motif_list = jsondecode(json);
 
+	% for 3.48 J3, jsondecode returned motif_list as a cell array
+	% for everything before that, jsondecode returned motif_list as a struct array!
+	% apparently with 3.48 J3 some entries did not have all the same fields,
+	% so Matlab could not use a struct array
+
+	if isstruct(motif_list)
+		motif_list = num2cell(motif_list);
+	end
+
 	% matlab changes the keys '1', '2', '3' to field names x1, x2, x3
 
 	% we don't know ahead of time how many distinct pdb ids there will be
@@ -64,8 +73,15 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 		% loop_ids{1}
 		% motif_list{i}.alignment.(loop_ids{1})
 
-		num_positions = length(fieldnames(motif_list{i}.alignment.(loop_ids{1})));
+		motif_list{i}.alignment
+		loop_ids{1}
+		motif_list{i}.alignment.(loop_ids{1})
 
+		if isstruct(motif_list{i}.alignment.(loop_ids{1}))
+			num_positions = length(fieldnames(motif_list{i}.alignment.(loop_ids{1})));
+		else
+			num_positions = length(motif_list{i}.alignment.(loop_ids{1}));
+		end
 		% this is the structure we need to produce, although not all of these fields
 		% Candidates: [278×7 uint16]
 		% File: [1×278 struct]
@@ -74,12 +90,13 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 		% Signature: 'cWW-cWW-cWW'
 
 		motif_structure{i} = struct();
-        motif_structure{i}.motid_id = motif_list{i}.motif_id;
+        motif_structure{i}.motif_id = motif_list{i}.motif_id;
         motif_structure{i}.Candidates = zeros(num_instances,num_positions+1,'uint16');
 		motif_structure{i}.consensusEdge = zeros(num_positions,num_positions);
 		motif_structure{i}.bp_signature = motif_list{i}.bp_signature;  % text string
 		motif_structure{i}.Signature = motif_list{i}.bp_signature;  % text string
 		motif_structure{i}.chainbreak = motif_list{i}.chainbreak;
+		motif_structure{i}.loop_ids = loop_ids;
 
 		% create Truncate variable needed later to know where strand breaks are
 		Truncate = zeros(length(motif_structure{i}.chainbreak),1);
@@ -237,18 +254,20 @@ function [void] = convert_motif_groups_to_matlab(MotifLibraryLocation,Input,loop
 					% unit_ids in core positions in this loop
 					unit_ids = motif_list{i}.alignment.(loop_id);
 
-					unit_ids
-					fields = fieldnames(unit_ids);  % keys in the alignment, now fields
-
-					candidate_indices = zeros(1,length(fields)+1);
-					for k = 1:length(fields)
-						candidate_indices(k) = map_unit_id_to_index(sf_unit_id_to_index,unit_ids.(fields{k}));
+					% unit_ids are sometimes a structured variable, sometimes a cell array,
+					% depending on how jsondecode finds consistency in the variables
+					if isstruct(unit_ids)
+						fields = fieldnames(unit_ids);  % keys in the alignment, now fields
+						candidate_indices = zeros(1,length(fields)+1);
+						for k = 1:length(fields)
+							candidate_indices(k) = map_unit_id_to_index(sf_unit_id_to_index,unit_ids.(fields{k}));
+						end
+					else
+						candidate_indices = zeros(1,length(unit_ids)+1);
+						for k = 1:length(unit_ids)
+							candidate_indices(k) = map_unit_id_to_index(sf_unit_id_to_index,unit_ids{k});
+						end
 					end
-
-					% this code suddenly stopped working on 7/4/2025, don't know why
-					% for k = 1:length(unit_ids)
-					% 	candidate_indices(k) = map_unit_id_to_index(sf_unit_id_to_index,unit_ids{k});
-					% end
 					% list column of candidate_indices points to the sub-file index
 					candidate_indices(end) = j;
 
