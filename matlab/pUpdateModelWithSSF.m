@@ -1,4 +1,5 @@
-% pUpdateModelWithSSF(Node,Search,...) uses the sequence variability in Search to adjust insertion and substitution probabilities
+% pUpdateModelWithSSF(Node,Search,...) uses the sequence variability in Search to adjust
+% insertion and substitution probabilities
 
 function [Node,Search] = pUpdateModelWithSSF(Node,Search,f,F,Param,Prior,loopType,File,UseCandidate,Normalize)
 
@@ -32,7 +33,7 @@ end
 %   end
 % end
 
-if nargin < 9,
+if nargin < 9
     UseCandidate = 1:L;                     % Use all instances
 else
     L = length(UseCandidate);               % Only use given instances
@@ -40,10 +41,10 @@ end
 
 % ---------------------------- Set parameters for the nodes from instances
 
-for n = 1:length(Node),
+for n = 1:length(Node)
     switch Node(n).type
         case 'Initial' % ==========================================================
-            if n == 1,
+            if n == 1
                 % harsher penalties for first node insertions
                 Node(n).leftLengthDist = OutsideFlankLengthDist;
                 Node(n).rightLengthDist = OutsideFlankLengthDist;
@@ -56,27 +57,35 @@ for n = 1:length(Node),
                 % adjust insertion probs for initial nodes after the first node
                 % ----------------------------- tally insertions on the left
 
-                if n < length(Node)-1,              % no insertions after last pair
-                  if a < aa,                        % possible insertion here
+                if n <= length(Node)-1
+                    if a < aa                         % possible insertion here
 
-                    [LengthDist,LetterDist] = pInsertionDistribution(Search,a,UseCandidate,Prior,Normalize);
-                    Node(n).leftLengthDist = LengthDist;
-                    Node(n).leftLetterDist = LetterDist;
+                        [LengthDist,LetterDist] = pInsertionDistribution(Search,a,UseCandidate,Prior,Normalize);
+                        Node(n).leftLengthDist = LengthDist;
+                        Node(n).leftLetterDist = LetterDist;
 
-                  else
-                    Node(n).leftLengthDist = [1];   % no insertions possible
-                  end
+                    else
+                        Node(n).leftLengthDist = [1];   % no insertions possible because index is the same
+                    end
 
-                  if b > bb,
-                    % ----------------------------- tally insertions on the right
+                    if b > bb
+                        % ----------------------------- tally insertions on the right
 
-                    [LengthDist,LetterDist] = pInsertionDistribution(Search,bb,UseCandidate,Prior,Normalize);
-                    Node(n).rightLengthDist = LengthDist;
-                    Node(n).rightLetterDist = LetterDist;
+                        [LengthDist,LetterDist] = pInsertionDistribution(Search,bb,UseCandidate,Prior,Normalize);
+                        Node(n).rightLengthDist = LengthDist;
+                        Node(n).rightLetterDist = LetterDist;
 
-                  else
-                    Node(n).rightLengthDist = [1];   % no insertions possible
-                  end
+                    else
+                        Node(n).rightLengthDist = [1];   % no insertions possible because index is the same
+                    end
+                    if n == length(Node)-1
+                        fprintf('pUpdateModelWithSSF: %s allow insertions from initial node %d?',Search.motif_id,n)
+                        Node(n).leftLengthDist
+                        Node(n).leftLetterDist
+                        Node(n).rightLengthDist
+                        Node(n).rightLetterDist
+                        %pause
+                    end
                 end
             end
 
@@ -188,9 +197,9 @@ for n = 1:length(Node),
 
                 % ----------------------------- tally insertions on the right
 
-if bb >= b,
-  fprintf('pUpdateModelWithSSF:  Basepair and next node out of order! ************************ \n');
-end
+                if bb >= b,
+                    fprintf('pUpdateModelWithSSF:  Basepair and next node out of order! ************************ \n');
+                end
                 [LengthDist,LetterDist] = pInsertionDistribution(Search,bb,UseCandidate,Prior,Normalize);
                 Node(n).rightLengthDist = LengthDist;
                 Node(n).rightLetterDist = LetterDist;
@@ -234,7 +243,7 @@ end
                 Node(n).SubsProb(:,:,newinter) = diag(dist);     % put dist down the diagonal
                 Node(n).InteractionComment{newinter} = [' // Cluster node fixed base, nucleotide ' num2str(fi) ' at position ' num2str(p)];
                 fprintf('pUpdateModelWithSSF:  Added a fixed base to a cluster node that was not previously modeled\n');
-                pause
+                %pause
             end
 
             % ---------- find consensus 4x4 substitution matrix for basepairs and for fixed but non-basepairing nucleotides
@@ -273,12 +282,12 @@ end
 
             insertions = 0;                        % number of insertions identified so far
 
-            for i = InsertionPositions,
+            for i = InsertionPositions
                 a = Indices(i);                    % index within the motif
 
                 [LengthDist,LetterDist,insnumber] = pInsertionDistribution(Search,a,UseCandidate,Prior,Normalize);
 
-                if max(insnumber) > 0,             % only put insertions where one is found
+                if max(insnumber) > 0              % only put insertions where one is found
                     insertions = insertions + 1;
                     Node(n).Insertion(insertions).Position = i;
                     Node(n).Insertion(insertions).Index = a;
@@ -338,7 +347,7 @@ end
                     Node(n).SubsProb(:,:,newinter) = diag(dist);     % put dist down the diagonal
                     Node(n).InteractionComment{newinter} = [' // Hairpin fixed base, nucleotide ' num2str(fi) ' at position ' num2str(p)];
                     fprintf('pUpdateModelWithSSF:  Added a fixed base to a hairpin node that was not previously modeled\n');
-                    pause
+                    %pause
                 end
 
                 % ---------- find consensus 4x4 substitution matrix for basepairs
@@ -401,6 +410,61 @@ end
                 end
 
             end
+        end
+    end
+
+    % try to identify all insertion positions according to the core position they come before
+    % a left index inserts before its index number; that is "outside" of the node
+    % a right index inserts after its index number; that is "outside" of the node
+    insertions_modeled_before = zeros(1,N+1);
+    for n = 1:length(Node)
+        indices = [];    % indices immediately after an insertion
+        if strcmp(Node(n).type,'Initial')
+            if length(Node(n).leftLengthDist) > 1
+                indices = [indices Node(n).LeftIndex];
+            end
+            if length(Node(n).rightLengthDist) > 1
+                indices = [indices Node(n).RightIndex+1];
+            end
+        end
+        if length(indices) > 0
+            for a = indices
+                if insertions_modeled_before(a) > 0 && insertions_modeled_before(a) ~= n
+                    Node(insertions_modeled_before(a))
+                    Node(n)
+                    fprintf('Motif %s. Nodes %d and %d both model an insertion before position %d. Nodes are above.\n',Search.motif_id,insertions_modeled_before(a),n,a);
+                    fprintf('Fixing the second one to have length distribution concentrated on zero\n')
+                    %pause
+                    if a == Node(n).LeftIndex
+                        Node(n).leftLengthDist = [1];
+                    else
+                        Node(n).rightLengthDist = [1];
+                    end
+                else
+                    insertions_modeled_before(a) = n;
+                end
+            end
+        end
+    end
+
+    % ---------------------------- Remove Initial Nodes that do not insert anything
+    Keep = 1:length(Node);
+    for n = 1:length(Node)
+        if strcmp(Node(n).type,'Initial')
+            if length(Node(n).leftLengthDist) == 1 && length(Node(n).rightLengthDist) == 1
+                if Verbose > 0
+                    fprintf('pUpdateModelWithSSF: Node %d has both insertion lengths equal to 0; removing\n',n);
+                    Keep(n) = 0;
+                end
+            end
+        end
+    end
+
+    Node = Node(find(Keep));
+    for n = 1:(length(Node)-1)
+        if ~strcmp(Node(n).type,'Junction')
+            % just don't track next node for junctions, too easy to get wrong
+            Node(n).nextnode = n + 1;
         end
     end
 end
