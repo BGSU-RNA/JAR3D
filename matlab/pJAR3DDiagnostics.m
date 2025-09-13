@@ -73,12 +73,11 @@ loopType = Release(1:2);
 
 switch loopType
   case 'HL'
-    Rotations = 1;                      % only one "rotation"
+    max_rotation = 0;                      % rotation 0 means no change
   case 'IL'
-    Rotations = 2;                      % two rotations are computed
+    max_rotation = 1;                      % rotations 0 and 1 are needed
   otherwise
-    loopType
-    Rotations = str2num(strrep(loopType,'J',''));   % three rotations, for 3-way junctions
+    max_rotation = str2num(strrep(loopType,'J','')) - 1;   % 0, 1, 2 for 3-way junctions
 end
 
 % ----------------------------------- set paths, make directories if needed
@@ -235,8 +234,10 @@ end
 
 % --------------------- Write sequences to one file for each rotation
 
+fprintf('Writing sequences with max_rotation %d',max_rotation)
+
 % [AllSequencesFile] = pWriteSequencesWithRotations(ModelPath,FASTA,loopType,Rotations);
-[AllSequencesFile,rotatedFASTA] = pWriteSequencesWithRotations(DiagnosticPath,FASTA,loopType,Rotations,'internal_diagnostic');
+[AllSequencesFile,rotatedFASTA] = pWriteSequencesWithRotations(DiagnosticPath,FASTA,loopType,max_rotation,'internal_diagnostic');
 
 % ------------------------- Load parsing and edit distance data if available
 
@@ -314,24 +315,24 @@ else
 	clear TotalProb
 	clear Percentile
 
-	% MLPS(a,m,r) is the score of sequence a against model m using rotation r
-	% Percentile(a,m,r) is the percentile of sequence a against model m using r
+	% MLPS(a,m,r+1) is the score of sequence a against model m using rotation r
+	% Percentile(a,m,r+1) is the percentile of sequence a against model m using r
 
 	% Temp.A = 12;
 	% Temp.B = 27;
 
-  MLPS = zeros(NumSequences,length(GroupData),Rotations);
+  MLPS = zeros(NumSequences,length(GroupData),max_rotation+1);
 
 	fprintf('Parsing %4d sequences against %4d models\n', NumSequences, length(GroupData));
 	for m = 1:length(GroupData)
 	  % quantileFile = [ModelPath filesep GroupData(m).MotifID '_distribution.txt'];
-	  for r = 1:Rotations
-      TotalProb(:,m,r) = zeros(1,NumSequences);     % total probability score for each sequence
-      Percentile(:,m,r) = zeros(1,NumSequences);    % percentile of this score
+	  for r = 0:max_rotation
+      TotalProb(:,m,r+1) = zeros(1,NumSequences);     % total probability score for each sequence
+      Percentile(:,m,r+1) = zeros(1,NumSequences);    % percentile of this score
 
       MN = [ModelPath filesep GroupData(m).MotifID '_model.txt'];
-	    S = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifParseSingle(pwd,AllSequencesFile{r},MN);
-	    MLPS(:,m,r) = S;          % max log probability score for each sequence
+	    S = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifParseSingle(pwd,AllSequencesFile{r+1},MN);
+	    MLPS(:,m,r+1) = S;          % max log probability score for each sequence
 
       %	    T = edu.bgsu.rna.jar3d.JAR3DMatlab.MotifTotalProbSingle(pwd,AllSequencesFile{r},MN);
       % MixedScore = -(GroupData(m).DeficitCoeff * (max(GroupData(m).OwnScore) - S) + GroupData(m).CoreEditCoeff * CoreEditDistance(:,m,r));
@@ -371,9 +372,9 @@ size(CoreEditDistance)
 size(Percentile)
 
 for mm = 1:length(GroupData)
-  for r = 1:Rotations
-    Features = [MLPS(:,mm,r) CoreEditDistance(:,mm,r) Percentile(:,mm,r)];
-    [CutoffMet(:,mm,r), CutoffScore(:,mm,r)] = pModelSpecificCutoff(GroupData(mm),Features,Par);
+  for r = 0:max_rotation
+    Features = [MLPS(:,mm,r+1) CoreEditDistance(:,mm,r+1) Percentile(:,mm,r+1)];
+    [CutoffMet(:,mm,r+1), CutoffScore(:,mm,r+1)] = pModelSpecificCutoff(GroupData(mm),Features,Par);
   end
 end
 
@@ -406,7 +407,7 @@ OwnCutoffScore = zeros(1,NumSequences);
 OwnDeficit = zeros(1,NumSequences);
 
 for s = 1:NumSequences
-  SeqLength(s) = length(FASTA(s).Sequence)-Rotations+1; % HL, R=1, IL, R=2, etc.
+  SeqLength(s) = length(FASTA(s).Sequence)-max_rotation; % HL subtract 0, IL subtract 1 star, etc.
 
   g = OwnMotif(s);
   OwnPercentile(s) = Percentile(s,g,1);
