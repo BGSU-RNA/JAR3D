@@ -13,18 +13,25 @@
 % 2. Numbering along each strand, from 1 to N on each strand.  ss, tt, zs, zt, xs, yt, RightNotInter are on this scheme.
 % 3. Numbering the interacting bases in the cluster from 1 to M, regardless of strand.  rightnum, e, IBases are on this scheme.
 
-if pStrandBreaksBetween(a,B,Truncate) == 0
+num_strand_breaks = pStrandBreaksBetween(a,B,Truncate);
+if num_strand_breaks == 0
   % hairpin
   amax = min([length(File.NT) a+cdepth floor((a+B)/2)]);
   bmin = max([1 B-cdepth ceil((a+B)/2) amax+1]);
-
-  fprintf('amax is %d bmin is %d\n',amax,bmin);
   use_amax = 0;
-else
-  % IL or junction
+  fprintf('pMakeNodesCluster: amax is %d bmin is %d, use_amax is %d\n',amax,bmin,use_amax);
+elseif num_strand_breaks == 1
+  % IL, which can take all of the nucleotides to the end of the loop and use * hairpin
   amax = min(a+cdepth,pNextTruncation(a,Truncate,N)); % how far to look on left, at most
   bmin = max(B-cdepth,pNextTruncation(B,Truncate,1)); % how far to look on right, at most
   use_amax = 1;
+  fprintf('pMakeNodesCluster: amax is %d bmin is %d, use_amax is %d\n',amax,bmin,use_amax);
+else
+  % junction, which cannot handle interactions between branch 1 and branch 2
+  amax = min(a+cdepth,pNextTruncation(a,Truncate,N)-1); % how far to look on left, at most
+  bmin = max(B-cdepth,pNextTruncation(B,Truncate,1)+1); % how far to look on right, at most; avoid flanking pair
+  use_amax = 1;
+  fprintf('pMakeNodesCluster: amax is %d bmin is %d, use_amax is %d\n',amax,bmin,use_amax);
 end
 
 b = B;                                 % current base on right
@@ -97,12 +104,12 @@ Node(n).LeftLetter  = cat(2,File.NT(a:aa).Base);
 Node(n).RightLetter = cat(2,File.NT(bb:b).Base);
 Node(n).RightIndex  = bb:b;
 
-Node(n).Comment = [' // Cluster node ' File.NT(Node(n).LeftIndex(1)).Base File.NT(Node(n).LeftIndex(1)).Number ':' File.NT(Node(n).LeftIndex(end)).Base, File.NT(Node(n).LeftIndex(end)).Number ' and ' File.NT(Node(n).RightIndex(1)).Base File.NT(Node(n).RightIndex(1)).Number ':' File.NT(Node(n).RightIndex(end)).Base File.NT(Node(n).RightIndex(end)).Number];
+Node(n).Comment = [' // Cluster node ' File.NT(Node(n).LeftIndex(1)).ID ':' File.NT(Node(n).LeftIndex(end)).ID ' and ' File.NT(Node(n).RightIndex(1)).ID ':' File.NT(Node(n).RightIndex(end)).ID];
 
 AllIndices = [a:aa bb:b];
 
 if Verbose > 0
-  fprintf('%3d Cluster   %s:%s %s:%s\n', n, File.NT(a).Number, File.NT(aa).Number, File.NT(bb).Number, File.NT(b).Number);
+  fprintf('%3d Cluster   %s:%s %s:%s\n', n, File.NT(a).ID, File.NT(aa).ID, File.NT(bb).ID, File.NT(b).ID);
 end
 
 % -------------------- identify which bases are interacting on left and right
@@ -187,16 +194,14 @@ disp('Checking for interactions made by single inserted base');
   Node(n).Insertion(cc).LengthDist = ID.LengthDist;
   Node(n).Insertion(cc).LetterDist = ID.LetterDist;
 
-  Node(n).InsertionComment{aaa} = [' // Insertion between ' File.NT(AllIndices(h(aaa))).Base File.NT(AllIndices(h(aaa))).Number ' and ' File.NT(AllIndices(h(aaa)+d(h(aaa)))).Base File.NT(AllIndices(h(aaa)+d(h(aaa)))).Number];
+  Node(n).InsertionComment{aaa} = [' // Insertion between ' File.NT(AllIndices(h(aaa))).ID ' and ' File.NT(AllIndices(h(aaa)+d(h(aaa)))).ID];
 
-  if Verbose > 0,
-    fprintf('    %d insertions (%s) between %s%s and %s%s\n', ...
+  if Verbose > 0
+    fprintf('    %d insertions (%s) between %s and %s\n', ...
     d(h(aaa))-1, ...
     cat(2,File.NT((AllIndices(h(aaa))+1):(AllIndices(h(aaa)+d(h(aaa)))-1)).Base), ...
-                 File.NT(AllIndices(h(aaa))).Base, ...
-                 File.NT(AllIndices(h(aaa))).Number, ...
-                 File.NT(AllIndices(h(aaa)+d(h(aaa)))).Base, ...
-                 File.NT(AllIndices(h(aaa)+d(h(aaa)))).Number);
+                 File.NT(AllIndices(h(aaa))).ID, ...
+                 File.NT(AllIndices(h(aaa)+d(h(aaa)))).ID);
   end
   cc = cc + 1;
 end
@@ -206,16 +211,16 @@ end
 % ---- interactions between left and right
 K = 1;                                % counter
 [i,j] = find(Z);                      % interacting pairs
-for k = 1:length(i),                  % loop through them
+for k = 1:length(i)                   % loop through them
     Node(n).IBases(K,:) = [leftnum(i(k)) rightnum(j(k))];
     i1 = i(k) + a - 1;                % index of first base
     i2 = j(k) + bb - 1;               % index of second
     Node(n).InterIndices(K,:) = [i1 i2];
 
-    Node(n).InteractionComment{K} = [ ' // Cluster Interaction ' File.NT(i1).Base File.NT(i1).Number ' - ' File.NT(i2).Base File.NT(i2).Number ' ' zEdgeText(File.Edge(i1,i2))];
+    Node(n).InteractionComment{K} = [ ' // Cluster Interaction ' File.NT(i1).ID ' - ' File.NT(i2).ID ' ' zEdgeText(File.Edge(i1,i2))];
 
     if Verbose > 0,
-      fprintf('    LR Inter  %4s %4s %c%c %s\n', File.NT(i1).Number, File.NT(i2).Number, File.NT(i1).Base, File.NT(i2).Base, zEdgeText(File.Edge(i1,i2)));
+      fprintf('    LR Inter  %s %s %s\n', File.NT(i1).ID, File.NT(i2).ID, zEdgeText(File.Edge(i1,i2)));
 %              fprintf('%d %d\n', Node(n).IBases(K,1), Node(n).IBases(K,2));
     end
 
@@ -234,11 +239,11 @@ for k = 1:length(i),                 % loop through them
     i2 = j(k) + a - 1;             % index of second
     Node(n).InterIndices(K,:) = [i1 i2];
 
-    Node(n).InteractionComment{K} = [ ' // Cluster Interaction ' File.NT(i1).Base File.NT(i1).Number ' - ' File.NT(i2).Base File.NT(i2).Number ' ' zEdgeText(File.Edge(i1,i2))];
+    Node(n).InteractionComment{K} = [ ' // Cluster Interaction ' File.NT(i1).ID ' - ' File.NT(i2).ID ' ' zEdgeText(File.Edge(i1,i2))];
 
-    if Verbose > 0,
-      fprintf('    LL Inter  %4s %4s %c%c %s\n', File.NT(i1).Number, File.NT(i2).Number, File.NT(i1).Base, File.NT(i2).Base, zEdgeText(File.Edge(i1,i2)));
-%fprintf('%d %d\n', Node(n).IBases(K,1), Node(n).IBases(K,2));
+    if Verbose > 0
+      fprintf('    LL Inter  %s %s %s\n', File.NT(i1).ID, File.NT(i2).ID, zEdgeText(File.Edge(i1,i2)));
+      %fprintf('%d %d\n', Node(n).IBases(K,1), Node(n).IBases(K,2));
     end
 
     Node(n).SubsProb(:,:,K) = pIsoScore(File.Edge(i1,i2), ...
@@ -256,10 +261,10 @@ for k = 1:length(i)                   % loop through them
     i2 = j(k) + bb - 1;               % index of second
     Node(n).InterIndices(K,:) = [i1 i2];
 
-    Node(n).InteractionComment{K} = [ ' // Cluster Interaction ' File.NT(i1).Base File.NT(i1).Number ' - ' File.NT(i2).Base File.NT(i2).Number ' ' zEdgeText(File.Edge(i1,i2))];
+    Node(n).InteractionComment{K} = [ ' // Cluster Interaction ' File.NT(i1).ID ' - ' File.NT(i2).ID ' ' zEdgeText(File.Edge(i1,i2))];
 
     if Verbose > 0
-      fprintf('    RR Inter  %4s %4s %c%c %s\n', File.NT(i1).Number, File.NT(i2).Number, File.NT(i1).Base, File.NT(i2).Base, zEdgeText(File.Edge(i1,i2)));
+      fprintf('    RR Inter  %s %s %s\n', File.NT(i1).ID, File.NT(i2).ID, zEdgeText(File.Edge(i1,i2)));
 %fprintf('%d %d\n', Node(n).IBases(K,1), Node(n).IBases(K,2));
     end
 
@@ -315,14 +320,13 @@ if AdjustSubsForLR == 1 && (TertiaryFreeNode == 0 || Extension < 2),
     if Verbose > 1,
       NT1 = File.NT(i1);
       NT2 = File.NT(i2);
-      fprintf('    Possibly adjusting substitution probabilities for %4s %4s %s%s %s\n', NT1.Number, NT2.Number, NT1.Base, NT2.Base, zEdgeText(File.Edge(i1,i2)));
+      fprintf('    Possibly adjusting substitution probabilities for %s %s %s\n', NT1.ID, NT2.ID, zEdgeText(File.Edge(i1,i2)));
     end
     Node(n).SubsProb(:,:,K) = pAdjustSubsProb(File,i1,i2,P,method,AllIndices);
   end
 end
 
 a = aa + 1;                           % current base on left
-                                      % skip over rest of cluster
 B = bb - 1;                           % current base on right
 
 fprintf('pMakeNodesCluster a=%d B=%d at the end\n', a, B)
@@ -333,9 +337,14 @@ B = max(B,1);
 
 % a = min(a,B);                         % just in case!
 
+% if use_amax && a <= B
+%   a = min(a,amax);                      % don't go beyond the current strand
+%   B = max(B,bmin);
+% end
+
 if use_amax && a <= B
-  a = min(a,amax);                      % don't go beyond the current strand
-  B = max(B,bmin);
+  a = min(a,pNextTruncation(a,Truncate,N));  % don't go beyond the current strand
+  B = max(B,pNextTruncation(B,Truncate,1));
 end
 
 fprintf('pMakeNodesCluster a=%d B=%d at the end\n', a, B)
