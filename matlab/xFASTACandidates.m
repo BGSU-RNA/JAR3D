@@ -8,16 +8,16 @@
 % nucleotides in the first candidate.  0 means not to reorder them.
 
 % Also returns alignment text in AText
+% Also returns the list of correspondences that can be used to show detailed
+% alignments of sequences to the model.
 
 function [Text,AText,BText,CText,FASTA,DText] = xFASTACandidates(File,Search,Direction,ModelName)
 
-if nargin < 4,
+if nargin < 4
   MN = Search.Query.Name;
 else
   MN = ModelName;
 end
-
-AModelName = ModelName(1:6);       % temporary fix for filenames
 
 Query      = Search.Query;
 Candidates = Search.Candidates;
@@ -25,7 +25,7 @@ Candidates = Search.Candidates;
 [L,N] = size(Candidates);
 N = N - 1;
 
-if Direction ~= 0,
+if Direction ~= 0
   [y,p] = sort(Direction*double(Candidates(1,1:N)));
                                     % put nucleotides in inc/decreasing order
 else
@@ -51,13 +51,13 @@ end
 % ---------------------------- Calculate maximum gaps between cand. nucleotides
 
 maxinsert = zeros(1,N-1);
-for c = 1:L,
+for c = 1:L
   maxinsert = max(maxinsert,abs(diff(double(Cand(c,1:N))))-1);
 end
 
 % ---------------------------- Check about Truncate
 
-if ~isfield(Search,'Truncate'),
+if ~isfield(Search,'Truncate')
   Search.Truncate = [];
 else
   maxinsert = 0*maxinsert;
@@ -72,12 +72,12 @@ k = N;                                          % number of columns being shown
 % ----------------------------- Print alignment
 
 CorrCodeList = zeros(c,N);                        % for bases corresp to query
-for j = 1:N,
+for j = 1:N
   InsCode{j}.Count = zeros(1,4);
   InsLength{j}.Count = [];
 end
 
-for c = 1:L,                                      % loop through candidates
+for c = 1:L                                       % loop through candidates
   f = F(c);                                       % file number
   FN = strrep(Search.File(f).PDBFilename,'.pdb','');
 
@@ -88,9 +88,9 @@ for c = 1:L,                                      % loop through candidates
 
   k = 1;                                          % column counter
 
-  DText{c} = [sprintf('%s_Instance_%d has_name %s_%s_%s%s_%s%s', MN, c, MN, File(f).Filename, File(f).NT(Cand(c,1)).Base, File(f).NT(Cand(c,1)).Number, File(f).NT(Cand(c,end)).Base, File(f).NT(Cand(c,end)).Number)];
+  DText{c} = [sprintf('%s_Instance_%d has_name %s,%s,%s%s_%s%s', MN, c, MN, Search.loop_ids{c}, File(f).NT(Cand(c,1)).Base, File(f).NT(Cand(c,1)).Number, File(f).NT(Cand(c,end)).Base, File(f).NT(Cand(c,end)).Number)];
 
-  for n = 1:N,                                    % print alignment for cand
+  for n = 1:N                                     % print alignment for cand
 
     % ------------------------------------- add bases at conserved positions
 
@@ -111,9 +111,9 @@ for c = 1:L,                                      % loop through candidates
 
     % ----------------------- add inserted bases between conserved positions
 
-    if n < N,
+    if n < N
       k = k + 1;
-      if (MaxDiff(n) == Inf) || (maxinsert(n) >= 4) || any(n+1 == Search.Truncate),
+      if (MaxDiff(n) == Inf) || (maxinsert(n) >= 4) || any(n+1 == Search.Truncate)
         Text{t} = [Text{t} sprintf('*')];            % show break in strand
       else
         if Cand(c,n+1) - Cand(c,n) > 1,             % increasing order
@@ -152,7 +152,7 @@ for c = 1:L,                                      % loop through candidates
             end
             r = r + 1;
             AText{r} = sprintf('%s_Instance_%d_Column_%d-%d_Insertion_%d_%s corresponds_to_sequence %s_Sequence_%d_Position_%d_%s', ModelName, c, n, n+1, ic, NT.Base, ModelName, c, length(Text{t}), NT.Base);
-            if isfield(NT,'ID') && ~isempty(NT.ID),
+            if isfield(NT,'ID') && ~isempty(NT.ID)
               BText{r} = sprintf('%s_Instance_%d_Column_%d-%d_Insertion_%d_%s corresponds_to_PDB %s_%d_%s_%s_%s', ModelName, c, n, n+1, ic, NT.Base, FN, MNum, NT.Chain, NT.Number, NT.Base);
             else
               BText{r} = sprintf('%s_Instance_%d_Column_%d-%d_Insertion_%d_%s corresponds_to_PDB %s_%d_%s_%s_%s', ModelName, c, n, n+1, ic, NT.Base, FN, MNum, NT.Chain, NT.Number, NT.Base);
