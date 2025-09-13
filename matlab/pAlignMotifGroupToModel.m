@@ -21,12 +21,16 @@ for n = 1:length(Node),
   if strcmp(Node(n).type,'Initial') && n > 1,
     if n < length(Node),
       if Node(n+1).LeftLetter == '*',
-        i = min(Node(n).LeftIndex);
-        T{r} = sprintf('%s_Column_%d-*_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i-1, ModelName, n, 1);
-        r = r + 1;
-        i = Node(n).RightIndex;
-        T{r} = sprintf('%s_Column_*-%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i+1, ModelName, n, 2);
-        r = r + 1;
+        if length(Node(n).leftLengthDist) > 1,  % has a non-zero insertion probability
+          i = min(Node(n).LeftIndex);
+          T{r} = sprintf('%s_Column_%d-*_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i-1, ModelName, n, 1);
+          r = r + 1;
+        end
+        if length(Node(n).rightLengthDist) > 1, % has a non-zero insertion probability
+          i = Node(n).RightIndex;
+          T{r} = sprintf('%s_Column_*-%d_Insertion corresponds_to_JAR3D %s_Node_%d_Position_%d_Insertion', MatFileName, i+1, ModelName, n, 2);
+          r = r + 1;
+        end
       else
         if length(Node(n).leftLengthDist) > 1,  % has a non-zero insertion probability
           i = min(Node(n).LeftIndex);
