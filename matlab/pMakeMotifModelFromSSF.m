@@ -90,7 +90,7 @@ function [Node,Search] = pMakeMotifModelFromSSF(Search,Param,Prior,loopType,UseI
   if sum(sum(BPh .* (1-eye(size(BPh))))) > 0 && Verbose > 0
     [i,j,k] = find(BPh);
     for a = 1:length(i),
-      if i(a) ~= j(a) && Verbose > 0,
+      if i(a) ~= j(a) && Verbose > 0
         fprintf('pMakeMotifModelFromSSF: Conserved base-phosphate: %d %d %s\n', i(a), j(a), zBasePhosphateText(k(a)));
       end
     end
@@ -203,8 +203,17 @@ function [Node,Search] = pMakeMotifModelFromSSF(Search,Param,Prior,loopType,UseI
   % end
 
   if Verbose >= 0
+    fprintf('pMakeMotifModelFromSSF:  Nodes before fixes\n');
     for n = 1:length(Node)
-      fprintf('pMakeMotifModelFromSSF:  %d %s\n', n, Node(n).type);
+      fprintf('pMakeMotifModelFromSSF:  %2d %9s Left', n, Node(n).type);
+      if ~isempty(Node(n).LeftIndex)
+        fprintf(' %2d', Node(n).LeftIndex);
+      end
+      fprintf(' Right');
+      if ~isempty(Node(n).RightIndex)
+        fprintf(' %2d', Node(n).RightIndex);
+      end
+      fprintf('\n');
     end
   end
 
@@ -250,11 +259,11 @@ function [Node,Search] = pMakeMotifModelFromSSF(Search,Param,Prior,loopType,UseI
 
   Node = NNode;
 
-  if Verbose > 1
-    for n = 1:length(Node)
-      fprintf('%d %s\n', n, Node(n).type);
-    end
-  end
+  % if Verbose > 1
+  %   for n = 1:length(Node)
+  %     fprintf('%d %s\n', n, Node(n).type);
+  %   end
+  % end
 
   % ---------------------------- Turn conserved insertion(s) after Basepair into Initial Node
   m = 1;
@@ -295,11 +304,11 @@ function [Node,Search] = pMakeMotifModelFromSSF(Search,Param,Prior,loopType,UseI
 
   Node = NNode;
 
-  if Verbose > 0
-    for n = 1:length(Node)
-      fprintf('%d %s\n', n, Node(n).type);
-    end
-  end
+  % if Verbose > 0
+  %   for n = 1:length(Node)
+  %     fprintf('%d %s\n', n, Node(n).type);
+  %   end
+  % end
 
   % ------------------------------ Turn initial nodes with conserved bases into alternating Fixed and Initial with nothing
 
@@ -321,6 +330,7 @@ function [Node,Search] = pMakeMotifModelFromSSF(Search,Param,Prior,loopType,UseI
           % fprintf('pMakeMotifModelFromSSF: LeftIndex %d RightIndex %d\n', max(NNode(m-1).LeftIndex), min(NNode(m-1).RightIndex));
           if max(NNode(m-1).LeftIndex) > min(NNode(m-1).RightIndex)
               fprintf('pMakeMotifModelFromSSF: Error: LeftIndex > RightIndex\n');
+              pause
               NNode(m-1)
           end
 
@@ -340,7 +350,7 @@ function [Node,Search] = pMakeMotifModelFromSSF(Search,Param,Prior,loopType,UseI
               NNode(m).leftLetterDist = [1 1 1 1];
               NNode(m).rightLetterDist = [1 1 1 1];
           end
-          NNode(m).Comment    = ' // Fixed node on left';
+          NNode(m).Comment    = [' // Fixed node on left for ' File.NT(Node(n).LeftIndex+j-1).ID];
           if Verbose > 0
             fprintf('pMakeMotifModelFromSSF:  Adding an Initial node after Fixed\n');
           end
@@ -384,7 +394,7 @@ function [Node,Search] = pMakeMotifModelFromSSF(Search,Param,Prior,loopType,UseI
               NNode(m).leftLetterDist  = [1 1 1 1];
               NNode(m).rightLetterDist = [1 1 1 1];
           end
-          NNode(m).Comment    = ' // Fixed node on right';
+          NNode(m).Comment    = [' // Fixed node on right for ' File.NT(Node(n).RightIndex-j+1).ID];
           if Verbose > 0
             fprintf('pMakeMotifModelFromSSF:  Adding an Initial node after Fixed\n');
           end
@@ -411,11 +421,12 @@ function [Node,Search] = pMakeMotifModelFromSSF(Search,Param,Prior,loopType,UseI
 
   Node = NNode;
 
-  if Verbose > 1
-    for n = 1:length(Node)
-      fprintf('%d %s\n', n, Node(n).type);
-    end
-  end
+  % if Verbose > 1
+  %   fprintf('pMakeMotifModelFromSSF:  %2d %9s %2d %2d\n', n, Node(n).type, Node(n).LeftIndex, Node(n).RightIndex);
+  %   for n = 1:length(Node)
+  %     fprintf('pMakeMotifModelFromSSF:  %2d %9s %2d %2d\n', n, Node(n).type, Node(n).LeftIndex, Node(n).RightIndex);
+  %   end
+  % end
 
   if 0 > 1
     Text = pNodeToSCFGModelText(Node,5);
@@ -445,10 +456,60 @@ function [Node,Search] = pMakeMotifModelFromSSF(Search,Param,Prior,loopType,UseI
     end
   end
 
+
+  fprintf('All nodes in detail\n')
+  for n = 1:length(Node)
+    fprintf('Node %d\n',n);
+    Node(n)
+  end
+
+  % Try to identify core positions that are modeled more than once
+  % Not easy because of Interaction lines in Cluster and Hairpin nodes
+  core_positions_modeled = zeros(1,N);
+  for n = 1:length(Node)
+    indices = [];
+    if strcmp(Node(n).type,'Basepair')
+      indices = [Node(n).LeftIndex Node(n).RightIndex];
+    elseif strcmp(Node(n).type,'Fixed')
+      if length(Node(n).leftLengthDist) > 1
+        indices = [Node(n).LeftIndex];
+      end
+      if length(Node(n).rightLengthDist) > 1
+        indices = [indices Node(n).RightIndex];
+      end
+    elseif strcmp(Node(n).type,'Cluster') || strcmp(Node(n).type,'Hairpin')
+      for k = 1:size(Node(n).InterIndices,1)
+        indices = [indices Node(n).InterIndices(k,:)];
+      end
+    end
+    for a = indices
+      if core_positions_modeled(a) > 0 && core_positions_modeled(a) ~= n
+        fprintf('%s Core position %d modeled in nodes %d and %d!!!\n',Search.motif_id,a,core_positions_modeled(a),n);
+        pause
+      else
+        core_positions_modeled(a) = n;
+      end
+    end
+  end
+  for i = find(core_positions_modeled == 0)
+    fprintf('Position %d is not modeled\n',i);
+    pause
+  end
+
+
   if Verbose > 0
-    fprintf('pMakeMotifModelFromSSF: complete list of nodes\n')
+    % list all nodes and what they model
+    fprintf('pMakeMotifModelFromSSF:  Nodes after fixes\n');
     for n = 1:length(Node)
-      fprintf('%d %s\n', n, Node(n).type);
+      fprintf('pMakeMotifModelFromSSF:  %2d %9s Left', n, Node(n).type);
+      if ~isempty(Node(n).LeftIndex)
+        fprintf(' %2d', Node(n).LeftIndex);
+      end
+      fprintf(' Right');
+      if ~isempty(Node(n).RightIndex)
+        fprintf(' %2d', Node(n).RightIndex);
+      end
+      fprintf('\n');
     end
   end
 
@@ -465,8 +526,11 @@ function [Node,Search] = pMakeMotifModelFromSSF(Search,Param,Prior,loopType,UseI
     end
   end
 
-  % ------------------------------------ Modify pair and substitution probs
+  % ------------------------------------ Modify insertion and substitution probs
   [Node,Search] = pUpdateModelWithSSF(Node,Search,f,F,Param,Prior,loopType,File,UseIndex,Normalize);
+
+  % update nextnode list of Junction nodes now that nodes are re-numbered
+  [Node, k] = pNextNodeJunction(Node,1);
 
   if Verbose > 0
     fprintf('\n')
