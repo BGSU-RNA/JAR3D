@@ -9,11 +9,13 @@ rr= a;                               % start of current loop
 aaa = pNextTruncation(a,Truncate,N);
 BBB = pNextTruncation(B,Truncate,1);
 
-% next strand left, next strand right
+% next strand left on the left after a, next strand right on the right before B
 [NSL,NSR] = pNextStrands(a,B,Truncate,N);
 
-% find last nt on next strand left that interacts with current left strand
-s = NSL(end);
+% find last nt on next strand left that interacts with current left strand,
+% but not as far as the last nucleotide on that strand because that is needed
+% for the flanking pair there
+s = NSL(end)-1;
 while sum(sum(G(s,a:aaa))) == 0 && s > NSL(1)
   s = s - 1;
 end
