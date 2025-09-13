@@ -224,8 +224,7 @@ clear OwnScoreStats
 
 % loop over motif groups and their .mat files
 
-% temporary start at 64
-
+% for m = 48:48
 for m = 1:length(Filenames)
   MotifName = Filenames(m).name;
 
@@ -257,6 +256,11 @@ for m = 1:length(Filenames)
   clear Search
 
   load([MotifLibraryPath filesep MotifName '.mat'], 'Search');
+
+  if isfield(Search,'motid_id')
+    % fix typo
+    Search.motif_id = Search.motid_id;
+  end
 
   % set some variables that might not have been created yet
   % best place to make sure we know where the strands end
