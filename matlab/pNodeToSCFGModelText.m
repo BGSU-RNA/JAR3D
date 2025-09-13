@@ -10,11 +10,11 @@ if nargin < 2
 end
 
 if NumChar == 4
-  Text = 'Character Definition | A,C,G,U // Define characters here';
+  Text = 'Character Definition | A,C,G,U // Identity and order of characters in matrices';
 elseif NumChar == 5
-  Text = 'Character Definition | A,C,G,U,* // Define characters here';
+  Text = 'Character Definition | A,C,G,U,* // Identity and order of characters in matrices';
 elseif NumChar == 6
-  Text = 'Character Definition | A,C,G,U,N // Define characters here';
+  Text = 'Character Definition | A,C,G,U,N // Identity and order of characters in matrices';
 end
 
 T{1} = Text;
