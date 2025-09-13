@@ -11,18 +11,17 @@
 
 function [T] = pColumnsForModelRecursive(Node,N)
 
-clear T                                % build up lines from the left
-r = 1;
-clear U                                % build up lines from the right,
-                                       % will be read backwards
-U = [];
+T = cell(0);                  % build up lines from the left
+U = cell(0);                  % build up lines from the right,
+                              % will be read backwards
 
-s = 1;
+r = 1;                        % current line on the left
+s = 1;                        % current line on the right
 
-n = N;                                 % node number to start working
+n = N;                        % node number to start working
 continu = 1;
 
-while continu > 0,
+while continu > 0
   if strcmp(Node(n).type,'Initial')
     if length(Node(n).leftLengthDist) > 1
       T{r} = sprintf('Node_%d_Position_1_Insertion', n);
@@ -87,6 +86,7 @@ while continu > 0,
 
     continu = 0;                        % stop after a hairpin
   elseif strcmp(Node(n).type,'Junction')
+    % this code assumes that every junction is binary and the nextnode field is set correctly
     T = [T pColumnsForModelRecursive(Node,Node(n).nextnode(1))];
     T = [T pColumnsForModelRecursive(Node,Node(n).nextnode(2))];
     continu = 0;
