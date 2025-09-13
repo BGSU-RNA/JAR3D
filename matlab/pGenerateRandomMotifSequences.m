@@ -6,21 +6,24 @@ if nargin < 3
   Mode = 3;                           % no constraints on base combinations
 end
 
-numrepeats = 50;                      % number of repetitions of each combination of strand lengths
-
 loopType = Release(1:2);
 
-numfiles = 20;
 switch loopType
 case 'HL'
+  numrepeats = 50;                      % number of repetitions of each combination of strand lengths
   numfiles = 20;
 case 'IL'
+  numrepeats = 50;                      % number of repetitions of each combination of strand lengths
   numfiles = 20;
-end
-
-if loopType(1) == 'J'
+case 'J3'
   numrepeats = 30;
-  numfiles = 15;
+  numfiles = 20;
+case 'J4'
+  numrepeats = 25;
+  numfiles = 20;
+otherwise
+  numrepeats = 25;
+  numfiles = 20;
 end
 
 Release = strrep(Release,'\',filesep);
@@ -131,7 +134,6 @@ for r = 1:length(uniqueseqlengths(:,1))
 end
 
 for v = 1:numfiles
-	Sequences = pMakeRandomSequencesWeighted(seqlengths,loopType,length(seqlengths(:,1)),TransitionFile,Mode);
   switch Mode
   case 1
     FN = [ModelPath filesep loopType '_RandomMotifSequencesNonCan_' num2str(v) '.fasta'];
@@ -140,9 +142,15 @@ for v = 1:numfiles
   case 3
     FN = [ModelPath filesep loopType '_RandomMotifSequences_' num2str(v) '.fasta'];
   end
-	fid = fopen(FN,'w');
-	for s = 1:length(Sequences)
-		fprintf(fid,'%s\n',Sequences{s});
-	end
-	fclose(fid);
+
+  % only make and write the file if it does not already exist;
+  % avoid overwriting previously generated ones
+  if ~isfile(FN)
+    Sequences = pMakeRandomSequencesWeighted(seqlengths,loopType,length(seqlengths(:,1)),TransitionFile,Mode);
+    fid = fopen(FN,'w');
+    for s = 1:length(Sequences)
+      fprintf(fid,'%s\n',Sequences{s});
+    end
+    fclose(fid);
+  end
 end
