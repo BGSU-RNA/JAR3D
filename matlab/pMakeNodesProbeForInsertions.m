@@ -318,7 +318,7 @@ end
 % ---------------------------------------------- Add comments for initial node
 
 if strcmp(Node(n).type,'Initial')
-  Node(n).Comment = [' // Initial node ' File.NT(aa).ID ' - ' File.NT(BB).ID ' from Node ' Node(n).id];
+  Node(n).Comment = [' // Initial node ' File.NT(aa).ID ' - ' File.NT(BB).ID ' from node ' Node(n).id];
 
   if Verbose > 0
     fprintf('%3d Initial   %4s (%d insertion) and %4s (%d insertion)\n', n, File.NT(Node(n).LeftIndex).Number, LeftIns, File.NT(Node(n).RightIndex).Number, RightIns);
